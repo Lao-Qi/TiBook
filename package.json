@@ -1,0 +1,40 @@
+{
+  "name": "tonyoulu.app",
+  "private": true,
+  "version": "0.0.0",
+  "description": "一个简单好用的聊天软件",
+  "main": "./electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "electron": "wait-on tcp:3000 && cross-env IS_DEV=true electron .",
+    "electron:dev": "concurrently -K \"npm run dev\" \"npm run electron\"",
+    "electron:build": "npm run build && electron-builder",
+    "server": "nodemon ./server/index.js",
+    "socket": "nodemon ./server/chat_service/index.js"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "electron-store": "^8.0.1",
+    "element-plus": "^2.2.0",
+    "nedb": "^1.8.0",
+    "pinia": "^2.0.14",
+    "socket.io-client": "^4.5.0",
+    "vue": "^3.2.25",
+    "vue-router": "^4.0.13"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^2.3.3",
+    "concurrently": "^7.2.0",
+    "cross-env": "^7.0.3",
+    "electron": "^18.2.3",
+    "electron-builder": "^23.0.3",
+    "less": "^4.1.2",
+    "less-loader": "^10.2.0",
+    "unplugin-auto-import": "^0.7.1",
+    "unplugin-vue-components": "^0.19.5",
+    "vite": "^2.9.9",
+    "wait-on": "^6.0.1"
+  }
+}

@@ -1,0 +1,85 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Helvetica, 'Hiragino Sans GB', 'Microsoft Yahei', '微软雅黑', Arial, sans-serif;
+}
+
+*:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+*::-webkit-scrollbar {
+    width: 5px;
+    background-color: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 10px;
+
+}
+
+/*
+    软件主色调
+    #226285
+    #282c34
+    #f5f8fd
+    #293948
+*/
+
+html {
+    --theme-color-one: #226285; /* 主题色一 */
+    --theme-color-two: #282c34; /* 主题色二 */
+    --theme-color-three: #e3e7f1; /* 主题色三 */
+    --theme-color-four: #282c34; /* 主题色四 */
+    --border-color: #282e34; /* 边框颜色 */
+    --chat-win-border-color: #8d9db0;
+    --message-card-color: #a3aab7; /* 消息卡片字体颜色 */
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    color: var(--theme-color-three);
+}
+
+li {
+    list-style: none;
+}
+
+#title {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    height: 30px;
+    text-align: center;
+    font-size: 13px;
+    line-height: 30px;
+    background-color: var(--theme-color-one);
+}
+
+#title #logo {
+    width: 30px;
+    height: 100%;
+}
+
+#title p {
+    flex: 1;
+    font-family: Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    font-size: 16px;
+    letter-spacing: 1px;
+    -webkit-app-region: drag;
+}
+
+#title #control-keys i {
+    display: inline-block;
+    width: 45px;
+    height: 100%;
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+}
