@@ -15,7 +15,7 @@
               @click="openThisCardChatWin(messageCard)"
               class="message-card"
               :class="{
-                'current-message-card': messageCard.account === openChatWindows.account
+                'current-message-card': messageCard.account === openChatWindow.account
               }"
           ></message-card>
         </template>
@@ -34,10 +34,20 @@
     </div>
 </template>
 
+<script>
+export default {
+  name: "info",
+  created() {
+    document.querySelector("#title>p").innerHTML = "Message";
+    this.$emit("pageChange", "info");
+  }
+}
+</script>
+
 <script setup async>
 import MessageCard from "../components/message-card.vue";
 import ChatWin from "../components/chat-win.vue";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 const { ipcRenderer } = require("electron");
 
 const MessageCardList = ref([]);
@@ -68,8 +78,6 @@ ipcRenderer.on("new messageCard", (event, msgCard) => {
     MessageCardList.value.unshift(msgCard);
   }
 })
-
-document.querySelector("#title>p").innerHTML = "Message";
 </script>
 
 <style lang="less" scoped>

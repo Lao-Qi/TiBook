@@ -11,8 +11,7 @@ const {
 	insertMessage,
 	findHistoryAccountMessage,
 	getLocalMessageCard,
-	insertMessageCard,
-	updateMessageCard,
+	updateOrInsertMessageCard,
 	insertFriend,
 	findLocalFriends,
 	findLocalFriend
@@ -111,22 +110,11 @@ module.exports = function createMainWin() {
 		// 要更新的好友账号如果是我自己，则修改接收方在本地的消息卡片
 		const insertMessageCardAccount = UserInfo.account === msg.from ? msg.to : msg.from;
 		// 更新本地好友消息卡片
-		updateMessageCard(insertMessageCardAccount, msg)
-			// 本地有好友的消息卡片
-			.then(doc => {
-				mainWin.webContents.send("new messageCard", doc);
-				mainWin.webContents.send(`new messageCard ${insertMessageCardAccount}`, doc);
-				mainWin.webContents.send("message", msg);
-			})
-			// 到本地好友列表和服务器上查找用户基本消息，创建消息卡片
-			.catch(msg => {
-				insertMessageCard(insertMessageCardAccount, msg)
-					.then(doc => {
-						mainWin.webContents.send("new messageCard", doc);
-						mainWin.webContents.send(`new messageCard ${insertMessageCardAccount}`, doc);
-						mainWin.webContents.send("message", msg);
-					})
-			})
+		updateOrInsertMessageCard(insertMessageCardAccount, msg).then((doc) => {
+			mainWin.webContents.send("new messageCard", doc);
+			mainWin.webContents.send(`new messageCard ${insertMessageCardAccount}`, doc);
+			mainWin.webContents.send("message", msg);
+		})
 	})
 
 	// 用户加入其他房间后服务端响应完成
@@ -145,13 +133,23 @@ module.exports = function createMainWin() {
 	// 获取当前房间的历史聊天记录
 	ipcMain.handle("get account history message", async (event, account) => await findHistoryAccountMessage(account))
 	// 获取本地存储的消息卡片列表
-	ipcMain.handle("get local message card list", async () => await getLocalMessageCard())
+	ipcMain.handle("get local message card list", async () => await getLocalMessageCard());
 	// 获取本地存储的用户信息
-	ipcMain.handle("get user info", async () => UserStore.get("info"))
+	ipcMain.handle("get user info", async () => UserStore.get("info"));
 	// 获取上次所处房间
 	ipcMain.handle("get room", async () => room);
 	// 获取本地存储的好友信息
-	ipcMain.handle("get local friend info", async (event, account) => await findLocalFriend(account))
+	ipcMain.handle("get local friend info", async (event, account) => await findLocalFriend(account));
+
+	// 前端联系人页面(点击发送消息按钮)跳转聊天窗口页面
+	// 添加聊天卡片
+	ipcMain.on("go chat win",  async (event, account) => {
+		const latelyMessage = (await findHistoryAccountMessage(account)).at(-1);
+		updateOrInsertMessageCard(account, latelyMessage).then(() => {
+			UserStore.set("room", account);
+			mainWin.webContents.send("is go chat win");
+		});
+	})
 
 
 	// 窗口控件事件

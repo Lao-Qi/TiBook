@@ -48,7 +48,22 @@ function findHistoryAccountMessage(account) {
 }
 
 
-
+// 修改消息卡片，如果不存在则创建消息卡片
+function updateOrInsertMessageCard(insertMessageCardAccount, msg) {
+	return new Promise((res, rej) => {
+		updateMessageCard(insertMessageCardAccount, msg)
+			.then((doc) => {
+				res(doc);
+			})
+			.catch(() => {
+				insertMessageCard(insertMessageCardAccount, msg)
+					.then((doc) => {
+						res(doc);
+					})
+					.catch(rej);
+			})
+	})
+}
 
 // 更新消息卡片
 function updateMessageCard(insertMessageCardAccount, { content, date }) {
@@ -60,8 +75,8 @@ function updateMessageCard(insertMessageCardAccount, { content, date }) {
 		}, {
 			$set: {
 				msg: {
-					content,
-					date
+					content: content ?? "",
+					date: date ?? Date.now()
 				}
 			}
 		}, {
@@ -69,14 +84,14 @@ function updateMessageCard(insertMessageCardAccount, { content, date }) {
 			returnUpdatedDocs: true
 		},(err, ret, newDoc) => {
 			// 查询得到并且修改成功
-			ret === 1  ? res(newDoc) : rej({content, date});
+			ret === 1  ? res(newDoc) : rej({ content, date });
 		})
 	})
 }
 
 // 添加消息卡片
-function insertMessageCard(insertMessageCardAccount, {content, date}) {
-	return new Promise(res => {
+function insertMessageCard(insertMessageCardAccount, { content, date }) {
+	return new Promise((res, rej) => {
 		// 先查询本地好友列表查看有没有该条消息的来源用户
 		DB.friends.findOne({
 			account: insertMessageCardAccount
@@ -99,7 +114,7 @@ function insertMessageCard(insertMessageCardAccount, {content, date}) {
 					date
 				}
 			}, (err, doc) => {
-				res(err ? {} : doc);
+				err ? rej(err) : res(doc);
 			})
 		})
 	})
@@ -144,8 +159,7 @@ module.exports = {
 	insertMessage,
 	findHistoryAccountMessage,
 	getLocalMessageCard,
-	insertMessageCard,
-	updateMessageCard,
+	updateOrInsertMessageCard,
 	insertFriend,
 	findLocalFriends,
 	findLocalFriend

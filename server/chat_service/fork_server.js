@@ -78,6 +78,7 @@ io.on("connection", (socket) => {
 	// 客户端退出
 	socket.on("disconnecting", () => {
 		// 在在线用户集合中删除用户
+		console.log(`用户: ${socket.data.account} ${socket.data.name} 下线`);
 		UserSet.delete(socket.data.account);
 
 		// 取消订阅该用户房间

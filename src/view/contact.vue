@@ -36,18 +36,24 @@
   </div>
 </template>
 
+<script>
+export default {
+  name: "contact",
+  created() {
+    document.querySelector("#title>p").innerHTML = "Contact";
+    this.$emit("pageChange", "contact");
+  }
+}
+</script>
+
 <script setup async>
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import FriendInfoWin from "../components/friend-info-win.vue";
 const { ipcRenderer } = require("electron");
 
 const friendList = ref([]);
 const showFriendAccount = ref(null);
 friendList.value = await ipcRenderer.invoke("user-friendList");
-
-onMounted(() => {
-  document.querySelector("#title>p").innerHTML = "Contact";
-})
 </script>
 
 <style lang="less" scoped>

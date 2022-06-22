@@ -82,39 +82,43 @@
   </div>
   <div id="content-win">
     <Suspense>
-      <router-view></router-view>
+      <router-view @pageChange="pageChange"></router-view>
     </Suspense>
   </div>
 </template>
 
 <script setup>
-import { reactive } from "vue";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
 
 // 当页面被加载的时候，获取当前url来判断当前打开的是那个页面
-const current = reactive(
-    (() => {
-      const PageRouter = {
-        home: false,
-        info: false,
-        contact: false,
-        search: false,
-        config: false,
-      };
-      const currentPage = window.location.hash.slice(2);
-      currentPage ? (PageRouter[currentPage] = true) : (PageRouter.info = true);
-      return PageRouter;
-    })()
-);
+const current = ref({
+  home: false,
+  info: false,
+  contact: false,
+  search: false,
+  config: false,
+});
+
+const currentPage = window.location.hash.slice(2);
+current.value[currentPage] ? current.value[currentPage] = true : current.value.info = true;
 
 const router = useRouter();
 
 function ToggleOptions(page) {
-  for (let key in current) {
-    current[key] = false;
-  }
-  current[page] = true;
-  router.push({name: page});
+  router.push({ name: page });
+}
+
+function pageChange(page) {
+  current.value = {
+    home: false,
+    info: false,
+    contact: false,
+    search: false,
+    config: false,
+  };
+  current.value[page] = true;
+  console.log(current.value)
 }
 </script>
 

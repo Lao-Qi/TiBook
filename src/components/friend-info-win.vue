@@ -30,10 +30,12 @@
 </template>
 
 <script setup async>
+import { useRouter } from "vue-router";
 const { ipcRenderer } = require("electron");
 const props = defineProps({
   account: String,
 })
+const router = useRouter();
 const friendInfoOnServer = await ipcRenderer.invoke("get-user-info", props.account);
 const localInfo = await ipcRenderer.invoke("get local friend info", props.account);
 
@@ -42,7 +44,12 @@ const date = new Date(localInfo.AddTime);
 const addTime = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
 
 function GoChatWin() {
-
+  ipcRenderer.send("go chat win", props.account);
+  ipcRenderer.on("is go chat win", () => {
+    router.push({
+      name: "info"
+    })
+  })
 }
 </script>
 

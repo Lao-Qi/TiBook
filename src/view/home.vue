@@ -2,6 +2,12 @@
     <h3>home</h3>
 </template>
 
-<script setup>
-document.querySelector("#title>p").innerHTML = "Home";
+<script>
+export default {
+  name: "home",
+  created() {
+    document.querySelector("#title>p").innerHTML = "Home";
+    this.$emit("pageChange", "home");
+  }
+}
 </script>

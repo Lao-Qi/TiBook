@@ -40,6 +40,16 @@
   </div>
 </template>
 
+<script>
+export default {
+  name: "search",
+  created() {
+    document.querySelector("#title>p").innerHTML = "Search";
+    this.$emit("pageChange", "search");
+  }
+}
+</script>
+
 <script setup>
 import { onMounted, ref } from "vue";
 import { ElNotification } from "element-plus";
@@ -102,7 +112,6 @@ ipcRenderer.on("add-friend-return", (event, returnData) => {
 // 搜索框默认聚焦
 onMounted(() => {
   SearchInput.value.focus();
-  document.querySelector("#title>p").innerHTML = "Search";
 });
 </script>
 
