@@ -2,7 +2,7 @@
 const { app } = require("electron");
 const Store = require("electron-store");
 const createMainWin = require("./windows/mainWin");
-const { GetPublicKey, LoginUser} = require("./tool/ServerRequire");
+const { GetPublicKey, LoginUser } = require("./tool/ServerRequire");
 
 
 const [account, pwd] = ["2231675321", "2231675321"];

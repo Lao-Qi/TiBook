@@ -2,8 +2,21 @@
 const { BrowserWindow, ipcMain } = require("electron");
 const io = require("socket.io-client");
 const Store = require("electron-store");
-const { FindUserFriendsList, AddFriend, SearchUsers, SearchUser } = require("../tool/ServerRequire");
-const { insertMessage, findHistoryAccountMessage, getLocalMessageCard,insertMessageCard, updateMessageCard, findLocalFriends, insertFriend } = require("../tool/LocalOperation");
+const {
+	AddFriend,
+	SearchUsers,
+	SearchUser
+} = require("../tool/ServerRequire");
+const {
+	insertMessage,
+	findHistoryAccountMessage,
+	getLocalMessageCard,
+	insertMessageCard,
+	updateMessageCard,
+	insertFriend,
+	findLocalFriends,
+	findLocalFriend
+} = require("../tool/LocalOperation");
 
 // 本地软件配置存储
 const UserStore = new Store({accessPropertiesByDotNotation: false});
@@ -26,11 +39,13 @@ module.exports = function createMainWin() {
 	});
 	mainWin.loadURL("http://127.0.0.1:3000");
 	// 用户当前所处房间
-	let room = UserStore.get("account");
+	let room = UserStore.get("room");
 
 	// 涉及到api服务器的事件
 	// 获取好友列表
-	ipcMain.handle("user-friendsList",async () => await findLocalFriends());
+	ipcMain.handle("user-friendList",async () => {
+		return await findLocalFriends();
+	});
 	// 搜索匹配用户
 	ipcMain.handle("search-users", async (event, KeyWorld) => {
 	 	 const searchData = await SearchUsers(KeyWorld);
@@ -63,7 +78,6 @@ module.exports = function createMainWin() {
 
 	// 与服务器连接成功
 	socket.on("connect", () => {
-
 		mainWin.webContents.send("connect");
 
 		// 可被页面触发套接字的事件
@@ -136,6 +150,8 @@ module.exports = function createMainWin() {
 	ipcMain.handle("get user info", async () => UserStore.get("info"))
 	// 获取上次所处房间
 	ipcMain.handle("get room", async () => room);
+	// 获取本地存储的好友信息
+	ipcMain.handle("get local friend info", async (event, account) => await findLocalFriend(account))
 
 
 	// 窗口控件事件

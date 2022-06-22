@@ -49,6 +49,7 @@ function findHistoryAccountMessage(account) {
 
 
 
+
 // 更新消息卡片
 function updateMessageCard(insertMessageCardAccount, { content, date }) {
 	return new Promise((res, rej) => {
@@ -116,7 +117,6 @@ function getLocalMessageCard() {
 
 
 
-
 // 查询本地好友列表
 function findLocalFriends() {
 	return new Promise((res, rej) => {
@@ -131,12 +131,22 @@ function insertFriend(friend) {
 	DB.friends.insert(friend)
 }
 
+// 本地搜索一个好友的添加时间
+function findLocalFriend(account) {
+	return new Promise((res, rej) => {
+		DB.friends.findOne({ account }, { AddTime: 1, _id: 0 },(err, doc) => {
+			err ? rej(err) : res(doc);
+		})
+	})
+}
+
 module.exports = {
 	insertMessage,
 	findHistoryAccountMessage,
 	getLocalMessageCard,
 	insertMessageCard,
 	updateMessageCard,
+	insertFriend,
 	findLocalFriends,
-	insertFriend
+	findLocalFriend
 }

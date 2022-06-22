@@ -16,7 +16,7 @@
         >
           <div class="avatar" :style="{ backgroundImage: `url('${avatar}')` }"></div>
           <div class="message-content">
-            <span>{{chatMessage.content}}</span>
+            <span>{{ chatMessage.content }}</span>
           </div>
         </div>
       </template>

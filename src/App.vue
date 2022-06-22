@@ -131,7 +131,7 @@ function ToggleOptions(page) {
   height: 100%;
   padding: 9px 0 9px 0;
   overflow: hidden;
-  background-color: #282c34;
+  background-color: var(--theme-color-two);
 
   .nav-top-option {
     margin-bottom: auto;

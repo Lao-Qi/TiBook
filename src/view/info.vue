@@ -21,12 +21,12 @@
         </template>
       </div>
       <div id="chat-wins-box">
-        <template v-if="Object.keys(openChatWindows).length">
+        <template v-if="Object.keys(openChatWindow).length">
           <Suspense>
             <chat-win
-                :name="openChatWindows.name"
-                :account="openChatWindows.account"
-                :avatar="openChatWindows.avatar"
+                :name="openChatWindow.name"
+                :account="openChatWindow.account"
+                :avatar="openChatWindow.avatar"
             ></chat-win>
           </Suspense>
         </template>
@@ -41,7 +41,7 @@ import { ref } from "vue";
 const { ipcRenderer } = require("electron");
 
 const MessageCardList = ref([]);
-const openChatWindows = ref({});
+const openChatWindow = ref({});
 const Room = ref("");
 
 // 获取用户消息卡片列表
@@ -50,13 +50,13 @@ MessageCardList.value = await ipcRenderer.invoke("get local message card list");
 Room.value = await ipcRenderer.invoke("get room");
 
 // 找到上次所处房间的消息卡片，并打开聊天窗口, 如果没有则返回初始值
-openChatWindows.value = MessageCardList.value.find(item => item?.account === Room.value) ?? {};
+openChatWindow.value = MessageCardList.value.find(item => item?.account === Room.value) ?? {};
 
 
-// 切换聊天窗口
+// 打卡聊天窗口
 function openThisCardChatWin(messageCard) {
   ipcRenderer.send("join room", messageCard.account);
-  openChatWindows.value = messageCard;
+  openChatWindow.value = messageCard;
 }
 
 // 当有新的消息，需要更新前端卡片列表的时候触发
@@ -105,7 +105,7 @@ document.querySelector("#title>p").innerHTML = "Message";
     #chat-wins-box {
       flex: 1;
       overflow: hidden;
-      background-color: var(--theme-color-three);
+      background-color: var(--theme-color-two);
     }
   }
 </style>

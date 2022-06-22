@@ -11,7 +11,7 @@
             v-for="friend in friendList"
             :key="friend.account"
             class="side-ber-el"
-            @click="ExhibitionFriend = friend"
+            @click="showFriendAccount = friend.account"
         >
           <img
               :alt="friend.name"
@@ -24,11 +24,13 @@
     </template>
   </div>
   <div class="contact-info-box">
-    <template v-if="ExhibitionFriend.account">
-      <friend-info-win
-          :add-obj="friendAddTimeList.find(item => item.account === ExhibitionFriend.account)"
-          :friend="ExhibitionFriend">
-      </friend-info-win>
+    <template v-if="showFriendAccount">
+      <Suspense>
+        <friend-info-win
+            :account="showFriendAccount"
+            >
+        </friend-info-win>
+      </Suspense>
     </template>
   </div>
   </div>
@@ -36,28 +38,12 @@
 
 <script setup async>
 import { onMounted, ref } from "vue";
-import { ElNotification } from "element-plus";
 import FriendInfoWin from "../components/friend-info-win.vue";
 const { ipcRenderer } = require("electron");
 
 const friendList = ref([]);
-const friendAddTimeList = ref([]);
-const ExhibitionFriend = ref({})
-
-// 获取好友列表信息
-const friendsData = await ipcRenderer.invoke("user-friendsList");
-if (friendsData) {
-  friendList.value = friendsData.userList;
-} else {
-  ElNotification({
-    title: "用户列表获取失败",
-    message: `error: ${friendsData.msg}; code: ${friendsData.code}`,
-    duration: 3000,
-    type: "error",
-    showClose: false,
-    offset: 20
-  })
-}
+const showFriendAccount = ref(null);
+friendList.value = await ipcRenderer.invoke("user-friendList");
 
 onMounted(() => {
   document.querySelector("#title>p").innerHTML = "Contact";
@@ -69,7 +55,7 @@ onMounted(() => {
   display: flex;
   width: 100%;
   height: 100%;
-  background-color: var(--theme-color-one);
+  background-color: var(--theme-color-two);
 
   .side-bar {
     width: 240px;

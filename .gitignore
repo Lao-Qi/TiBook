@@ -9,6 +9,10 @@ lerna-debug.log*
 
 node_modules
 dist
+keys
+friendList.db
+message.db
+messageCards.db
 dist-ssr
 *.local
 .env*
@@ -16,7 +20,6 @@ dist-ssr
 
 # Editor directories and files
 .vscode/*
-keys/*
 demo/*
 !.vscode/extensions.json
 .idea

@@ -2,21 +2,24 @@
   <div class="friend-info-box">
     <div class="basic-info">
       <div class="friend-name">
-        {{friend.name}}
+        {{ friendInfoOnServer.name }}
       </div>
       <div class="friend-avatar">
-        <img :src="avatarSrc" :alt="friend.name">
+        <img
+            :src="src"
+            :alt="friendInfoOnServer.name"
+        >
       </div>
     </div>
     <div class="basic-border"></div>
     <div class="info">
       <div>
         <span class="left">添加时间： </span>
-        <span class="right">{{addObj.AddTime}}</span>
+        <span class="right">{{ addTime }}</span>
       </div>
       <div>
         <span class="left">账号： </span>
-        <span class="right">{{friend.account}}</span>
+        <span class="right">{{ friendInfoOnServer.account }}</span>
       </div>
     </div>
     <div class="info-border"></div>
@@ -26,17 +29,20 @@
   </div>
 </template>
 
-<script setup>
-import { useRouter } from "vue-router";
+<script setup async>
 const { ipcRenderer } = require("electron");
-const router = useRouter();
 const props = defineProps({
   account: String,
 })
-const avatarSrc = props.friend.avatar === "none" ? "/src/assets/img/DefaultAvatar.jpg" : `http://127.0.0.1:8080/user/avatar/${props.friend.avatar}`;
+const friendInfoOnServer = await ipcRenderer.invoke("get-user-info", props.account);
+const localInfo = await ipcRenderer.invoke("get local friend info", props.account);
+
+const src = friendInfoOnServer.avatar === "none" ? "/src/assets/img/DefaultAvatar.jpg" : `http://127.0.0.1:8080/static/user/avatar/${friendInfoOnServer.avatar}`
+const date = new Date(localInfo.AddTime);
+const addTime = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
 
 function GoChatWin() {
-  router.push({ name: "" })
+
 }
 </script>
 
