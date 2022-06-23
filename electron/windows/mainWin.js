@@ -36,7 +36,7 @@ module.exports = function createMainWin() {
 			webSecurity: false // 支持不同协议的资源
 		}
 	});
-	mainWin.loadURL("http://127.0.0.1:3000");
+	mainWin.loadURL("http://127.0.0.1:3000/#/login");
 	// 用户当前所处房间
 	let room = UserStore.get("room");
 

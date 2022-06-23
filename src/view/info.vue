@@ -39,7 +39,7 @@ export default {
   name: "info",
   created() {
     document.querySelector("#title>p").innerHTML = "Message";
-    this.$emit("pageChange", "info");
+    this.$emit("pageChange", "message");
   }
 }
 </script>
@@ -47,7 +47,7 @@ export default {
 <script setup async>
 import MessageCard from "../components/message-card.vue";
 import ChatWin from "../components/chat-win.vue";
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 const { ipcRenderer } = require("electron");
 
 const MessageCardList = ref([]);

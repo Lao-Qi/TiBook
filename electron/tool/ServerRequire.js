@@ -12,12 +12,13 @@ const localToken = UserStore.get("token");
 async function GetPublicKey() {
 	const res = await axios.get("/api/publicKey.key");
 	return res.status === 200 && res.data.code === 200 ?
-		Buffer.from(res.data.publicKey, "base64").toString() : false;
+		Buffer.from(res.data.publicKey, "base64").toString() : res.data;
 }
 
 
 // 注册用户
-async function RegisterUser(name, account, paw, publicKey) {
+async function RegisterUser(name, account, paw) {
+	const publicKey = await GetPublicKey();
 	const ping = publicEncrypt(publicKey, Buffer.from(paw)).toString("base64");
 	const res = await axios.post("/api/user/register", {
 		name,
@@ -30,10 +31,15 @@ async function RegisterUser(name, account, paw, publicKey) {
 
 
 // 登录用户生成token
-async function LoginUser(account, paw, publicKey) {
-	const ping = publicEncrypt(publicKey, Buffer.from(paw)).toString("base64");
-	const res = await axios.post(`/api/user/login`, { account, ping })
-	return res.status === 200 ? res.data : false;
+async function LoginUser(account, paw) {
+	const publicKey = await GetPublicKey();
+	if(!publicKey) {
+		return publicKey;
+	}else {
+		const ping = publicEncrypt(publicKey, Buffer.from(paw)).toString("base64");
+		const res = await axios.post(`/api/user/login`, { account, ping })
+		return res.status === 200 ? res.data : false;
+	}
 }
 
 
@@ -70,10 +76,8 @@ async function SearchUsers(key) {
 }
 
 module.exports = {
-	GetPublicKey,
 	RegisterUser,
 	LoginUser,
-	FindUserFriendsList,
 	AddFriend,
 	SearchUser,
 	SearchUsers
