@@ -19,21 +19,25 @@ async function GetPublicKey() {
 // 注册用户
 async function RegisterUser(name, account, paw) {
 	const publicKey = await GetPublicKey();
-	const ping = publicEncrypt(publicKey, Buffer.from(paw)).toString("base64");
-	const res = await axios.post("/api/user/register", {
-		name,
-		account,
-		type: type(),
-		ping
-	})
-	return res.status === 200 ? res.data : false;
+	if(publicKey?.code) {
+		return publicKey;
+	}else {
+		const ping = publicEncrypt(publicKey, Buffer.from(paw)).toString("base64");
+		const res = await axios.post("/api/user/register", {
+			name,
+			account,
+			type: type(),
+			ping
+		})
+		return res.status === 200 ? res.data : false;
+	}
 }
 
 
 // 登录用户生成token
 async function LoginUser(account, paw) {
 	const publicKey = await GetPublicKey();
-	if(!publicKey) {
+	if(publicKey?.code) {
 		return publicKey;
 	}else {
 		const ping = publicEncrypt(publicKey, Buffer.from(paw)).toString("base64");

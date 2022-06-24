@@ -9,26 +9,6 @@
     <link rel="stylesheet" href="./src/assets/font/iconfont.css">
   </head>
   <body>
-    <div id="title">
-      <div id="logo"></div>
-      <p>主页 - Chain CS</p>
-      <div id="control-keys">
-          <i class="iconfont icon-zuixiaohua" id="minimize"></i>
-          <i class="iconfont icon-zuidahuaxi" id="maximize"></i>
-          <i class="iconfont icon-guanbi1" id="closure"></i>
-      </div>
-    </div>
-    <script>
-      const { ipcRenderer } = require("electron");
-      // 窗口控件
-      document.querySelector('#closure').addEventListener('click', () => ipcRenderer.send('mainWin-destroy'))
-      document.querySelector('#minimize').addEventListener('click', () => ipcRenderer.send('mainWin-minimize'))
-      document.querySelector('#maximize').addEventListener('click', (e) => {
-          ipcRenderer.send('mainWin-maximize');
-          ipcRenderer.on("mainWin-maximize", () => e.target.setAttribute('class', 'iconfont icon-zuidahua'));
-          ipcRenderer.on("mainWin-unmaximize", () => e.target.setAttribute('class', 'iconfont icon-zuidahuaxi'));
-      })
-    </script>
     <div id="app"></div>
     <script type="module" src="./src/main.js"></script>
   </body>

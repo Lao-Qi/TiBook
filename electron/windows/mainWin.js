@@ -37,6 +37,7 @@ module.exports = function createMainWin() {
 		}
 	});
 	mainWin.loadURL("http://127.0.0.1:3000/#/login");
+	mainWin.once("ready-to-show",  () => mainWin.show());
 	// 用户当前所处房间
 	let room = UserStore.get("room");
 
@@ -154,17 +155,8 @@ module.exports = function createMainWin() {
 
 	// 窗口控件事件
 	// 窗口在后台渲染完成触发
-	mainWin.once("ready-to-show",  () => mainWin.show());
-	// 窗口关闭
-	ipcMain.on('mainWin-destroy',() => {mainWin.destroy(); socket.disconnect()});
-	// 窗口最小化
-	ipcMain.on('mainWin-minimize',() => mainWin.minimize());
-	// 窗口最大化
-	ipcMain.on('mainWin-maximize',() => mainWin.isMaximized() ? mainWin.unmaximize() : mainWin.maximize());
-	// 窗口最大化触发
-	mainWin.on("maximize", () => mainWin.webContents.send("mainWin-maximize"));
-	// 窗口取消最大化触发
-	mainWin.on("unmaximize", () => mainWin.webContents.send("mainWin-unmaximize"));
+
+	ipcMain.on('mainWin-destroy',() => socket.disconnect());
 
 	return mainWin;
 }

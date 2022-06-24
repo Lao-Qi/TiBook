@@ -6,6 +6,13 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "2939196",
+      "name": "关闭26",
+      "font_class": "guanbi",
+      "unicode": "e64d",
+      "unicode_decimal": 58957
+    },
+    {
       "icon_id": "8958532",
       "name": "搜索",
       "font_class": "sousuo",
@@ -46,13 +53,6 @@
       "font_class": "icontianjiatupian",
       "unicode": "e621",
       "unicode_decimal": 58913
-    },
-    {
-      "icon_id": "577309",
-      "name": "关闭1",
-      "font_class": "guanbi1",
-      "unicode": "e723",
-      "unicode_decimal": 59171
     },
     {
       "icon_id": "4485682",

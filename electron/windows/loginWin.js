@@ -6,8 +6,6 @@ module.exports = async function createLoginWin() {
 	const loginWin = new BrowserWindow({
 		width: 800,
 		height: 600,
-		maxWidth: 1000,
-		maxHeight: 800,
 		minWidth: 600,
 		minHeight: 400,
 		show: false,
@@ -19,11 +17,16 @@ module.exports = async function createLoginWin() {
 		}
 	})
 
+	loginWin.loadURL("http://127.0.0.1:3000/#/login");
+	loginWin.once("ready-to-show",  () => loginWin.show());
+
 	const UserStore = new Store({ accessPropertiesByDotNotation: false })
 
-	ipcMain.on("register", async (event, { account, paw }) => {
+	ipcMain.on("register", async (event, { name, account, paw }) => {
 		const registerData = await RegisterUser(name, account, paw);
+		if(registerData.code === 200) {}
 	})
+
 	ipcMain.on("login", async (event, { account, paw }) => {
 		const loginUserData = await LoginUser(account, paw);
 		if(loginUserData.code === 200) {
@@ -32,15 +35,6 @@ module.exports = async function createLoginWin() {
 		loginWin.webContents.send("login message", loginUserData);
 	})
 
-
-
-
-	loginWin.once("ready-to-show",  () => loginWin.show());
-	ipcMain.on("loginWin-destroy", () => loginWin.destroy());
-	ipcMain.on("loginWin-minimize", () => loginWin.minimize());
-	ipcMain.on("loginWin-maximize", () => loginWin.isMaximized() ? loginWin.unmaximize() : loginWin.maximize());
-	loginWin.on("maximize", () => loginWin.webContents.send("loginWin-maximize"));
-	loginWin.on("unmaximize", () => loginWin.webContents.send("loginWin-unmaximize"));
 
 	return loginWin;
 }
