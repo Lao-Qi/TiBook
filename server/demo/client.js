@@ -1,6 +1,6 @@
 // const readline = require("node:readline");
 // const io = require("socket.io-client");
-// const { LoginUser, GetPublicKey } = require("../../electron/tool/ServerRequire");
+// const { LoginUser, GetPublicKey } = require("../../electron/tools/ServerRequire");
 //
 //
 //

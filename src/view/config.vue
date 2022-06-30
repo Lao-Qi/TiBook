@@ -3,5 +3,5 @@
 </template>
 
 <script setup>
-document.querySelector("#title>p").innerHTML= "Config";
+document.querySelector("#title>p").innerHTML = "Config"
 </script>

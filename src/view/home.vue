@@ -4,10 +4,10 @@
 
 <script>
 export default {
-  name: "home",
-  created() {
-    document.querySelector("#title>p").innerHTML = "Home";
-    this.$emit("pageChange", "home");
-  }
+    name: "home",
+    created() {
+        document.querySelector("#title>p").innerHTML = "Home"
+        this.$emit("pageChange", "home")
+    },
 }
 </script>

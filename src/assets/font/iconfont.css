@@ -1,67 +1,81 @@
 @font-face {
-  font-family: "iconfont"; /* Project id 2917191 */
-  src: url('iconfont.woff2?t=1652782830816') format('woff2'),
-       url('iconfont.woff?t=1652782830816') format('woff'),
-       url('iconfont.ttf?t=1652782830816') format('truetype');
+    font-family: "iconfont"; /* Project id 2917191 */
+    src: url("iconfont.woff2?t=1652782830816") format("woff2"),
+        url("iconfont.woff?t=1652782830816") format("woff"),
+        url("iconfont.ttf?t=1652782830816") format("truetype");
+}
+
+.window-icon {
+    font-family: "iconfont" !important;
+    font-size: 11px;
+    font-style: normal;
+    text-transform: none;
+    text-decoration: none;
+    text-shadow: 3px 3px 3px rgba(0, 0, 0, 0.4);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .iconfont {
-  font-family: "iconfont" !important;
-  font-size: 11px;
-  font-style: normal;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    font-family: "iconfont" !important;
+    font-size: 16px;
+    font-style: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .icon-sousuo:before {
-  content: "\e6a5";
+    content: "\e6a5";
 }
 
 .icon-home:before {
-  content: "\e603";
-  color: #fff;
+    content: "\e603";
+    color: #fff;
 }
 
 .icon-xiaoxi:before {
-  content: "\e8bd";
+    content: "\e8bd";
+}
+
+.icon-send:before {
+    content: "\e607";
 }
 
 .icon-lianxiren:before {
-  content: "\e613";
+    content: "\e613";
 }
 
 .icon-shezhi:before {
-  content: "\e61f";
+    content: "\e61f";
 }
 
 .icon-icontianjiatupian:before {
-  content: "\e621";
+    content: "\e621";
 }
 
-.icon-guanbi:before {
-  content: "\e64d";
+.window-close:before {
+    content: "\e64d";
 }
 
-.icon-zuidahua:before {
-  content: "\e600";
+.window-unmaximize:before {
+    content: "\e600";
 }
 
-.icon-zuidahuaxi:before {
-  content: "\e64c";
+.window-maximize:before {
+    content: "\e64c";
 }
 
-.icon-zuixiaohua:before {
-  content: "\e650";
+.window-minimize:before {
+    content: "\e650";
 }
 
-.icon-zuidahua:hover,
-.icon-zuidahuaxi:hover,
-.icon-zuixiaohua:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+.window-maximize:hover,
+.window-unmaximize:hover,
+.window-minimize:hover {
+    background-color: rgba(0, 0, 0, 0.1);
 }
 
-.icon-guanbi:hover {
-  background-color: #d51325;
-  color: #fff;
+.window-close:hover {
+    background-color: #d51325;
+    color: #fff;
 }
-

@@ -7,20 +7,20 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# dir
 node_modules
 dist
-keys
-friendList.db
-message.db
-messageCards.db
 dist-ssr
-*.local
+demo
+keys
+
+# config file
 .env*
 .env
+.prettierignore
 
 # Editor directories and files
 .vscode/*
-demo/*
 !.vscode/extensions.json
 .idea
 .DS_Store
@@ -29,3 +29,5 @@ demo/*
 *.njsproj
 *.sln
 *.sw?
+*.db
+*.local
