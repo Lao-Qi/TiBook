@@ -1,9 +1,14 @@
 {
     "name": "tonyoulu.app",
-    "private": true,
     "version": "0.0.0",
     "description": "一个简单好用的聊天软件",
     "main": "./electron/main.js",
+    "author": {
+        "name": "王老柒",
+        "email": "Wang.Lao.Qi@qq.com"
+    },
+    "license": "MIT",
+    "private": true,
     "scripts": {
         "dev": "vite",
         "build": "vite build",
@@ -29,7 +34,7 @@
         "@vitejs/plugin-vue": "^2.3.3",
         "concurrently": "^7.2.0",
         "cross-env": "^7.0.3",
-        "electron": "^18.2.3",
+        "electron": "18.2.3",
         "electron-builder": "^23.0.3",
         "less": "^4.1.2",
         "less-loader": "^10.2.0",
@@ -38,5 +43,13 @@
         "unplugin-vue-components": "^0.19.5",
         "vite": "^2.9.9",
         "wait-on": "^6.0.1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Lao-Qi/TonYouLu.git"
+    },
+    "engines": {
+        "node": ">=16",
+        "pnpm": ">=3"
     }
 }
