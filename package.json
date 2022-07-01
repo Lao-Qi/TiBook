@@ -14,11 +14,11 @@
         "build": "vite build",
         "preview": "vite preview",
         "electron": "wait-on tcp:3000 && cross-env IS_DEV=true electron .",
-        "electron:dev": "concurrently -K \"npm run dev\" \"npm run electron\"",
-        "electron:build": "npm run build && electron-builder",
+        "electron:dev": "concurrently -K \"pnpm run dev\" \"pnpm run electron\"",
+        "electron:build": "pnpm run build && electron-builder",
         "server": "nodemon ./server/index.js",
         "socket": "nodemon ./server/chat_service/index.js",
-        "test": "concurrently -K \"npm run dev\" \"npm run socket\" \"npm run server\""
+        "test": "concurrently -K \"pnpm run server\" \"pnpm run socket\" \"pnpm run dev\""
     },
     "dependencies": {
         "axios": "^0.27.2",

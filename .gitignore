@@ -17,7 +17,6 @@ keys
 # config file
 .env*
 .env
-yarn.lock
 message.db
 messageCards.db
 friendList.db
