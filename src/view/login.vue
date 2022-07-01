@@ -1,11 +1,13 @@
 <template>
     <div class="page-content">
-        <div
-            :class="{
-                'background-box': true,
-                'background-box-transition': isBackgroundBoxStartTransition,
-            }"
-        ></div>
+        <div :class="{
+            'background-box': true,
+            'background-box-transition': isBackgroundBoxStartPlayAnimation,
+        }">
+            <div class="ring-type ring-type-transition"></div>
+            <div class="ring-type ring-type-transition"></div>
+            <div class="ring-type ring-type-transition"></div>
+        </div>
         <div class="chat-window-container">
             <div class="chat-window-title">
                 <p>登录</p>
@@ -13,48 +15,37 @@
             <div class="chat-message-content-container">
                 <div class="chat-message-content-container-inset-border">
                     <template v-if="MessageList.length">
-                        <div
-                            v-for="(message, index) in MessageList"
-                            :key="index"
-                            :class="{
-                                'message-box': true,
-                                'is-me': message.isMe,
-                                'not-me': !message.isMe,
-                                'up-message-is-same-person': ThisMessageIsMe(
-                                    message.isMe
-                                ),
-                            }"
-                        >
-                            <div class="message-content">
+                        <div v-for="(message, index) in MessageList" :key="index" :class="{
+                            'message-box': true,
+                            'is-me': message.isMe,
+                            'not-me': !message.isMe,
+                            'up-message-is-same-person': thisMessageIsMe(
+                                message.isMe
+                            ),
+                        }">
+                            <div :class="{
+                                'message-content': true,
+                                'message-content-animation': isMessageListStartPlayAnimation,
+                                'not-me-message-animation': !message.isMe && isMessageListStartPlayAnimation,
+                                'is-me-message-animation': message.isMe && isMessageListStartPlayAnimation
+                            }">
                                 {{ message.content }}
                             </div>
                         </div>
                     </template>
                 </div>
             </div>
-            <div
-                class="chat-input-container"
-                :class="{
-                    'changes-in-input-focus': inputConfig.focus,
-                }"
-            >
+            <div class="chat-input-container" :class="{
+                'changes-in-input-focus': inputConfig.focus,
+            }">
                 <div class="input-box">
-                    <input
-                        :type="inputConfig.type"
-                        :placeholder="inputConfig.placeholder"
-                        v-model="inputConfig.content"
-                        @focus="inputConfig.focus = true"
-                        @blur="inputConfig.focus = false"
-                        @keydown.enter="userSendMessage"
-                    />
+                    <input :type="inputConfig.type" :placeholder="inputConfig.placeholder" v-model="inputConfig.content"
+                        @focus="inputConfig.focus = true" @blur="inputConfig.focus = false"
+                        @keydown.enter="userSendMessage" />
                     <p>{{ inputConfig.content }}</p>
                 </div>
                 <div class="message-send-btn">
-                    <a
-                        href="javascript:"
-                        class="iconfont icon-send"
-                        @click="userSendMessage"
-                    ></a>
+                    <a href="javascript:" class="iconfont icon-send" @click="userSendMessage"></a>
                 </div>
             </div>
         </div>
@@ -89,9 +80,10 @@ const userInputInfo = reactive({
 let upMessageIsMe = false
 // 显示的消息列表
 const MessageList = reactive([])
-const isBackgroundBoxStartTransition = ref(false)
+const isBackgroundBoxStartPlayAnimation = ref(false)
+const isMessageListStartPlayAnimation = ref(false)
 
-function ThisMessageIsMe(isMe) {
+function thisMessageIsMe(isMe) {
     if (isMe === upMessageIsMe) {
         return true
     } else {
@@ -126,19 +118,29 @@ function LoginUser() {
         inputConfig.placeholder = "..."
 
         ipcRenderer.send("login", { ...userInputInfo })
-        ipcRenderer.send("")
     }
 }
 
-function RegisterUser() {}
+function RegisterUser() { }
+
+ipcRenderer.on("login-message", (event, msg) => {
+    MessageList.push({
+        content: msg,
+        isMe: false
+    })
+})
 
 onMounted(() => {
-    isBackgroundBoxStartTransition.value = true
-
     MessageList.push({
         content: "请输入账号",
         isMe: false,
     })
+    setTimeout(() => {
+        isBackgroundBoxStartPlayAnimation.value = true
+        setTimeout(() => {
+            isMessageListStartPlayAnimation.value = true
+        }, 5)
+    }, 10)
 })
 </script>
 
@@ -153,8 +155,8 @@ onMounted(() => {
     border-radius: 10px;
 
     /**
-    背景盒子
-  */
+        背景盒子
+    */
     .background-box {
         position: absolute;
         top: -400px;
@@ -162,21 +164,21 @@ onMounted(() => {
         width: 30vw;
         height: 30vw;
         z-index: -1;
-        background-color: var(--not-me-message-box-show);
+        background-color: rgba(199, 108, 52, 0.7);
         border: 1vw solid var(--card-background-color);
-        transition: all ease 0.4s;
+        filter: blur(3px);
+        transition: all ease 1s;
     }
 
     .background-box-transition {
         top: 50px;
         left: 50px;
-        filter: blur(5px);
         border-radius: calc(35vw / 2);
     }
 
     /** 
-    聊天窗口 
-  */
+        聊天窗口 
+    */
     .chat-window-container {
         width: 300px;
         height: 100%;
@@ -208,17 +210,25 @@ onMounted(() => {
                 box-shadow: 2px 2px 4px 1px inset rgba(0, 0, 0, 0.4);
 
                 .message-box {
+                    position: relative;
                     display: flex;
                     width: 100%;
                     height: auto;
                     padding-top: 20px;
 
                     .message-content {
+                        position: absolute;
                         display: inline-block;
                         width: auto;
                         height: auto;
+                        opacity: 0;
                         padding: 5px 10px;
                         color: var(--card-background-color);
+                        transition: all ease 1s;
+                    }
+
+                    .message-content-animation {
+                        opacity: 1;
                     }
                 }
 
@@ -227,15 +237,15 @@ onMounted(() => {
                     justify-content: left;
 
                     .message-content {
+
                         border-radius: 0 10px 10px 15px;
-                        box-shadow: 2px 2px 2px 1px
-                                var(--not-me-message-box-show),
+                        box-shadow: 2px 2px 2px 1px var(--not-me-message-box-show),
                             3px 3px 2px 1px rgba(0, 0, 0, 0.3);
-                        background-color: var(
-                            --not-me-message-background-color
-                        );
+                        background-color: var(--not-me-message-background-color);
                     }
                 }
+
+
 
                 .is-me {
                     padding-left: 25px;
@@ -243,8 +253,7 @@ onMounted(() => {
 
                     .message-content {
                         border-radius: 10px 0 10px 10px;
-                        box-shadow: 2px 2px 2px 1px
-                                var(--is-me-message-box-show),
+                        box-shadow: 2px 2px 2px 1px var(--is-me-message-box-show),
                             3px 3px 2px 1px rgba(0, 0, 0, 0.3);
                         background-color: var(--is-me-message-background-color);
                     }

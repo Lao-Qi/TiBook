@@ -18,23 +18,26 @@ module.exports = async function createLoginWin() {
     })
 
     loginWin.loadURL("http://127.0.0.1:3000/#/login")
-    loginWin.once("ready-to-show", () => loginWin.show())
+    loginWin.once("ready-to-show", () => {
+        loginWin.show()
+        loginWin.webContents.send("window-show")
+    })
 
     const UserStore = new Store({ accessPropertiesByDotNotation: false })
 
     ipcMain.on("register", async (event, { name, account, paw }) => {
         const registerData = await RegisterUser(name, account, paw)
-        if (registerData.code === 200) {
-        }
+        console.log(registerData)
+        // if (registerData.code === 200) {
+        // }
     })
 
     ipcMain.on("login", async (event, { account, pw }) => {
-        console.log(account, pw)
         const loginUserData = await LoginUser(account, pw)
         if (loginUserData.code === 200) {
             UserStore.set("token", loginUserData.token)
         }
-        loginWin.webContents.send("login-message", loginUserData)
+        loginWin.webContents.send("login-message", loginUserData.msg)
     })
 
     return loginWin

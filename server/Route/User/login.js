@@ -6,9 +6,20 @@ const router = require("express").Router()
 
 /** 登录 */
 router.post("/login", async (req, res, next) => {
-    if (req.body.account) {
+    if (!req.body.ping) {
+        res.send({
+            code: 400,
+            body: req.body,
+            msg: "Ping字段为空",
+        })
+    } else if (!req.body.account) {
+        res.send({
+            code: 400,
+            body: req.body,
+            msg: "账号字段为空",
+        })
+    } else {
         const doc = await FindUser(req.body.account)
-        console.log(doc)
         if (doc) {
             req.doc = doc
             next()
@@ -19,12 +30,6 @@ router.post("/login", async (req, res, next) => {
                 msg: "用户不存在",
             })
         }
-    } else {
-        res.send({
-            code: 400,
-            body: req.body,
-            msg: "账号字段为空",
-        })
     }
 })
 
@@ -56,8 +61,8 @@ router.post("/login", async (req, res) => {
 module.exports = router
 
 async function FindUser(account) {
-    return new Promise((res) => {
-        Users.findOne({ account: account }).then((doc) => {
+    return new Promise(res => {
+        Users.findOne({ account: account }).then(doc => {
             res(doc)
         })
     })
