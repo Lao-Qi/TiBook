@@ -17,9 +17,6 @@ keys
 # config file
 .env*
 .env
-message.db
-messageCards.db
-friendList.db
 
 # Editor directories and files
 .vscode/*
