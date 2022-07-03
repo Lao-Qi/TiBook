@@ -1,8 +1,6 @@
 @font-face {
     font-family: "iconfont"; /* Project id 2917191 */
-    src: url("iconfont.woff2?t=1652782830816") format("woff2"),
-        url("iconfont.woff?t=1652782830816") format("woff"),
-        url("iconfont.ttf?t=1652782830816") format("truetype");
+    src: url("iconfont.woff2?t=1652782830816") format("woff2"), url("iconfont.woff?t=1652782830816") format("woff"), url("iconfont.ttf?t=1652782830816") format("truetype");
 }
 
 .window-icon {
@@ -24,28 +22,28 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
-.icon-sousuo:before {
-    content: "\e6a5";
-}
-
 .icon-home:before {
     content: "\e603";
     color: #fff;
 }
 
-.icon-xiaoxi:before {
+.icon-message:before {
     content: "\e8bd";
+}
+
+.icon-search:before {
+    content: "\e6a5";
+}
+
+.icon-contacts:before {
+    content: "\e613";
 }
 
 .icon-send:before {
     content: "\e607";
 }
 
-.icon-lianxiren:before {
-    content: "\e613";
-}
-
-.icon-shezhi:before {
+.icon-config:before {
     content: "\e61f";
 }
 
