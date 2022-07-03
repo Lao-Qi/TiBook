@@ -1,7 +1,12 @@
+"use strict"
 const { BrowserWindow, ipcMain } = require("electron")
 const Store = require("electron-store")
 const { RegisterUser, LoginUser } = require("../tools/ServerRequire")
 
+/**
+ * @example 创建注册页窗口
+ * @returns { Promise<BrowserWindow }
+ */
 module.exports = async function createLoginWin() {
     const loginWin = new BrowserWindow({
         width: 800,
@@ -25,19 +30,16 @@ module.exports = async function createLoginWin() {
 
     const UserStore = new Store({ accessPropertiesByDotNotation: false })
 
-    ipcMain.on("register", async (event, { name, account, paw }) => {
-        const registerData = await RegisterUser(name, account, paw)
-        console.log(registerData)
-        // if (registerData.code === 200) {
-        // }
+    ipcMain.on("register", async (event, name, account, pw) => {
+        const registerData = await RegisterUser(name, account, pw)
     })
 
-    ipcMain.on("login", async (event, { account, pw }) => {
+    ipcMain.on("login", async (event, account, pw) => {
         const loginUserData = await LoginUser(account, pw)
-        if (loginUserData.code === 200) {
+        if (loginUserData.code === 200 && loginUserData.body.account === account) {
             UserStore.set("token", loginUserData.token)
         }
-        loginWin.webContents.send("login-message", loginUserData.msg)
+        loginWin.webContents.send("server-return-message", loginUserData.msg, loginUserData.code)
     })
 
     return loginWin

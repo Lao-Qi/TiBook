@@ -4,18 +4,20 @@
             'background-box': true,
             'background-box-transition': isBackgroundBoxStartPlayAnimation,
         }">
-            <div class="ring-type ring-type-transition"></div>
-            <div class="ring-type ring-type-transition"></div>
-            <div class="ring-type ring-type-transition"></div>
+        </div>
+        <div class="slogan-text-box">
+            <a href="javascript:;" class="register-btn" @click="changeCahtWindow">
+                <h1>{{ userInputInfo.slogan }}</h1>
+            </a>
         </div>
         <div class="chat-window-container">
             <div class="chat-window-title">
-                <p>登录</p>
+                <p>{{ userInputInfo.title }}</p>
             </div>
             <div class="chat-message-content-container">
-                <div class="chat-message-content-container-inset-border">
+                <div class="chat-message-content-container-inset-show">
                     <template v-if="MessageList.length">
-                        <div v-for="(message, index) in MessageList" :key="index" :class="{
+                        <div v-for="message in MessageList" :key="message" :class="{
                             'message-box': true,
                             'is-me': message.isMe,
                             'not-me': !message.isMe,
@@ -54,15 +56,13 @@
 
 <script setup>
 import { onMounted, reactive, ref } from "vue"
-import { useRouter } from "vue-router"
 const { ipcRenderer } = require("electron")
-
-const router = useRouter()
 
 // 输入框的配置信息
 const inputConfig = reactive({
     focus: false,
     type: "text",
+    contentPurpose: "account",
     placeholder: "账号",
     content: "",
 })
@@ -71,76 +71,160 @@ const inputConfig = reactive({
 const userInputInfo = reactive({
     name: "",
     account: "",
-    pw: "",
+    password: "",
     // 用户当前的状态 login | register
     state: "login",
+    // 页面标语 注册 | 登录
+    slogan: "注册",
+    // 聊天窗口标题 注册 | 登录
+    title: "登录"
 })
 
 // 上一条消息是否为自己输入
 let upMessageIsMe = false
 // 显示的消息列表
-const MessageList = reactive([])
+let MessageList = ref([])
 const isBackgroundBoxStartPlayAnimation = ref(false)
 const isMessageListStartPlayAnimation = ref(false)
 
+/**
+ * @example 改变聊天窗口的功能 login | register
+ */
+function changeCahtWindow() {
+    MessageList.value = []
+
+    if (userInputInfo.state === "login") {
+        // 改变为注册功能
+        userInputInfo.title = "注册"
+        userInputInfo.slogan = "登录"
+        userInputInfo.state = "register"
+        inputConfig.contentPurpose = "name"
+        inputConfig.type = "text"
+        inputConfig.placeholder = "名称"
+
+        MessageList.value.push({
+            content: "请输入用户名称",
+            isMe: false
+        })
+
+    } else if (userInputInfo.state === "register") {
+        // 改变为登录功能
+        userInputInfo.title = "登录"
+        userInputInfo.slogan = "注册"
+        userInputInfo.state = "login"
+        inputConfig.contentPurpose = "account"
+        inputConfig.type = "text"
+        inputConfig.placeholder = "账号"
+
+        MessageList.value.push({
+            content: "请输入账号",
+            isMe: false
+        })
+    }
+
+    // 清空用户输入的消息
+    userInputInfo.name = ""
+    userInputInfo.account = ""
+    userInputInfo.password = ""
+    inputConfig.content = ""
+}
+
+/**
+ * @example 判断上一条消息是否为同一人发送
+ * @param {Boolean} isMe 
+ */
 function thisMessageIsMe(isMe) {
     if (isMe === upMessageIsMe) {
         return true
     } else {
+        // 非同一人则修改为上一条消息为该人输入
         upMessageIsMe = isMe
         return false
     }
 }
 
-// 用户发送消息
+/**
+ * @example 用户发送消息
+ */
 function userSendMessage() {
+    MessageList.value.push({
+        content: inputConfig.content,
+        isMe: true,
+    })
     if (userInputInfo.state === "login") {
         LoginUser()
     } else if (userInputInfo.state === "register") {
         RegisterUser()
     }
-
-    MessageList.push({
-        content: inputConfig.content,
-        isMe: true,
-    })
     inputConfig.content = ""
 }
 
+/**
+ * @example 用户登录
+ */
 function LoginUser() {
+    userInputInfo[inputConfig.contentPurpose] = inputConfig.content
+
     if (inputConfig.type === "text") {
-        userInputInfo.account = inputConfig.content
         inputConfig.type = "password"
         inputConfig.placeholder = "密码"
+        inputConfig.contentPurpose = "password"
+
+        MessageList.value.push({
+            content: "请输入账户密码",
+            isMe: false
+        })
+
     } else if (inputConfig.type === "password") {
-        userInputInfo.pw = inputConfig.content
         inputConfig.type = "text"
         inputConfig.placeholder = "..."
 
-        ipcRenderer.send("login", { ...userInputInfo })
+        // 调用后台登录事件
+        ipcRenderer.send("login", userInputInfo.account, userInputInfo.password)
     }
 }
 
-function RegisterUser() { }
+/**
+ * @example 用户注册
+ */
+function RegisterUser() {
+    userInputInfo[inputConfig.contentPurpose] = inputConfig.content
 
-ipcRenderer.on("login-message", (event, msg) => {
-    MessageList.push({
-        content: msg,
-        isMe: false
-    })
-})
+    if (inputConfig.contentPurpose === "name") {
+        inputConfig.contentPurpose = "account"
+        inputConfig.placeholder = "账号"
+    }
+
+}
 
 onMounted(() => {
-    MessageList.push({
+    MessageList.value.push({
         content: "请输入账号",
         isMe: false,
     })
+
+    // 延时添加动画，等到窗口加载完毕并显示出来时添加动画
     setTimeout(() => {
         isBackgroundBoxStartPlayAnimation.value = true
         setTimeout(() => {
             isMessageListStartPlayAnimation.value = true
         }, 5)
     }, 10)
+})
+
+// 服务端返回的消息
+ipcRenderer.on("server-return-message", (event, msg, code) => {
+    MessageList.value.push({
+        content: msg,
+        isMe: false
+    })
+    if (code === 200) {
+        MessageList.value.push({
+            content: "正在跳转主页...",
+            isMe: false
+        })
+        ipcRenderer.send("login-complete-open-mainWin")
+    }
 })
 </script>
 
@@ -176,6 +260,20 @@ onMounted(() => {
         border-radius: calc(35vw / 2);
     }
 
+    /**
+        标语盒子
+    */
+    .slogan-text-box {
+        position: absolute;
+        top: 150px;
+        left: 200px;
+
+        a {
+            font-size: 20px;
+            color: var(--text-colo);
+        }
+    }
+
     /** 
         聊天窗口 
     */
@@ -202,22 +300,21 @@ onMounted(() => {
             flex: 1;
             padding: 5px 7px;
 
-            .chat-message-content-container-inset-border {
+            .chat-message-content-container-inset-show {
                 width: 100%;
                 height: 100%;
                 padding: 10px 10px 5px 10px;
+                overflow: hidden;
                 border-radius: 10px;
                 box-shadow: 2px 2px 4px 1px inset rgba(0, 0, 0, 0.4);
 
                 .message-box {
-                    position: relative;
                     display: flex;
                     width: 100%;
                     height: auto;
                     padding-top: 20px;
 
                     .message-content {
-                        position: absolute;
                         display: inline-block;
                         width: auto;
                         height: auto;
@@ -237,7 +334,6 @@ onMounted(() => {
                     justify-content: left;
 
                     .message-content {
-
                         border-radius: 0 10px 10px 15px;
                         box-shadow: 2px 2px 2px 1px var(--not-me-message-box-show),
                             3px 3px 2px 1px rgba(0, 0, 0, 0.3);
