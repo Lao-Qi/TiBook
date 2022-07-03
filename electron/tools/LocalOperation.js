@@ -23,14 +23,22 @@ const DB = {
     }),
 }
 
-// 添加消息
+/**
+ * @example 向本地存储中插入新的消息
+ * @param { Object } msg
+ * @param { Boolean } isRead
+ */
 function insertMessage(msg, isRead) {
     DB.message.insert({ ...msg, isRead })
 }
 
-// 查找对应转换的消息记录
+/**
+ * @example 查找对应账户的消息记录
+ * @param { String } account
+ * @returns { Promise<Array>}
+ */
 function findHistoryAccountMessage(account) {
-    return new Promise((res) => {
+    return new Promise(res => {
         // 查询我发给他的 或 他发给我的
         DB.message.find(
             {
@@ -49,16 +57,21 @@ function findHistoryAccountMessage(account) {
     })
 }
 
-// 修改消息卡片，如果不存在则创建消息卡片
+/**
+ * @example 修改本地的消息卡片，如果消息卡片不存在则插入新的消息卡片
+ * @param { String } insertMessageCardAccount
+ * @param { Object } msg
+ * @returns
+ */
 function updateOrInsertMessageCard(insertMessageCardAccount, msg) {
     return new Promise((res, rej) => {
         updateMessageCard(insertMessageCardAccount, msg)
-            .then((doc) => {
+            .then(doc => {
                 res(doc)
             })
             .catch(() => {
                 insertMessageCard(insertMessageCardAccount, msg)
-                    .then((doc) => {
+                    .then(doc => {
                         res(doc)
                     })
                     .catch(rej)
@@ -66,7 +79,12 @@ function updateOrInsertMessageCard(insertMessageCardAccount, msg) {
     })
 }
 
-// 更新消息卡片
+/**
+ * @example 修改本地的消息卡片
+ * @param { String } insertMessageCardAccount
+ * @param { String } msg
+ * @returns
+ */
 function updateMessageCard(insertMessageCardAccount, { content, date }) {
     return new Promise((res, rej) => {
         // 更新该好友消息卡片的消息记录
@@ -95,7 +113,12 @@ function updateMessageCard(insertMessageCardAccount, { content, date }) {
     })
 }
 
-// 添加消息卡片
+/**
+ * @example 向本地存储的消息卡片列表中存储新的消息卡片
+ * @param { String } insertMessageCardAccount
+ * @param { String } param1
+ * @returns
+ */
 function insertMessageCard(insertMessageCardAccount, { content, date }) {
     return new Promise((res, rej) => {
         // 先查询本地好友列表查看有没有该条消息的来源用户
@@ -107,9 +130,7 @@ function insertMessageCard(insertMessageCardAccount, { content, date }) {
                 // 查询不到用户
                 if (!doc) {
                     // 本地查询不到则到服务器查询
-                    const SearchUserDate = (
-                        await SearchUser(insertMessageCardAccount)
-                    ).user
+                    const SearchUserDate = (await SearchUser(insertMessageCardAccount)).user
                     doc = {
                         name: SearchUserDate.name,
                         account: SearchUserDate.account,
@@ -134,16 +155,22 @@ function insertMessageCard(insertMessageCardAccount, { content, date }) {
     })
 }
 
-// 获取本地所有的消息卡片
+/**
+ * @example 获取本地存储的消息卡片列表
+ * @returns { Promise<[]> }
+ */
 function getLocalMessageCard() {
-    return new Promise((res) => {
+    return new Promise(res => {
         DB.messageCards.find({}, (err, docs) => {
-            res(docs)
+            res(err ? [] : docs)
         })
     })
 }
 
-// 查询本地好友列表
+/**
+ * @example 查找本地存储的好友列表
+ * @returns { Promise<[]> }
+ */
 function findLocalFriends() {
     return new Promise((res, rej) => {
         DB.friends.find({}, (err, docs) => {
@@ -152,16 +179,23 @@ function findLocalFriends() {
     })
 }
 
-// 添加好友
+/**
+ * @example 向本地好友列表插入新的好友记录
+ * @param { Object } friend
+ */
 function insertFriend(friend) {
     DB.friends.insert(friend)
 }
 
-// 本地搜索一个好友的添加时间
+/**
+ * @exampl 向本地好友列表中查找特点的好友记录
+ * @param { String } account
+ * @returns { Promise<[]> }
+ */
 function findLocalFriend(account) {
-    return new Promise((res, rej) => {
+    return new Promise(res => {
         DB.friends.findOne({ account }, { AddTime: 1, _id: 0 }, (err, doc) => {
-            err ? rej(err) : res(doc)
+            res(err ? [] : doc)
         })
     })
 }
