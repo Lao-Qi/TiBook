@@ -3,32 +3,20 @@
         <div class="sidebar-border"></div>
         <div id="message-list-box">
             <template v-if="MessageCardList.length">
-                <message-card
-                    v-for="messageCard in MessageCardList"
-                    :data-id="messageCard._id"
-                    :key="messageCard._id"
-                    :name="messageCard.name"
-                    :account="messageCard.account"
-                    :avatar="messageCard.avatar"
-                    :message="messageCard.msg.content"
-                    :date="messageCard.msg.date"
-                    @click="openThisCardChatWin(messageCard)"
-                    class="message-card"
-                    :class="{
+                <message-card v-for="messageCard in MessageCardList" :data-id="messageCard._id" :key="messageCard._id"
+                    :name="messageCard.name" :account="messageCard.account" :avatar="messageCard.avatar"
+                    :message="messageCard.msg.content" :date="messageCard.msg.date"
+                    @click="openThisCardChatWin(messageCard)" class="message-card" :class="{
                         'current-message-card':
                             messageCard.account === openChatWindow.account,
-                    }"
-                ></message-card>
+                    }"></message-card>
             </template>
         </div>
         <div id="chat-wins-box">
             <template v-if="Object.keys(openChatWindow).length">
                 <Suspense>
-                    <chat-win
-                        :name="openChatWindow.name"
-                        :account="openChatWindow.account"
-                        :avatar="openChatWindow.avatar"
-                    ></chat-win>
+                    <chat-win :name="openChatWindow.name" :account="openChatWindow.account"
+                        :avatar="openChatWindow.avatar"></chat-win>
                 </Suspense>
             </template>
         </div>
