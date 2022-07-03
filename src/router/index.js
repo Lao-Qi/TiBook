@@ -1,11 +1,4 @@
 import { createRouter, createWebHashHistory } from "vue-router"
-import login_page from "../view/login.vue"
-import main_page from "../view/main.vue"
-import info_page from "../view/info.vue"
-import home_page from "../view/home.vue"
-import contact_page from "../view/contact.vue"
-import search_page from "../view/search.vue"
-import config_page from "../view/config.vue"
 
 export const Router = createRouter({
     history: createWebHashHistory(),
@@ -13,37 +6,37 @@ export const Router = createRouter({
         {
             path: "/login", // 软件登录页
             name: "login",
-            component: login_page,
+            component: () => import("../view/login.vue"),
         },
         {
             path: "/main", // 软件主页
             name: "main",
-            component: main_page,
+            component: () => import("../view/main.vue"),
             children: [
                 {
                     path: "/message",
                     name: "message",
-                    component: info_page,
+                    component: () => import("../view/message.vue"),
                 },
                 {
                     path: "/home", // 用户信息页
                     name: "home",
-                    component: home_page,
+                    component: () => import("../view/home.vue"),
                 },
                 {
                     path: "/contact", // 联系人页
                     name: "contact",
-                    component: contact_page,
+                    component: () => import("../view/contact.vue"),
                 },
                 {
                     path: "/search", // 搜索页
                     name: "search",
-                    component: search_page,
+                    component: () => import("../view/search.vue"),
                 },
                 {
                     path: "/config", // 设置页
                     name: "config",
-                    component: config_page,
+                    component: () => import("../view/config.vue"),
                 },
             ],
         },
