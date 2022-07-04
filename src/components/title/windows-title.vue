@@ -2,16 +2,9 @@
     <div id="logo"></div>
     <p></p>
     <div class="window-controls-container">
-        <div
-            class="window-icon window-minimize"
-            @click="() => ipcRenderer.send('window-minimize')"
-        ></div>
-        <div
-            class="window-icon"
-            :class="isMaximize ? 'window-unmaximize' : 'window-maximize'"
-            ref="maximizeBtn"
-            @click="() => ipcRenderer.send('window-maximize')"
-        ></div>
+        <div class="window-icon window-minimize" @click="() => ipcRenderer.send('window-minimize')"></div>
+        <div class="window-icon" :class="isMaximize ? 'window-unmaximize' : 'window-maximize'" ref="maximizeBtn"
+            @click="() => ipcRenderer.send('window-maximize')"></div>
         <div class="window-icon window-close" @click="MainWinDestroy"></div>
     </div>
 </template>
@@ -19,9 +12,10 @@
 <script setup>
 import { ref } from "vue"
 const { ipcRenderer } = require("electron")
+
 const isMaximize = ref(false)
-ipcRenderer.on("window-maximize", () => (isMaximize.value = true))
-ipcRenderer.on("window-unmaximize", () => (isMaximize.value = false))
+ipcRenderer.on("window-maximize", () => isMaximize.value = true)
+ipcRenderer.on("window-unmaximize", () => isMaximize.value = false)
 
 function MainWinDestroy() {
     ipcRenderer.send("window-destroy")
