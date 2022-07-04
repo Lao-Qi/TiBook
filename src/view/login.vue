@@ -230,12 +230,12 @@ ipcRenderer.on("server-return-message", (event, msg, code) => {
 
 <style scoped lang="less">
 .page-content {
+    display: flex;
     width: 100%;
     max-width: 800px;
     height: 100%;
-    display: flex;
+    padding: 5px 25px 25px 25px;
     justify-content: right;
-    margin-top: 5px;
     border-radius: 10px;
 
     /**

@@ -19,15 +19,9 @@
 import WindowsTitle from "./components/title/windows-title.vue"
 import MacTitle from "./components/title/mac-title.vue"
 import LinuxTitle from "./components/title/linux-title.vue"
-import { useRouter } from "vue-router"
-const { type } = require("os")
+const { type } = require("os");
 
-const router = useRouter()
-const SystemType = type()
-
-router.replace({
-    path: "/login",
-})
+const SystemType = type();
 </script>
 
 <style lang="less">
@@ -53,7 +47,6 @@ router.replace({
     flex: 1;
     display: flex;
     justify-content: center;
-    padding: 0 25px 25px 25px;
     z-index: 1;
 }
 </style>
