@@ -21,7 +21,7 @@
         "test": "concurrently -K \"pnpm run server\" \"pnpm run socket\" \"pnpm run dev\""
     },
     "dependencies": {
-        "@icon-park/vue": "^1.4.2",
+        "@icon-park/vue-next": "^1.4.2",
         "axios": "^0.27.2",
         "electron-store": "^8.0.1",
         "element-plus": "^2.2.0",
