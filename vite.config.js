@@ -2,16 +2,14 @@ import { defineConfig } from "vite"
 import vue from "@vitejs/plugin-vue"
 import AutoImport from "unplugin-auto-import/vite"
 import Components from "unplugin-vue-components/vite"
-// import { ElementPlusResolver, VueUseComponentsResolver } from "unplugin-vue-components/resolvers"
-import { ElementPlusResolver } from "unplugin-vue-components/resolvers"
+import { ElementPlusResolver, VueUseComponentsResolver } from "unplugin-vue-components/resolvers"
 
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [
-        // vue({
-        //     include: [/\.vue$/, /\.md$/],
-        // }),
-        vue(),
+        vue({
+            include: [/\.vue$/, /\.md$/],
+        }),
         AutoImport({
             resolvers: [ElementPlusResolver(), VueUseComponentsResolver()],
             resolvers: [ElementPlusResolver()],
@@ -32,7 +30,7 @@ export default defineConfig({
                 VueUseComponentsResolver(),
                 componentName => {
                     if (componentName.startsWith("Icon")) {
-                        return { name: componentName.slice(4), from: "@icon-park/vue" }
+                        return { name: componentName.slice(4), from: "@icon-park/vue-next" }
                     }
                 },
             ],
