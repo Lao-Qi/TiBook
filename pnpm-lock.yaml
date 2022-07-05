@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@icon-park/vue': ^1.4.2
   '@vitejs/plugin-vue': ^2.3.3
   axios: ^0.27.2
   concurrently: ^7.2.0
@@ -23,6 +24,7 @@ specifiers:
   wait-on: ^6.0.1
 
 dependencies:
+  '@icon-park/vue': 1.4.2_vue@3.2.37
   axios: 0.27.2
   electron-store: 8.0.2
   element-plus: 2.2.8_vue@3.2.37
@@ -147,6 +149,17 @@ packages:
     dependencies:
       '@hapi/hoek': 9.3.0
     dev: true
+
+  /@icon-park/vue/1.4.2_vue@3.2.37:
+    resolution: {integrity: sha512-YXXC53R0hjM76B2M4ANRI0m2bQB1cifUW+YXxQfGofITP6gr+pSMafBz/vzECYSkW3zZklm2mVuqQj4RAZGR2Q==}
+    engines: {node: '>= 8.0.0', npm: '>= 5.0.0'}
+    peerDependencies:
+      vue: 2.x
+    dependencies:
+      '@vue/babel-helper-vue-jsx-merge-props': 1.2.1
+      csstype: 3.1.0
+      vue: 3.2.37
+    dev: false
 
   /@malept/cross-spawn-promise/1.1.1:
     resolution: {integrity: sha512-RTBGWL5FWQcg9orDOCcp4LvItNzUPcyEU9bwaeJX0rJ1IQxzucC48Y0/sQLp/g6t99IQgAlGIaesJS+gTn7tVQ==}
@@ -334,6 +347,10 @@ packages:
       vite: 2.9.13_less@4.1.3
       vue: 3.2.37
     dev: true
+
+  /@vue/babel-helper-vue-jsx-merge-props/1.2.1:
+    resolution: {integrity: sha512-QOi5OW45e2R20VygMSNhyQHvpdUwQZqGPc748JLGCYEy+yp8fNFNdbNIGAgZmi9e+2JHPd6i6idRuqivyicIkA==}
+    dev: false
 
   /@vue/compiler-core/3.2.37:
     resolution: {integrity: sha512-81KhEjo7YAOh0vQJoSmAD68wLfYqJvoiD4ulyedzF+OEk/bk6/hx3fTNVfuzugIIaTrOx4PGx6pAiBRe5e9Zmg==}
@@ -1020,6 +1037,10 @@ packages:
 
   /csstype/2.6.20:
     resolution: {integrity: sha512-/WwNkdXfckNgw6S5R125rrW8ez139lBHWouiBvX8dfMFtcn6V81REDqnH7+CRpRipfYlyU1CmOnOxrmGcFOjeA==}
+
+  /csstype/3.1.0:
+    resolution: {integrity: sha512-uX1KG+x9h5hIJsaKR9xHUeUraxf8IODOwq9JLNPq6BwB04a/xgpq3rcx47l5BZu5zBPlgD342tdke3Hom/nJRA==}
+    dev: false
 
   /date-fns/2.28.0:
     resolution: {integrity: sha512-8d35hViGYx/QH0icHYCeLmsLmMUheMmTyV9Fcm6gvNwdw31yXXH+O85sOBJ+OLnLQMKZowvpKb6FgMIQjcpvQw==}
