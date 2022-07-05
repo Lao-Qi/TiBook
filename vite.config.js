@@ -2,17 +2,40 @@ import { defineConfig } from "vite"
 import vue from "@vitejs/plugin-vue"
 import AutoImport from "unplugin-auto-import/vite"
 import Components from "unplugin-vue-components/vite"
+// import { ElementPlusResolver, VueUseComponentsResolver } from "unplugin-vue-components/resolvers"
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers"
 
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [
+        // vue({
+        //     include: [/\.vue$/, /\.md$/],
+        // }),
         vue(),
         AutoImport({
+            resolvers: [ElementPlusResolver(), VueUseComponentsResolver()],
             resolvers: [ElementPlusResolver()],
+            imports: [
+                "vue",
+                "vue-router",
+                {
+                    "element-plus": ["ElTooltip", "ElNotification"],
+                },
+            ],
         }),
         Components({
-            resolvers: [ElementPlusResolver()],
+            extensions: ["vue", "md", "svg"],
+            directoryAsNamespace: true,
+            dts: true,
+            resolvers: [
+                ElementPlusResolver(),
+                VueUseComponentsResolver(),
+                componentName => {
+                    if (componentName.startsWith("Icon")) {
+                        return { name: componentName.slice(4), from: "@icon-park/vue" }
+                    }
+                },
+            ],
         }),
     ],
     base: "./",
