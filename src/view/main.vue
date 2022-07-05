@@ -1,88 +1,42 @@
 <template>
     <div id="side-nav-bar">
         <div class="nav-top-option">
-            <el-tooltip
-                :hide-after="0"
-                :offset="2"
-                :show-after="340"
-                content="个人信息"
-                placement="right"
-            >
-                <div
-                    :class="{ 'current-option': current === 'home' }"
-                    class="option"
-                    @click="ToggleOptions('home')"
-                >
-                    <i class="iconfont">&#xe603;</i>
+            <el-tooltip :hide-after="0" :offset="2" :show-after="340" content="个人信息" placement="right">
+                <div :class="{ 'current-option': current === 'home' }" class="option" @click="toggleOptions('home')">
+                    <home theme="outline" size="30" fill="#333" />
                 </div>
             </el-tooltip>
-            <el-tooltip
-                :hide-after="0"
-                :offset="2"
-                :show-after="340"
-                content="聊天"
-                placement="right"
-            >
-                <div
-                    :class="{ 'current-option': current === 'message' }"
-                    class="option"
-                    @click="ToggleOptions('message')"
-                >
-                    <i class="iconfont">&#xe8bd;</i>
+            <el-tooltip :hide-after="0" :offset="2" :show-after="340" content="聊天" placement="right">
+                <div :class="{ 'current-option': current === 'message' }" class="option"
+                    @click="toggleOptions('message')">
+                    <comment theme="outline" size="30" fill="#333" />
                 </div>
             </el-tooltip>
-            <el-tooltip
-                :hide-after="0"
-                :offset="2"
-                :show-after="340"
-                content="联系人"
-                placement="right"
-            >
-                <div
-                    :class="{ 'current-option': current === 'contact' }"
-                    class="option"
-                    @click="ToggleOptions('contact')"
-                >
-                    <i class="iconfont">&#xe613;</i>
+            <el-tooltip :hide-after="0" :offset="2" :show-after="340" content="联系人" placement="right">
+                <div :class="{ 'current-option': current === 'contact' }" class="option"
+                    @click="toggleOptions('contact')">
+                    <personal-collection theme="outline" size="30" fill="#333" />
                 </div>
             </el-tooltip>
-            <el-tooltip
-                :hide-after="0"
-                :offset="2"
-                :show-after="340"
-                content="搜索"
-                placement="right"
-            >
-                <div
-                    :class="{ 'current-option': current === 'search' }"
-                    class="option"
-                    @click="ToggleOptions('search')"
-                >
-                    <i class="iconfont">&#xe6a5;</i>
+            <el-tooltip :hide-after="0" :offset="2" :show-after="340" content="搜索" placement="right">
+                <div :class="{ 'current-option': current === 'search' }" class="option"
+                    @click="toggleOptions('search')">
+                    <search theme="outline" size="30" fill="#333" />
                 </div>
             </el-tooltip>
         </div>
         <div class="nav-bot-option">
-            <el-tooltip
-                :hide-after="0"
-                :offset="2"
-                :show-after="340"
-                content="设置"
-                placement="right"
-            >
-                <div
-                    :class="{ 'current-option': current === 'config' }"
-                    class="option"
-                    @click="ToggleOptions('config')"
-                >
-                    <i class="iconfont">&#xe61f;</i>
+            <el-tooltip :hide-after="0" :offset="2" :show-after="340" content="设置" placement="right">
+                <div :class="{ 'current-option': current === 'config' }" class="option"
+                    @click="toggleOptions('config')">
+                    <setting-config theme="outline" size="30" fill="#333" />
                 </div>
             </el-tooltip>
         </div>
     </div>
     <div id="content-win">
         <Suspense>
-            <router-view @pageChange="ToggleOptions"></router-view>
+            <router-view @pageChange="toggleOptions"></router-view>
         </Suspense>
     </div>
 </template>
@@ -90,11 +44,12 @@
 <script setup>
 import { ref, watchEffect } from "vue"
 import { useRouter } from "vue-router"
+import { SettingConfig, Comment, PersonalCollection, Home, Search } from "@icon-park/vue-next"
 
 const router = useRouter()
 const current = ref("message")
 
-function ToggleOptions(page) {
+function toggleOptions(page) {
     current.value = page
 }
 
@@ -115,8 +70,9 @@ watchEffect(() => {
     width: 55px;
     height: 100%;
     padding: 9px 0 9px 0;
+    margin-right: 10px;
     overflow: hidden;
-    background-color: var(--theme-color-two);
+    background-color: var(--card-background-color);
 
     .nav-top-option {
         margin-bottom: auto;
@@ -128,20 +84,25 @@ watchEffect(() => {
         text-align: center;
         line-height: 55px;
         cursor: pointer;
-        border-left: 2px solid transparent;
 
         .iconfont {
             font-size: 24px;
-
-            &:hover {
-                color: #fff;
-            }
         }
     }
 
     .current-option {
-        color: var(--theme-color-three);
-        border-left: 2px solid var(--theme-color-three);
+        position: relative;
+        color: var(--text-color);
+
+        &::before {
+            position: absolute;
+            display: block;
+            content: "";
+            width: 3px;
+            height: 100%;
+            border-radius: 3px;
+            background-color: var(--small-mark-color);
+        }
     }
 }
 
