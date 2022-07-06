@@ -1,7 +1,7 @@
 {
-    "name": "tonyoulu.app",
+    "name": "tibook",
     "version": "0.0.0",
-    "description": "一个简单好用的聊天软件",
+    "description": "题书，一个简单好用的聊天软件",
     "main": "./electron/main.js",
     "author": {
         "name": "王老柒",

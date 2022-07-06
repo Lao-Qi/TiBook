@@ -1,4 +1,4 @@
-# 同友录
+# 题书
 
 
 [![OSCS Status](https://www.oscs1024.com/platform/badge/Lao-Qi/TonYouLu.svg?size=small)](https://www.oscs1024.com/project/Lao-Qi/TonYouLu?ref=badge_small)

@@ -32,7 +32,7 @@ dependencies:
   nedb: 1.8.0
   socket.io-client: 4.5.1
   vue: 3.2.37
-  vue-router: 4.0.16_vue@3.2.37
+  vue-router: 4.1.1_vue@3.2.37
 
 devDependencies:
   '@vitejs/plugin-vue': 2.3.3_vite@2.9.13+vue@3.2.37
@@ -255,7 +255,7 @@ packages:
   /@types/fs-extra/9.0.13:
     resolution: {integrity: sha512-nEnwB++1u5lVDM2UI4c1+5R+FYaKfaAzS4OococimjVm3nQw3TuzH5UNsocrcTBbhnerblyHj4A49qXbIiZdpA==}
     dependencies:
-      '@types/node': 18.0.0
+      '@types/node': 18.0.3
     dev: true
 
   /@types/glob/7.2.0:
@@ -263,14 +263,14 @@ packages:
     requiresBuild: true
     dependencies:
       '@types/minimatch': 3.0.5
-      '@types/node': 18.0.0
+      '@types/node': 18.0.3
     dev: true
     optional: true
 
   /@types/keyv/3.1.4:
     resolution: {integrity: sha512-BQ5aZNSCpj7D6K2ksrRCTmKRLEpnPvWDiLPfoGyhZ++8YtiK9d/3DBKPJgry359X/P1PfruyYwvnvwFjuEiEIg==}
     dependencies:
-      '@types/node': 16.11.42
+      '@types/node': 16.11.43
     dev: true
 
   /@types/lodash-es/4.17.6:
@@ -292,19 +292,19 @@ packages:
     resolution: {integrity: sha512-iiUgKzV9AuaEkZqkOLDIvlQiL6ltuZd9tGcW3gwpnX8JbuiuhFlEGmmFXEXkN50Cvq7Os88IY2v0dkDqXYWVgA==}
     dev: true
 
-  /@types/node/16.11.42:
-    resolution: {integrity: sha512-iwLrPOopPy6V3E+1yHTpJea3bdsNso0b0utLOJJwaa/PLzqBt3GZl3stMcakc/gr89SfcNk2ki3z7Gvue9hYGQ==}
+  /@types/node/16.11.43:
+    resolution: {integrity: sha512-GqWykok+3uocgfAJM8imbozrqLnPyTrpFlrryURQlw1EesPUCx5XxTiucWDSFF9/NUEXDuD4bnvHm8xfVGWTpQ==}
     dev: true
 
-  /@types/node/18.0.0:
-    resolution: {integrity: sha512-cHlGmko4gWLVI27cGJntjs/Sj8th9aYwplmZFwmmgYQQvL5NUsgVJG7OddLvNfLqYS31KFN0s3qlaD9qCaxACA==}
+  /@types/node/18.0.3:
+    resolution: {integrity: sha512-HzNRZtp4eepNitP+BD6k2L6DROIDG4Q0fm4x+dwfsr6LGmROENnok75VGw40628xf+iR24WeMFcHuuBDUAzzsQ==}
     dev: true
 
   /@types/plist/3.0.2:
     resolution: {integrity: sha512-ULqvZNGMv0zRFvqn8/4LSPtnmN4MfhlPNtJCTpKuIIxGVGZ2rYWzFXrvEBoh9CVyqSE7D6YFRJ1hydLHI6kbWw==}
     requiresBuild: true
     dependencies:
-      '@types/node': 18.0.0
+      '@types/node': 18.0.3
       xmlbuilder: 15.1.1
     dev: true
     optional: true
@@ -312,7 +312,7 @@ packages:
   /@types/responselike/1.0.0:
     resolution: {integrity: sha512-85Y2BjiufFzaMIlvJDvTTB8Fxl2xfLo4HgmHzVBz08w4wDePCTjYw66PdrolO0kzli3yam/YCgRufyo1DdQVTA==}
     dependencies:
-      '@types/node': 16.11.42
+      '@types/node': 16.11.43
     dev: true
 
   /@types/verror/1.10.5:
@@ -380,8 +380,8 @@ packages:
       '@vue/compiler-dom': 3.2.37
       '@vue/shared': 3.2.37
 
-  /@vue/devtools-api/6.1.4:
-    resolution: {integrity: sha512-IiA0SvDrJEgXvVxjNkHPFfDx6SXw0b/TUkqMcDZWNg9fnCAHbTpoo59YfJ9QLFkwa3raau5vSlRVzMSLDnfdtQ==}
+  /@vue/devtools-api/6.2.0:
+    resolution: {integrity: sha512-pF1G4wky+hkifDiZSWn8xfuLOJI1ZXtuambpBEYaf7Xaf6zC/pM29rvAGpd3qaGXnr4BAXU1Pxz/VfvBGwexGA==}
     dev: false
 
   /@vue/reactivity-transform/3.2.37:
@@ -423,8 +423,8 @@ packages:
   /@vue/shared/3.2.37:
     resolution: {integrity: sha512-4rSJemR2NQIo9Klm1vabqWjD8rs/ZaJSzMxkMNeJS6lHiUjjUeYFbooN19NgFjztubEKh3WlZUeOLVdbbUWHsw==}
 
-  /@vueuse/core/8.7.5_vue@3.2.37:
-    resolution: {integrity: sha512-tqgzeZGoZcXzoit4kOGLWJibDMLp0vdm6ZO41SSUQhkhtrPhAg6dbIEPiahhUu6sZAmSYvVrZgEr5aKD51nrLA==}
+  /@vueuse/core/8.8.0_vue@3.2.37:
+    resolution: {integrity: sha512-TyvcNuA6O9WGkT8oQB4ERt8aBxe/e0fUs3SnibaxtLOr4eVXq42m3sLZgwgWOrJi4s9/8pTsMaJNn/6BUefwpQ==}
     peerDependencies:
       '@vue/composition-api': ^1.1.0
       vue: ^2.6.0 || ^3.2.0
@@ -435,18 +435,18 @@ packages:
         optional: true
     dependencies:
       '@types/web-bluetooth': 0.0.14
-      '@vueuse/metadata': 8.7.5
-      '@vueuse/shared': 8.7.5_vue@3.2.37
+      '@vueuse/metadata': 8.8.0
+      '@vueuse/shared': 8.8.0_vue@3.2.37
       vue: 3.2.37
-      vue-demi: 0.13.1_vue@3.2.37
+      vue-demi: 0.13.2_vue@3.2.37
     dev: false
 
-  /@vueuse/metadata/8.7.5:
-    resolution: {integrity: sha512-emJZKRQSaEnVqmlu39NpNp8iaW+bPC2kWykWoWOZMSlO/0QVEmO/rt8A5VhOEJTKLX3vwTevqbiRy9WJRwVOQg==}
+  /@vueuse/metadata/8.8.0:
+    resolution: {integrity: sha512-bRF+QPrw/RtP0al3nT/DtJ7CN0a6y6tEEO6hQ4CuJcGuUqd15eCOF6WKqQnC5DRaGFhsq/YwnQYsLTdJsW8f1A==}
     dev: false
 
-  /@vueuse/shared/8.7.5_vue@3.2.37:
-    resolution: {integrity: sha512-THXPvMBFmg6Gf6AwRn/EdTh2mhqwjGsB2Yfp374LNQSQVKRHtnJ0I42bsZTn7nuEliBxqUrGQm/lN6qUHmhJLw==}
+  /@vueuse/shared/8.8.0_vue@3.2.37:
+    resolution: {integrity: sha512-DNZEs5Wy8hxxjAyWni6UK4BX/OGa8R7g0GX1tid5+AvmRbUwvUXL+0lVmGEuWPSQY4OZdYef1lvuFCi4Bfd59A==}
     peerDependencies:
       '@vue/composition-api': ^1.1.0
       vue: ^2.6.0 || ^3.2.0
@@ -457,7 +457,7 @@ packages:
         optional: true
     dependencies:
       vue: 3.2.37
-      vue-demi: 0.13.1_vue@3.2.37
+      vue-demi: 0.13.2_vue@3.2.37
     dev: false
 
   /acorn/8.7.1:
@@ -1145,7 +1145,6 @@ packages:
     resolution: {integrity: sha512-ZdzmqwKmECOWJpqefloC5OJy1+WZBBse5+MR88z9g9Zn4VY+WYUkAyojmhzJckH5YbbZGcYIuGAkY5/Ys5OM2Q==}
     engines: {node: '>=8'}
     os: [darwin]
-    deprecated: 'Disk image license agreements are deprecated by Apple and will probably be removed in a future macOS release. Discussion at: https://github.com/argv-minus-one/dmg-license/issues/11'
     hasBin: true
     requiresBuild: true
     dependencies:
@@ -1249,7 +1248,7 @@ packages:
     resolution: {integrity: sha512-9GwUMv51w8ydbkaG7X0HrPlElXLApg63zYy1/VZ/a08ndl0gfm4iCoD3f0E1JvP3V16a+7KxqriCI0c122stiA==}
     dependencies:
       conf: 10.1.2
-      type-fest: 2.15.1
+      type-fest: 2.16.0
     dev: false
 
   /electron/18.2.3:
@@ -1259,7 +1258,7 @@ packages:
     requiresBuild: true
     dependencies:
       '@electron/get': 1.14.1
-      '@types/node': 16.11.42
+      '@types/node': 16.11.43
       extract-zip: 1.7.0
     transitivePeerDependencies:
       - supports-color
@@ -1276,7 +1275,7 @@ packages:
       '@popperjs/core': /@sxzz/popperjs-es/2.11.7
       '@types/lodash': 4.14.182
       '@types/lodash-es': 4.17.6
-      '@vueuse/core': 8.7.5_vue@3.2.37
+      '@vueuse/core': 8.8.0_vue@3.2.37
       async-validator: 4.2.5
       dayjs: 1.11.3
       escape-html: 1.0.3
@@ -3039,8 +3038,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /type-fest/2.15.1:
-    resolution: {integrity: sha512-LYSjcIz3NmoQksXq/3/B7Nfad+T8mkaI628agAAnHCpXPTBRMK2ygt3eABpzII8CbZZM8dLdVQ4Gr8ousjFjMw==}
+  /type-fest/2.16.0:
+    resolution: {integrity: sha512-qpaThT2HQkFb83gMOrdKVsfCN7LKxP26Yq+smPzY1FqoHRjqmjqHXA7n5Gkxi8efirtbeEUxzfEdePthQWCuHw==}
     engines: {node: '>=12.20'}
     dev: false
 
@@ -3252,8 +3251,8 @@ packages:
       fsevents: 2.3.2
     dev: true
 
-  /vue-demi/0.13.1_vue@3.2.37:
-    resolution: {integrity: sha512-xmkJ56koG3ptpLnpgmIzk9/4nFf4CqduSJbUM0OdPoU87NwRuZ6x49OLhjSa/fC15fV+5CbEnrxU4oyE022svg==}
+  /vue-demi/0.13.2_vue@3.2.37:
+    resolution: {integrity: sha512-41ukrclEbMddAyP7PvxMSYqnOSzPV6r7GNnyTSKSCNTaz19GehxmTiXyP9kwHSUv2+Dr6hHqiUiF7L1VAw2KdQ==}
     engines: {node: '>=12'}
     hasBin: true
     requiresBuild: true
@@ -3267,12 +3266,12 @@ packages:
       vue: 3.2.37
     dev: false
 
-  /vue-router/4.0.16_vue@3.2.37:
-    resolution: {integrity: sha512-JcO7cb8QJLBWE+DfxGUL3xUDOae/8nhM1KVdnudadTAORbuxIC/xAydC5Zr/VLHUDQi1ppuTF5/rjBGzgzrJNA==}
+  /vue-router/4.1.1_vue@3.2.37:
+    resolution: {integrity: sha512-Wp1mEf2xCwT0ez7o9JvgpfBp9JGnVb+dPERzXDbugTatzJAJ60VWOhJKifQty85k+jOreoFHER4r5fu062PhPw==}
     peerDependencies:
       vue: ^3.2.0
     dependencies:
-      '@vue/devtools-api': 6.1.4
+      '@vue/devtools-api': 6.2.0
       vue: 3.2.37
     dev: false
 
