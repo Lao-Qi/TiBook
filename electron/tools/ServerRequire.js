@@ -54,7 +54,6 @@ async function LoginUser(account, paw) {
             msg: "网络请求失败，请检查本地网络连接状态",
         }
     } else {
-        console.log(account, paw)
         const ping = publicEncrypt(publicKey, Buffer.from(paw)).toString("base64")
         const res = await axios.post(`/api/user/login`, { account, ping })
         return res.status === 200 ? res.data : false
@@ -111,10 +110,21 @@ async function SearchUsers(key) {
     return res.status === 200 ? res.data : false
 }
 
+/**
+ * @example 验证本地token是否过期
+ * @param { String } token
+ * @returns { Promise<Object | {}>}
+ */
+async function VerifyTokenIsOut(token) {
+    const res = await axios.post("/api/verifyToken", { token })
+    return res.status === 200 ? res.data : { code: 404, data: false, msg: "网络错误" }
+}
+
 module.exports = {
     RegisterUser,
     LoginUser,
     AddFriend,
     SearchUser,
     SearchUsers,
+    VerifyTokenIsOut,
 }

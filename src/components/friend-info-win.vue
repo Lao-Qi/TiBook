@@ -26,38 +26,72 @@
     </div>
 </template>
 
-<script setup async>
-import { useRouter } from "vue-router"
+<script>
+import { inject } from "vue"
+const { ipcRenderer } = require("electron")
+export default {
+    name: "friendInfoWin",
+    props: {
+        account: String,
+    },
+    async setup(props) {
+        const toggleOptions = inject("toggleOptions")
+        const friendInfoOnServer = await ipcRenderer.invoke("get-user-info", props.account)
+        const localInfo = await ipcRenderer.invoke("get local friend info", props.account)
+
+        const src = friendInfoOnServer.avatar === "none" ? "/src/assets/img/DefaultAvatar.jpg" : `http://127.0.0.1:8080/static/user/avatar/${friendInfoOnServer.avatar}`
+        const date = new Date(localInfo.AddTime)
+        const addTime = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
+
+        function GoChatWin() {
+            ipcRenderer.send("contactPage Go ChatWin", props.account)
+            ipcRenderer.on("contactPage Go ChatWin return", (event, isGo) => {
+                if (isGo) {
+                    toggleOptions("message")
+                } else {
+                    console.log("跳转失败")
+                }
+            })
+        }
+
+        return {
+            friendInfoOnServer,
+            src,
+            addTime,
+            GoChatWin,
+        }
+    },
+}
+</script>
+
+<!-- <script setup async>
+import { onMounted } from "vue"
 const { ipcRenderer } = require("electron")
 const props = defineProps({
     account: String,
 })
-const router = useRouter()
-const friendInfoOnServer = await ipcRenderer.invoke(
-    "get-user-info",
-    props.account
-)
-const localInfo = await ipcRenderer.invoke(
-    "get local friend info",
-    props.account
-)
-
-const src =
-    friendInfoOnServer.avatar === "none"
-        ? "/src/assets/img/DefaultAvatar.jpg"
-        : `http://127.0.0.1:8080/static/user/avatar/${friendInfoOnServer.avatar}`
-const date = new Date(localInfo.AddTime)
-const addTime = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
 
 function GoChatWin() {
-    ipcRenderer.send("go chat win", props.account)
-    ipcRenderer.on("is go chat win", () => {
-        router.push({
-            name: "info",
-        })
+    onMounted(() => {
+        console.log(this)
     })
+    // ipcRenderer.send("contactPage Go ChatWin", props.account)
+    // ipcRenderer.on("contactPage Go ChatWin return", (event, isGo) => {
+    //     if (isGo) {
+    //         this
+    //     } else {
+    //         console.log("跳转失败")
+    //     }
+    // })
 }
-</script>
+
+const friendInfoOnServer = await ipcRenderer.invoke("get-user-info", props.account)
+const localInfo = await ipcRenderer.invoke("get local friend info", props.account)
+
+const src = friendInfoOnServer.avatar === "none" ? "/src/assets/img/DefaultAvatar.jpg" : `http://127.0.0.1:8080/static/user/avatar/${friendInfoOnServer.avatar}`
+const date = new Date(localInfo.AddTime)
+const addTime = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
+</script> -->
 
 <style scoped lang="less">
 .friend-info-box {

@@ -38,14 +38,16 @@ function insertMessage(msg, isRead) {
  * @returns { Promise<Array>}
  */
 function findHistoryAccountMessage(account) {
-    return new Promise(res => {
+    return new Promise((res, rej) => {
         // 查询我发给他的 或 他发给我的
         DB.message.find(
             {
                 $or: [{ from: account }, { to: account }],
             },
             (err, docs) => {
-                if (docs.length) {
+                if (err) {
+                    rej(err)
+                } else if (docs.length) {
                     // 按时间进行排序
                     docs.sort((a, b) => a.date - b.date)
                     res(docs)
@@ -67,14 +69,17 @@ function updateOrInsertMessageCard(insertMessageCardAccount, msg) {
     return new Promise((res, rej) => {
         updateMessageCard(insertMessageCardAccount, msg)
             .then(doc => {
+                console.log("卡片已修改")
                 res(doc)
             })
-            .catch(() => {
+            .catch(err => {
                 insertMessageCard(insertMessageCardAccount, msg)
                     .then(doc => {
                         res(doc)
                     })
-                    .catch(rej)
+                    .catch(err => {
+                        rej(err)
+                    })
             })
     })
 }
@@ -107,7 +112,7 @@ function updateMessageCard(insertMessageCardAccount, { content, date }) {
             },
             (err, ret, newDoc) => {
                 // 查询得到并且修改成功
-                ret === 1 ? res(newDoc) : rej({ content, date })
+                err || ret === 1 ? res(newDoc) : rej(err)
             }
         )
     })
@@ -127,14 +132,24 @@ function insertMessageCard(insertMessageCardAccount, { content, date }) {
                 account: insertMessageCardAccount,
             },
             async (err, doc) => {
+                if (err) {
+                    console.error(err)
+                }
+                console.log(doc)
                 // 查询不到用户
                 if (!doc) {
-                    // 本地查询不到则到服务器查询
-                    const SearchUserDate = (await SearchUser(insertMessageCardAccount)).user
-                    doc = {
-                        name: SearchUserDate.name,
-                        account: SearchUserDate.account,
-                        avatar: SearchUserDate.avatar,
+                    let SearchUserDate = null
+                    try {
+                        // 本地查询不到则到服务器查询
+                        SearchUserDate = await SearchUser(insertMessageCardAccount)
+                        SearchUserDate = SearchUserDate.user
+                        doc = {
+                            name: SearchUserDate.name,
+                            account: SearchUserDate.account,
+                            avatar: SearchUserDate.avatar,
+                        }
+                    } catch (err) {
+                        console.error(err)
                     }
                 }
                 // 添加消息卡片
@@ -160,9 +175,21 @@ function insertMessageCard(insertMessageCardAccount, { content, date }) {
  * @returns { Promise<[]> }
  */
 function getLocalMessageCard() {
-    return new Promise(res => {
+    return new Promise((res, rej) => {
         DB.messageCards.find({}, (err, docs) => {
-            res(err ? [] : docs)
+            err ? rej(err) : res(docs)
+        })
+    })
+}
+
+/**
+ * @example 查询是否存在消息卡片
+ * @returns { Promise<Boolean> }
+ */
+function findLocalMessageCard(account) {
+    return new Promise((res, rej) => {
+        DB.messageCards.findOne({ account }, (err, doc) => {
+            err ? rej(err) : res(Boolean(doc))
         })
     })
 }
@@ -193,9 +220,9 @@ function insertFriend(friend) {
  * @returns { Promise<[]> }
  */
 function findLocalFriend(account) {
-    return new Promise(res => {
+    return new Promise((res, rej) => {
         DB.friends.findOne({ account }, { AddTime: 1, _id: 0 }, (err, doc) => {
-            res(err ? [] : doc)
+            err ? rej(err) : res(doc)
         })
     })
 }
@@ -205,6 +232,8 @@ module.exports = {
     findHistoryAccountMessage,
     getLocalMessageCard,
     updateOrInsertMessageCard,
+    insertMessageCard,
+    findLocalMessageCard,
     insertFriend,
     findLocalFriends,
     findLocalFriend,
