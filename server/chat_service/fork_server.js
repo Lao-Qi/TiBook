@@ -1,9 +1,10 @@
 "use strict"
 const { Server } = require("socket.io")
-const redis = require("redis")
+// const redis = require("redis")
 const RSA_JWT = require("../lib/keys.js")
 const io = new Server()
-const port = parseInt(process.argv[2]) || 6001
+const port = parseInt(process.argv[2])
+io.listen(port)
 
 // redis的消息订阅与发布，一个用来订阅，一个用来发布
 // const pubClient = redis.createClient({ url: process.env.REDIS_URL });
@@ -19,7 +20,7 @@ const port = parseInt(process.argv[2]) || 6001
 // 在线用户集合
 const UserSet = new Set()
 
-io.on("connection", (socket) => {
+io.on("connection", socket => {
     VerifyToken(socket)
     // 订阅自己的房间
     const account = socket.data.account
@@ -39,7 +40,7 @@ io.on("connection", (socket) => {
     // })
 
     // 客户端发布消息
-    socket.on("send message", (content) => {
+    socket.on("send message", content => {
         // 消息信息
         const strMsg = {
             from: socket.data.account,
@@ -53,9 +54,7 @@ io.on("connection", (socket) => {
         if (socket.data.room !== socket.data.account) {
             io.to(socket.data.room).emit("message", strMsg)
         }
-        console.log(
-            `用户 ${socket.data.account} ${socket.data.name} 向 ${socket.data.room} 发布了消息: ${content}`
-        )
+        console.log(`用户 ${socket.data.account} ${socket.data.name} 向 ${socket.data.room} 发布了消息: ${content}`)
 
         // // 发布到用户当前所在房间
         // pubClient.publish(socket.data.room, JSON.stringify(strMsg)).then(number => {
@@ -69,14 +68,12 @@ io.on("connection", (socket) => {
 
     // 用户加入别人的房间(这里不需要socket.join加入别人的房间，而是修改用户当前的房间)
     // 如果用户加入了别人的房间，那么其他用户发给别人的房间的消息，这里的用户也就可以收到了(这是不可以的)
-    socket.on("join room", (account) => {
+    socket.on("join room", account => {
         // 修改当前房间
         socket.data.room = account
         // 通知
         socket.emit("join room res", { code: 200, account })
-        console.log(
-            `用户 ${socket.data.account} ${socket.data.name} 加入了 ${account} 的房间`
-        )
+        console.log(`用户 ${socket.data.account} ${socket.data.name} 加入了 ${account} 的房间`)
     })
 
     // 客户端退出
