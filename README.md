@@ -11,6 +11,25 @@
 
 该项目目前还在开发中... 基础功能还不完善，等开发到能用的时候再发布1.0版本
 
+### 如何在本地启动这个软件？
+```git 
+git clone https://github.com/Lao-Qi/TonYouLu.git
+
+cd TonYouLu
+```
+```git
+pnpm run server
+
+pnpm run socket
+
+pnpm run dev
+
+pnpm run electron
+```
+```git
+pnpm run test
+```
+
 ## 开源协议
 
 ### MIT
