@@ -82,6 +82,15 @@ module.exports = function createMainWin() {
         ipcMain.on("send message", (event, content) => {
             socket.emit("send message", content)
         })
+        // 发送添加好友的消息
+        // ipcMain.on("send add firend message", (event, account) => {
+        //     socket.emit("send message", {
+        //         message_type: "addFriend",
+        //         data: {
+        //             account,
+        //         },
+        //     })
+        // })
         // 加入用户房间事件
         ipcMain.on("join room", (event, UserRoomAccount) => {
             console.log(`试图加入到用户：${UserRoomAccount}房间中`)
@@ -96,11 +105,30 @@ module.exports = function createMainWin() {
         // 要更新的好友账号如果是我自己，则修改接收方在本地的消息卡片
         const insertMessageCardAccount = UserInfo.account === msg.from ? msg.to : msg.from
         // 更新本地好友消息卡片
-        updateOrInsertMessageCard(insertMessageCardAccount, msg).then(doc => {
-            mainWin.webContents.send("new messageCard", doc)
-            mainWin.webContents.send(`new messageCard ${insertMessageCardAccount}`, doc)
-            mainWin.webContents.send("message", msg)
-        })
+        updateOrInsertMessageCard(insertMessageCardAccount, msg)
+            .then(doc => {
+                console.log(doc, insertMessageCardAccount)
+                findLocalMessageCard(insertMessageCardAccount)
+                    .then(doc => {
+                        if (doc) {
+                            mainWin.webContents.send(`new message to ${insertMessageCardAccount}`, msg)
+                        } else {
+                            mainWin.webContents.send("new messageCard", doc)
+                        }
+                    })
+                    .catch(err => {
+                        mainWin.webContents.send(`new message to ${insertMessageCardAccount}`, {
+                            content: "消息加载失败...",
+                            date: Date.now(),
+                        })
+                        console.error(err)
+                    })
+                mainWin.webContents.send("message", msg)
+            })
+            .catch(err => {
+                console.log("卡片报错")
+                console.error(err)
+            })
     })
 
     // 用户加入其他房间后服务端响应完成
@@ -147,32 +175,41 @@ module.exports = function createMainWin() {
     // 前端联系人页面(点击发送消息按钮)跳转聊天窗口页面
     // 添加聊天卡片
     ipcMain.on("contactPage Go ChatWin", async (event, account) => {
-        if (await findLocalMessageCard(account)) {
-            console.log("本地存在改用户的消息卡片")
-            room = account
-            UserStore.set("room", account)
-            mainWin.webContents.send("contactPage Go ChatWin return", true)
-        } else {
-            console.log("本地消息卡片列表中查询不到该用户：" + account)
-            let latelyMessage = null
-            try {
-                latelyMessage = await findHistoryAccountMessage(account)
-                latelyMessage = latelyMessage.at(-1) ?? {}
-                console.log(latelyMessage)
-            } catch (err) {
-                console.error(err)
-            }
-            insertMessageCard(account, latelyMessage)
-                .then(() => {
+        findLocalMessageCard(account)
+            .then(async doc => {
+                if (doc) {
+                    console.log("本地存在跳转的用户消息卡片")
                     room = account
                     UserStore.set("room", account)
                     mainWin.webContents.send("contactPage Go ChatWin return", true)
-                })
-                .catch(err => {
-                    mainWin.webContents.send("contactPage Go ChatWin return", false)
-                    console.error(err)
-                })
-        }
+                } else {
+                    console.log("本地消息卡片列表中查询不到该用户：" + account)
+                    let latelyMessage = null
+                    try {
+                        latelyMessage = await findHistoryAccountMessage(account)
+                        latelyMessage = latelyMessage.at(-1) ?? {}
+                        console.log(latelyMessage)
+                    } catch (err) {
+                        console.log("查询本地聊天记录失败")
+                        mainWin.webContents.send("contactPage Go ChatWin return", false)
+                        console.error(err)
+                    }
+                    insertMessageCard(account, latelyMessage)
+                        .then(() => {
+                            room = account
+                            UserStore.set("room", account)
+                            mainWin.webContents.send("contactPage Go ChatWin return", true)
+                        })
+                        .catch(err => {
+                            mainWin.webContents.send("contactPage Go ChatWin return", false)
+                            console.error(err)
+                        })
+                }
+            })
+            .catch(err => {
+                mainWin.webContents.send("contactPage Go ChatWin return", false)
+                console.error(err)
+            })
     })
 
     // 窗口控件事件

@@ -1,22 +1,22 @@
 <template>
     <div class="message-card-box">
-        <div class="avatar">
-            <img :src="avatar" :alt="name" />
+        <div class="avatar user-info">
+            <img :src="showAvatar" :alt="name" />
         </div>
         <div class="text">
-            <div class="name">
+            <div class="name user-info">
                 <span>{{ name }}</span>
-                <span class="date">{{ showDate }}</span>
+                <span class="date user-info">{{ showDate }}</span>
             </div>
-            <div class="message">
-                <p>{{ message }}</p>
+            <div class="message user-info">
+                <p>{{ showMessage }}</p>
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { ref, computed } from "vue"
 const { ipcRenderer } = require("electron")
 
 const props = defineProps({
@@ -27,28 +27,24 @@ const props = defineProps({
     date: Number,
 })
 
-const avatar = ref(null) // 头像
-const message = ref(null) // 最近消息
-const date = ref(null) // 最近消息发送时间
-const showDate = ref(null) // 要显示的时间
+const initAvatar = ref(props.avatar) // 初始头像
+const initDate = ref(props.date) // 初始消息的时间戳
+const initMessage = ref(props.message) // 初始消息
 
-avatar.value =
-    props.avatar === "none" ? "/src/assets/img/DefaultAvatar.jpg" : props.avatar
-message.value =
-    props.message.length > 15
-        ? `${props.message.slice(0, 15)}...`
-        : props.message
-showDate.value = ConversionTime(props.date)
+const showAvatar = computed(() => (initAvatar.value === "none" ? "/src/assets/img/DefaultAvatar.jpg" : initAvatar.value))
+const showMessage = computed(() => (initMessage.length > 15 ? `${initMessage.slice(0, 15)}...` : initMessage))
+const showDate = computed(() => conversionTime(initDate.value))
 
 // 绑定该用户卡片的消息，用户切换消息卡片上的消息
-ipcRenderer.on(`new messageCard ${props.account}`, (event, card) => {
-    avatar.value = card.avatar
-    message.value = card.msg.content // 更好内容与时间
-    showDate.value = ConversionTime(card.msg.date)
+ipcRenderer.on(`new message to ${props.account}`, (event, { content, date }) => {
+    // 更新内容与时间
+    console.log(content, date)
+    initMessage.value = content
+    initDate.value = date
 })
 
 // 转换时间方法
-function ConversionTime(ts) {
+function conversionTime(ts) {
     // 今天的时间
     const todayTime = new Date()
     const messageDate = new Date(ts)
@@ -60,18 +56,16 @@ function ConversionTime(ts) {
         let Hours = messageDate.getHours()
         let Minutes = messageDate.getMinutes()
 
-        return `${ZeroFilling(Hours)}:${ZeroFilling(Minutes)}`
+        return `${zeroFilling(Hours)}:${zeroFilling(Minutes)}`
 
         // 不是今天的消息
     } else {
-        return `${messageDate.getFullYear()}/${ZeroFilling(
-            messageDate.getMonth() + 1
-        )}/${ZeroFilling(messageDate.getDate())}`
+        return `${messageDate.getFullYear()}/${zeroFilling(messageDate.getMonth() + 1)}/${zeroFilling(messageDate.getDate())}`
     }
 }
 
 // 补零
-function ZeroFilling(num) {
+function zeroFilling(num) {
     return num < 10 ? "0" + num : num
 }
 </script>
@@ -85,10 +79,10 @@ function ZeroFilling(num) {
     padding: 3px 10px 6px 20px;
     cursor: pointer;
     box-sizing: border-box;
-    transition: all ease 0.3s;
+    background-color: var(--card-background-color);
 
-    &:hover {
-        background-color: rgba(163, 170, 183, 0.1);
+    .user-info {
+        z-index: 999;
     }
 
     .avatar {
