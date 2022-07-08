@@ -189,7 +189,7 @@ function getLocalMessageCard() {
 function findLocalMessageCard(account) {
     return new Promise((res, rej) => {
         DB.messageCards.findOne({ account }, (err, doc) => {
-            err ? rej(err) : res(Boolean(doc))
+            err ? rej(err) : res(doc)
         })
     })
 }
