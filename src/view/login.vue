@@ -1,10 +1,11 @@
 <template>
     <div class="page-content">
-        <div :class="{
-            'background-box': true,
-            'background-box-transition': isBackgroundBoxStartPlayAnimation,
-        }">
-        </div>
+        <div
+            :class="{
+                'background-box': true,
+                'background-box-transition': isBackgroundBoxStartPlayAnimation,
+            }"
+        ></div>
         <div class="slogan-text-box">
             <a href="javascript:;" class="register-btn" @click="changeCahtWindow">
                 <h1>{{ userInputInfo.slogan }}</h1>
@@ -17,33 +18,45 @@
             <div class="chat-message-content-container">
                 <div class="chat-message-content-container-inset-show">
                     <template v-if="MessageList.length">
-                        <div v-for="message in MessageList" :key="message" :class="{
-                            'message-box': true,
-                            'is-me': message.isMe,
-                            'not-me': !message.isMe,
-                            'up-message-is-same-person': thisMessageIsMe(
-                                message.isMe
-                            ),
-                        }">
-                            <div :class="{
-                                'message-content': true,
-                                'message-content-animation': isMessageListStartPlayAnimation,
-                                'not-me-message-animation': !message.isMe && isMessageListStartPlayAnimation,
-                                'is-me-message-animation': message.isMe && isMessageListStartPlayAnimation
-                            }">
+                        <div
+                            v-for="message in MessageList"
+                            :key="message"
+                            :class="{
+                                'message-box': true,
+                                'is-me': message.isMe,
+                                'not-me': !message.isMe,
+                                'up-message-is-same-person': thisMessageIsMe(message.isMe),
+                            }"
+                        >
+                            <div
+                                :class="{
+                                    'message-content': true,
+                                    'message-content-animation': isMessageListStartPlayAnimation,
+                                    'not-me-message-animation': !message.isMe && isMessageListStartPlayAnimation,
+                                    'is-me-message-animation': message.isMe && isMessageListStartPlayAnimation,
+                                }"
+                            >
                                 {{ message.content }}
                             </div>
                         </div>
                     </template>
                 </div>
             </div>
-            <div class="chat-input-container" :class="{
-                'changes-in-input-focus': inputConfig.focus,
-            }">
+            <div
+                class="chat-input-container"
+                :class="{
+                    'changes-in-input-focus': inputConfig.focus,
+                }"
+            >
                 <div class="input-box">
-                    <input :type="inputConfig.type" :placeholder="inputConfig.placeholder" v-model="inputConfig.content"
-                        @focus="inputConfig.focus = true" @blur="inputConfig.focus = false"
-                        @keydown.enter="userSendMessage" />
+                    <input
+                        :type="inputConfig.type"
+                        :placeholder="inputConfig.placeholder"
+                        v-model="inputConfig.content"
+                        @focus="inputConfig.focus = true"
+                        @blur="inputConfig.focus = false"
+                        @keydown.enter="userSendMessage"
+                    />
                     <p>{{ inputConfig.content }}</p>
                 </div>
                 <div class="message-send-btn">
@@ -77,15 +90,16 @@ const userInputInfo = reactive({
     // 页面标语 注册 | 登录
     slogan: "注册",
     // 聊天窗口标题 注册 | 登录
-    title: "登录"
+    title: "登录",
 })
-
+// 是否开启背景盒子动画
+const isBackgroundBoxStartPlayAnimation = ref(false)
+// 是否开启消息动画
+const isMessageListStartPlayAnimation = ref(false)
 // 上一条消息是否为自己输入
 let upMessageIsMe = false
 // 显示的消息列表
 let MessageList = ref([])
-const isBackgroundBoxStartPlayAnimation = ref(false)
-const isMessageListStartPlayAnimation = ref(false)
 
 /**
  * @example 改变聊天窗口的功能 login | register
@@ -104,9 +118,8 @@ function changeCahtWindow() {
 
         MessageList.value.push({
             content: "请输入用户名称",
-            isMe: false
+            isMe: false,
         })
-
     } else if (userInputInfo.state === "register") {
         // 改变为登录功能
         userInputInfo.title = "登录"
@@ -118,7 +131,7 @@ function changeCahtWindow() {
 
         MessageList.value.push({
             content: "请输入账号",
-            isMe: false
+            isMe: false,
         })
     }
 
@@ -131,7 +144,7 @@ function changeCahtWindow() {
 
 /**
  * @example 判断上一条消息是否为同一人发送
- * @param {Boolean} isMe 
+ * @param {Boolean} isMe
  */
 function thisMessageIsMe(isMe) {
     if (isMe === upMessageIsMe) {
@@ -172,9 +185,8 @@ function LoginUser() {
 
         MessageList.value.push({
             content: "请输入账户密码",
-            isMe: false
+            isMe: false,
         })
-
     } else if (inputConfig.type === "password") {
         inputConfig.type = "text"
         inputConfig.placeholder = "..."
@@ -194,7 +206,6 @@ function RegisterUser() {
         inputConfig.contentPurpose = "account"
         inputConfig.placeholder = "账号"
     }
-
 }
 
 onMounted(() => {
@@ -216,12 +227,12 @@ onMounted(() => {
 ipcRenderer.on("server-return-message", (event, msg, code) => {
     MessageList.value.push({
         content: msg,
-        isMe: false
+        isMe: false,
     })
     if (code === 200) {
         MessageList.value.push({
             content: "正在跳转主页...",
-            isMe: false
+            isMe: false,
         })
         ipcRenderer.send("login-complete-open-mainWin")
     }
@@ -320,7 +331,7 @@ ipcRenderer.on("server-return-message", (event, msg, code) => {
                         height: auto;
                         opacity: 0;
                         padding: 5px 10px;
-                        color: var(--card-background-color);
+                        color: var(--text-color-two);
                         transition: all ease 1s;
                     }
 
@@ -335,13 +346,10 @@ ipcRenderer.on("server-return-message", (event, msg, code) => {
 
                     .message-content {
                         border-radius: 0 10px 10px 15px;
-                        box-shadow: 2px 2px 2px 1px var(--not-me-message-box-show),
-                            3px 3px 2px 1px rgba(0, 0, 0, 0.3);
+                        box-shadow: 2px 2px 2px 1px var(--not-me-message-box-show), 3px 3px 2px 1px rgba(0, 0, 0, 0.3);
                         background-color: var(--not-me-message-background-color);
                     }
                 }
-
-
 
                 .is-me {
                     padding-left: 25px;
@@ -349,8 +357,7 @@ ipcRenderer.on("server-return-message", (event, msg, code) => {
 
                     .message-content {
                         border-radius: 10px 0 10px 10px;
-                        box-shadow: 2px 2px 2px 1px var(--is-me-message-box-show),
-                            3px 3px 2px 1px rgba(0, 0, 0, 0.3);
+                        box-shadow: 2px 2px 2px 1px var(--is-me-message-box-show), 3px 3px 2px 1px rgba(0, 0, 0, 0.3);
                         background-color: var(--is-me-message-background-color);
                     }
                 }
@@ -390,13 +397,11 @@ ipcRenderer.on("server-return-message", (event, msg, code) => {
                     transition: all 0.3s ease;
 
                     &:hover {
-                        box-shadow: 2px 2px 3px 1px rgba(0, 0, 0, 0.4),
-                            2px 1px 3px 1px inset rgba(0, 0, 0, 0.4);
+                        box-shadow: 2px 2px 3px 1px rgba(0, 0, 0, 0.4), 2px 1px 3px 1px inset rgba(0, 0, 0, 0.4);
                     }
 
                     &:focus {
-                        box-shadow: 2px 2px 3px 1px rgba(0, 0, 0, 0.4),
-                            2px 1px 3px 1px inset rgba(0, 0, 0, 0.4);
+                        box-shadow: 2px 2px 3px 1px rgba(0, 0, 0, 0.4), 2px 1px 3px 1px inset rgba(0, 0, 0, 0.4);
                     }
                 }
             }
@@ -416,17 +421,16 @@ ipcRenderer.on("server-return-message", (event, msg, code) => {
                     text-decoration: none;
                     font-size: 16px;
                     border-radius: 10px;
-                    background-color: var(--theme-color-one);
+                    background-color: var(--operable-box-prompt-color);
                     box-shadow: 2px 2px 3px 1px rgba(0, 0, 0, 0.4);
                     transition: all 0.3s ease;
 
                     &:hover {
-                        box-shadow: 2px 2px 3px 1px rgba(0, 0, 0, 0.4),
-                            2px 1px 3px 1px inset rgba(0, 0, 0, 0.4);
+                        box-shadow: 2px 2px 3px 1px rgba(0, 0, 0, 0.4), 2px 1px 3px 1px inset rgba(0, 0, 0, 0.4);
                     }
 
                     &:before {
-                        color: var(--card-background-color);
+                        color: var(--text-color-two);
                     }
                 }
             }
