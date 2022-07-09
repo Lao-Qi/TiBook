@@ -19,6 +19,10 @@ const {
 const UserStore = new Store({ accessPropertiesByDotNotation: false })
 const UserInfo = UserStore.get("info")
 
+/**
+ * @example 创建主窗口
+ * @returns { BrowserWindow }
+ */
 module.exports = function createMainWin() {
     const mainWin = new BrowserWindow({
         width: 800,
@@ -33,7 +37,7 @@ module.exports = function createMainWin() {
             webSecurity: false, // 支持不同协议的资源
         },
     })
-    mainWin.loadURL("http://127.0.0.1:3000/#/main")
+    mainWin.loadURL(process.env.LoadPath)
     mainWin.once("ready-to-show", () => mainWin.show())
     // 用户当前所处房间
     let room = UserStore.get("room")

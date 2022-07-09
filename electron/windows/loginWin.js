@@ -22,7 +22,7 @@ module.exports = async function createLoginWin() {
         },
     })
 
-    loginWin.loadURL("http://127.0.0.1:3000/#/login")
+    loginWin.loadURL(process.env.LoadPath)
     loginWin.once("ready-to-show", () => {
         loginWin.show()
         loginWin.webContents.send("window-show")
@@ -32,6 +32,10 @@ module.exports = async function createLoginWin() {
 
     ipcMain.on("register", async (event, name, account, pw) => {
         const registerData = await RegisterUser(name, account, pw)
+        if (registerData.code === 200 && registerData.body.account === account) {
+            UserStore.set("info", { name, account, avatar: "none" })
+        }
+        loginWin.webContents.send("register-return-message", registerData.code)
     })
 
     ipcMain.on("login", async (event, account, pw) => {

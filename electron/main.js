@@ -1,15 +1,19 @@
 "use strict"
+const { join } = require("path")
 const { app, ipcMain } = require("electron")
 const Store = require("electron-store")
+
+// 配置页面资源加载环境
+process.env.LoadPath = process.env?.IS_DEV ? "http://127.0.0.1:3000" : `file:///${join(__dirname, "./dist/index.html")}`
+
 const createLoginWin = require("./windows/loginWin")
 const createMainWin = require("./windows/mainWin")
 const { VerifyTokenIsOut } = require("./tools/ServerRequire")
 
 let loginWin = null, // 登录窗口
     mainWin = null, // 主窗口
-    currentWin = null // 当前页面上的窗口
-
-// let currentWinName = null
+    currentWin = null, // 当前窗口
+    currentWinName = null // 当前窗口的名称
 
 app.whenReady().then(async () => {
     const UserStore = new Store({ accessPropertiesByDotNotation: false })
@@ -18,12 +22,13 @@ app.whenReady().then(async () => {
     if (token && VerifyTokenIsOut(token)) {
         mainWin = createMainWin()
         currentWin = mainWin
+        currentWinName = "main"
         mainWin.on("maximize", () => currentWin.webContents.send("window-maximize"))
         mainWin.on("unmaximize", () => currentWin.webContents.send("window-unmaximize"))
     } else {
         loginWin = await createLoginWin()
         currentWin = loginWin
-        // currentWinName = "loginWin"
+        currentWinName = "login"
         loginWin.on("maximize", () => currentWin.webContents.send("window-maximize"))
         loginWin.on("unmaximize", () => currentWin.webContents.send("window-unmaximize"))
 
@@ -31,7 +36,7 @@ app.whenReady().then(async () => {
             loginWin.close()
             mainWin = createMainWin()
             currentWin = mainWin
-            // currentWinName = "mainWin"
+            currentWinName = "main"
             mainWin.on("maximize", () => currentWin.webContents.send("window-maximize"))
             mainWin.on("unmaximize", () => currentWin.webContents.send("window-unmaximize"))
         })
@@ -40,4 +45,5 @@ app.whenReady().then(async () => {
     ipcMain.on("window-minimize", () => currentWin.minimize())
     ipcMain.on("window-maximize", () => (currentWin.isMaximized() ? currentWin.unmaximize() : currentWin.maximize()))
     ipcMain.on("window-destroy", () => currentWin.destroy())
+    ipcMain.handle("get-current-page", () => currentWinName)
 })
