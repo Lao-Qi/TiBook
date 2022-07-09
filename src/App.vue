@@ -1,6 +1,7 @@
 <template>
     <div id="title">
-        <template v-if="SystemType === 'Windows_NT'">
+        <WindowTitle></WindowTitle>
+        <!-- <template v-if="SystemType === 'Windows_NT'">
             <windows-title></windows-title>
         </template>
         <template v-if="SystemType === 'Darwin'">
@@ -8,7 +9,7 @@
         </template>
         <template v-if="SystemType === 'Linux'">
             <linux-title></linux-title>
-        </template>
+        </template> -->
     </div>
     <div id="view">
         <router-view></router-view>
@@ -16,12 +17,37 @@
 </template>
 
 <script setup>
-import WindowsTitle from "./components/title/windows-title.vue"
-import MacTitle from "./components/title/mac-title.vue"
-import LinuxTitle from "./components/title/linux-title.vue"
-const { type } = require("os");
+import { useRouter } from "vue-router"
+import { defineAsyncComponent } from "vue"
+const { type } = require("os")
+const { ipcRenderer } = require("electron")
 
-const SystemType = type();
+const router = useRouter()
+const SystemType = type()
+
+const WindowTitle = defineAsyncComponent(() => {
+    let windowTitleComponent = null
+    switch (SystemType) {
+        case "Windows_NT":
+            windowTitleComponent = import("./components/title/windows-title.vue")
+            break
+        case "Darwin":
+            windowTitleComponent = import("./components/title/mac-title.vue")
+            break
+        case "Linux":
+            windowTitleComponent = import("./components/title/linux-title.vue")
+            break
+        default:
+            windowTitleComponent = import("./components/title/windows-title.vue")
+    }
+    return windowTitleComponent
+})
+
+ipcRenderer.invoke("get-current-page").then(page => {
+    router.push({
+        name: page,
+    })
+})
 </script>
 
 <style lang="less">
