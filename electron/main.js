@@ -4,7 +4,7 @@ const { app, ipcMain } = require("electron")
 const Store = require("electron-store")
 
 // 配置页面资源加载环境
-process.env.LoadPath = process.env?.IS_DEV ? "http://127.0.0.1:3000" : `file:///${join(__dirname, "./dist/index.html")}`
+process.env.LoadPath = process.env?.IS_DEV ? "http://127.0.0.1:3000" : `file:///${join(__dirname, "../dist/index.html")}`
 
 const createLoginWin = require("./windows/loginWin")
 const createMainWin = require("./windows/mainWin")
