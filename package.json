@@ -5,7 +5,8 @@
     "main": "./electron/main.js",
     "author": {
         "name": "王老柒",
-        "email": "Wang.Lao.Qi@qq.com"
+        "email": "Wang.Lao.Qi@qq.com",
+        "url": "https://github.com/Lao-Qi"
     },
     "license": "MIT",
     "private": true,
@@ -14,11 +15,12 @@
         "build": "vite build",
         "preview": "vite preview",
         "electron": "wait-on tcp:3000 && cross-env IS_DEV=true electron .",
+        "electron:static": "electron .",
         "electron:dev": "concurrently -K \"pnpm run dev\" \"pnpm run electron\"",
         "electron:build": "pnpm run build && electron-builder",
+        "electron:builder": "electron-builder",
         "server": "nodemon ./server/index.js",
-        "socket": "nodemon ./server/chat_service/index.js",
-        "test": "concurrently -K \"pnpm run server\" \"pnpm run socket\" \"pnpm run dev\""
+        "socket": "nodemon ./server/chat_service/index.js"
     },
     "dependencies": {
         "@icon-park/vue-next": "^1.4.2",
@@ -52,5 +54,49 @@
     "engines": {
         "node": ">=16",
         "pnpm": ">=3"
+    },
+    "build": {
+        "productName": "题书",
+        "appId": "com.tibook.app",
+        "copyright": "Copyright © 2022 - present WangLaoQi(https://github.com/Lao-Qi)",
+        "files": [
+            "dist/**/*",
+            "electron/**/*"
+        ],
+        "directories": {
+            "buildResources": "dist",
+            "output": "electron_build"
+        },
+        "dmg": {
+            "window": {
+                "x": 100,
+                "y": 100,
+                "width": 500,
+                "height": 300
+            }
+        },
+        "nsis": {
+            "oneClick": false,
+            "uninstallDisplayName": "卸载题书",
+            "uninstallerIcon": "/dist/icon-uninstall-256x256.ico",
+            "allowToChangeInstallationDirectory": true
+        },
+        "win": {
+            "icon": "/dist/icon-256x256.ico",
+            "target": [
+                {
+                    "target": "nsis",
+                    "arch": [ "ia32" ]
+                }
+            ]
+        },
+        "mac": {
+            "icon": "/dist/icons-256x256.icns",
+            "target": "dmg"
+        },
+        "linux": {
+            "icon": "/dist/icon-256x256.ico",
+            "target": "deb"
+        }
     }
 }
