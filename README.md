@@ -18,16 +18,17 @@ git clone https://github.com/Lao-Qi/TonYouLu.git
 cd TonYouLu
 ```
 ```git
+# 启动后台服务器
 pnpm run server
 
+# 启动后台会话服务器
 pnpm run socket
 
+# 启动vite服务器
 pnpm run dev
 
+# 启动electron
 pnpm run electron
-```
-```git
-pnpm run test
 ```
 
 ## 开源协议

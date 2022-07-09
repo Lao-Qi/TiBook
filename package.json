@@ -78,7 +78,7 @@
         "nsis": {
             "oneClick": false,
             "uninstallDisplayName": "卸载题书",
-            "uninstallerIcon": "/dist/icon-uninstall-256x256.ico",
+            "uninstallerIcon": "./dist/icon-uninstall-256x256.ico",
             "allowToChangeInstallationDirectory": true
         },
         "win": {
