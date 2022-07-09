@@ -2,8 +2,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Helvetica, "Hiragino Sans GB", "Microsoft Yahei", "微软雅黑",
-        Arial, sans-serif;
+    font-family: Helvetica, "Hiragino Sans GB", "Microsoft Yahei", "微软雅黑", Arial, sans-serif;
 }
 
 *:hover::-webkit-scrollbar-thumb {
@@ -26,12 +25,15 @@ html {
     --theme-color-three: #e3e7f1; /* 主题色三 */
     --theme-color-four: #282c34; /* 主题色四 */
     --text-color: #2c2c2c; /* 软件字体颜色 */
+    --text-color-two: #fbfbfb;
     --card-background-color: #fbfbfb; /* 卡片背景颜色 */
-    --not-me-message-background-color: #c76c34;
-    --not-me-message-box-show: #b25d2a;
-    --is-me-message-background-color: #226285;
-    --is-me-message-box-show: #175579;
-    --background-color: #ebe9e7;
+    --not-me-message-background-color: #c76c34; /* 不是我的消息的背景颜色 */
+    --not-me-message-box-show: #b25d2a; /* 不是我的消息的背景阴影颜色 */
+    --is-me-message-background-color: #226285; /* 我的消息的背景颜色 */
+    --is-me-message-box-show: #175579; /* 我的消息的背景阴影颜色 */
+    --small-mark-color: #c76c34;
+    --operable-box-prompt-color: #226285;
+    --background-color: #ebe9e7; /* 窗口背景颜色 */
     --border-color: #282e34; /* 边框颜色 */
     --chat-win-border-color: #8d9db0;
     --message-card-color: #a3aab7; /* 消息卡片字体颜色 */
