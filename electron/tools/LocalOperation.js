@@ -1,9 +1,20 @@
 "use strict"
+const { accessSync, writeFileSync } = require("fs")
 const path = require("path")
 const Nedb = require("nedb")
 const { app } = require("electron")
 const { SearchUser } = require("./ServerRequire")
 
+// 验证本地数据库存储文件是否齐全
+const DBFiles = ["message.db", "messageCards.db", "friends.db"]
+for (let i = 0; i < DBFiles.length; i++) {
+    const dbFilePath = path.join(app.getAppPath(), DBFiles[i])
+    try {
+        accessSync(dbFilePath)
+    } catch {
+        writeFileSync(dbFilePath, "")
+    }
+}
 // 本地软件存储
 const DB = {
     message: new Nedb({
@@ -12,7 +23,7 @@ const DB = {
         corruptAlertThreshold: 1, // 数据缺失多少报错， 1表示不报错
     }),
     friends: new Nedb({
-        filename: path.join(app.getAppPath(), "./friendList.db"),
+        filename: path.join(app.getAppPath(), "./friends.db"),
         autoload: true,
         corruptAlertThreshold: 1,
     }),
