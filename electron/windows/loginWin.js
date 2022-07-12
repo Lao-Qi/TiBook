@@ -23,27 +23,49 @@ module.exports = async function createLoginWin() {
     })
 
     loginWin.loadURL(process.env.LoadPath)
-    loginWin.once("ready-to-show", () => {
-        loginWin.show()
-        loginWin.webContents.send("window-show")
-    })
+    loginWin.once("ready-to-show", () => loginWin.show())
 
     const UserStore = new Store({ accessPropertiesByDotNotation: false })
 
-    ipcMain.on("register", async (event, name, account, pw) => {
-        const registerData = await RegisterUser(name, account, pw)
-        if (registerData.code === 200 && registerData.body.account === account) {
-            UserStore.set("info", { name, account, avatar: "none" })
-        }
-        loginWin.webContents.send("register-return-message", registerData.code)
+    /**
+     * 注册事件
+     * 流程: 发送注册的网络请求 -> 返回注册数据 -> (正确) -> 将返回的用户信息存储到本地 -> 向页面发送服务器返回事件，参数(服务器返回的消息和状态码)
+     *                                       -> (失败) -> 向页面发送服务器返回的消息和状态码
+     *                                       -> (请求发送失败) -> 向页面发送消息(可能为网络问题)
+     */
+    ipcMain.on("register", (event, name, account, pw) => {
+        RegisterUser(name, account, pw)
+            .then(registerUserData => {
+                const data = registerUserData.data
+                if (data.code === 200) {
+                    UserStore.set("info", { ...data.body })
+                }
+                loginWin.webContents.send("server-return-message", data.msg, data.code)
+            })
+            .catch(err => {
+                loginWin.webContents.send("server-return-message", "注册失败，可能是网络问题", 500)
+                console.error(err)
+            })
     })
 
-    ipcMain.on("login", async (event, account, pw) => {
-        const loginUserData = await LoginUser(account, pw)
-        if (loginUserData.code === 200 && loginUserData.body.account === account) {
-            UserStore.set("token", loginUserData.token)
-        }
-        loginWin.webContents.send("server-return-message", loginUserData.msg, loginUserData.code)
+    /**
+     * 登录事件
+     * 流程: 发送登录的网络请求 -> 返回登录数据 -> (正确) -> 将登录成功的token存储到本地 -> 向页面发送服务器返回事件，参数(服务器返回的消息和状态码)
+     *                                       -> (失败) -> 向页面发送服务器返回的消息和状态码
+     *                                       -> (请求发送失败) -> 向页面发送消息(可能为网络问题)
+     */
+    ipcMain.on("login", (event, account, pw) => {
+        LoginUser(account, pw)
+            .then(loginUserData => {
+                if (loginUserData.code === 200 && loginUserData.body.account === account) {
+                    UserStore.set("token", loginUserData.token)
+                }
+                loginWin.webContents.send("server-return-message", loginUserData.msg, loginUserData.code)
+            })
+            .catch(err => {
+                loginWin.webContents.send("server-return-message", "注册失败，可能是网络问题", 500)
+                console.error(err)
+            })
     })
 
     return loginWin
