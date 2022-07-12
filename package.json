@@ -18,7 +18,12 @@
         "electron:static": "electron .",
         "electron:dev": "concurrently -K \"pnpm run dev\" \"pnpm run electron\"",
         "electron:build": "pnpm run build && electron-builder",
-        "electron:builder": "electron-builder"
+        "builder": "electron-builder",
+        "builder:mac": "electron-builder --mac",
+        "builder:win64": "electron-builder --win --x64",
+        "builder:win32": "electron-builder --win --ia32",
+        "builder:linux": "electron-builder --linux",
+        "builder:allSystem": "electron-builder -mwl"
     },
     "dependencies": {
         "@icon-park/vue-next": "^1.4.2",
