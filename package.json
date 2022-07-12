@@ -23,7 +23,8 @@
         "builder:win64": "electron-builder --win --x64",
         "builder:win32": "electron-builder --win --ia32",
         "builder:linux": "electron-builder --linux",
-        "builder:allSystem": "electron-builder -mwl"
+        "builder:allSystem": "electron-builder -mwl",
+        "format": "npx prettier --write"
     },
     "dependencies": {
         "@icon-park/vue-next": "^1.4.2",
