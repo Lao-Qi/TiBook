@@ -22,22 +22,27 @@ async function GetPublicKey() {
  * @param { String } name
  * @param { String } account
  * @param { String } paw
- * @returns { Promise<Object | Boolean >}
+ * @returns { Promise<Object> }
  */
-async function RegisterUser(name, account, paw) {
-    const publicKey = await GetPublicKey()
-    if (publicKey.status !== 200) {
-        return publicKey.status
-    } else {
-        const ping = publicEncrypt(publicKey, Buffer.from(paw)).toString("base64")
-        const res = await axios.post("/api/user/register", {
-            name,
-            account,
-            type: type(),
-            ping,
-        })
-        return res.status === 200 ? res.data : false
-    }
+function RegisterUser(name, account, paw) {
+    return new Promise((res, rej) => {
+        GetPublicKey()
+            .then(publicKey => {
+                const ping = publicEncrypt(publicKey, Buffer.from(paw)).toString("base64")
+                axios
+                    .post("/api/user/register", {
+                        name,
+                        account,
+                        type: type(),
+                        ping,
+                    })
+                    .then(registerData => {
+                        res(registerData)
+                    })
+                    .catch(err => rej(err))
+            })
+            .catch(err => rej(err))
+    })
 }
 
 /**
@@ -46,30 +51,34 @@ async function RegisterUser(name, account, paw) {
  * @param { String } paw
  * @returns { Promise<Object | Boolean >}
  */
-async function LoginUser(account, paw) {
-    const publicKey = await GetPublicKey()
-    if (!publicKey) {
-        return {
-            code: 404,
-            msg: "网络请求失败，请检查本地网络连接状态",
-        }
-    } else {
-        const ping = publicEncrypt(publicKey, Buffer.from(paw)).toString("base64")
-        const res = await axios.post(`/api/user/login`, { account, ping })
-        return res.status === 200 ? res.data : false
-    }
+function LoginUser(account, paw) {
+    return new Promise((res, rej) => {
+        GetPublicKey()
+            .then(publicKey => {
+                const ping = publicEncrypt(publicKey, Buffer.from(paw)).toString("base64")
+                axios
+                    .post(`/api/user/login`, { account, ping })
+                    .then(resData => res(resData))
+                    .catch(err => rej(err))
+            })
+            .catch(err => rej(err))
+    })
 }
 
 /**
  * @example 查询当前登录用户的好友列表
  * @returns { Promise<Object | Boolean> }
  */
-async function FindUserFriendsList() {
-    const res = await axios.get("/api/search/FriendsList", {
-        // token用户的身份认证
-        headers: { token: localToken },
+function FindUserFriendsList() {
+    return new Promise((res, rej) => {
+        axios
+            .get("/api/search/FriendsList", {
+                // token用户的身份认证
+                headers: { token: localToken },
+            })
+            .then(res)
+            .catch(rej)
     })
-    return res.status === 200 ? res.data : false
 }
 
 /**
@@ -77,15 +86,19 @@ async function FindUserFriendsList() {
  * @param { String } account
  * @returns { Promise<Object | Boolean }
  */
-async function AddFriend(account) {
-    const res = await axios.post(
-        "/api/user/addFriend",
-        { account },
-        {
-            headers: { token: localToken },
-        }
-    )
-    return res.status === 200 ? res.data : false
+function AddFriend(account) {
+    return new Promise((res, rej) => {
+        axios
+            .post(
+                "/api/user/addFriend",
+                { account },
+                {
+                    headers: { token: localToken },
+                }
+            )
+            .then(res)
+            .catch(rej)
+    })
 }
 
 /**
@@ -93,11 +106,15 @@ async function AddFriend(account) {
  * @param { String } account
  * @returns { Promise<Object | Boolean>}
  */
-async function SearchUser(account) {
-    const res = await axios.get("/api/search/searchUser", {
-        params: { account },
+function SearchUser(account) {
+    return new Promise((res, rej) => {
+        axios
+            .get("/api/search/searchUser", {
+                params: { account },
+            })
+            .then(res)
+            .catch(rej)
     })
-    return res.status === 200 ? res.data : false
 }
 
 /**
@@ -105,9 +122,10 @@ async function SearchUser(account) {
  * @param { String } key
  * @returns { Promise<Object | Boolean>}
  */
-async function SearchUsers(key) {
-    const res = await axios.get("/api/search/SearchUsers", { params: { key } })
-    return res.status === 200 ? res.data : false
+function SearchUsers(key) {
+    return new Promise((res, rej) => {
+        axios.get("/api/search/SearchUsers", { params: { key } }).then(res).catch(rej)
+    })
 }
 
 /**
@@ -115,9 +133,10 @@ async function SearchUsers(key) {
  * @param { String } token
  * @returns { Promise<Object | {}>}
  */
-async function VerifyTokenIsOut(token) {
-    const res = await axios.post("/api/verifyToken", { token })
-    return res.status === 200 ? res.data : { code: 404, data: false, msg: "网络错误" }
+function VerifyTokenIsOut(token) {
+    return new Promise((res, rej) => {
+        axios.post("/api/verifyToken", { token }).then(res).catch(rej)
+    })
 }
 
 module.exports = {
