@@ -56,7 +56,7 @@ module.exports = async function createLoginWin() {
      */
     ipcMain.on("login", (event, account, pw) => {
         LoginUser(account, pw)
-            .then(loginUserData => {
+            .then(({ data: loginUserData }) => {
                 if (loginUserData.code === 200 && loginUserData.body.account === account) {
                     UserStore.set("token", loginUserData.token)
                 }

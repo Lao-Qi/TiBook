@@ -91,6 +91,7 @@ function updateOrInsertMessageCard(insertMessageCardAccount, msg) {
                     .catch(err => {
                         rej(err)
                     })
+                console.error(err)
             })
     })
 }
