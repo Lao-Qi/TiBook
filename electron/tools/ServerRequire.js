@@ -10,11 +10,17 @@ const localToken = UserStore.get("token")
 
 /**
  * @example 获取服务器公钥
- * @returns { Promise<String | Boolean >}
+ * @returns { Promise<any>}
  */
-async function GetPublicKey() {
-    const res = await axios.get("/api/publicKey")
-    return res.status === 200 && res.data.code === 200 ? Buffer.from(res.data.publicKey, "base64").toString() : false
+function GetPublicKey() {
+    return new Promise((res, rej) => {
+        axios
+            .get("/api/publicKey")
+            .then(resData => {
+                res(Buffer.from(resData.data.publicKey, "base64").toString())
+            })
+            .catch(rej)
+    })
 }
 
 /**
@@ -39,9 +45,9 @@ function RegisterUser(name, account, paw) {
                     .then(registerData => {
                         res(registerData)
                     })
-                    .catch(err => rej(err))
+                    .catch(rej)
             })
-            .catch(err => rej(err))
+            .catch(rej)
     })
 }
 
@@ -59,9 +65,9 @@ function LoginUser(account, paw) {
                 axios
                     .post(`/api/user/login`, { account, ping })
                     .then(resData => res(resData))
-                    .catch(err => rej(err))
+                    .catch(rej)
             })
-            .catch(err => rej(err))
+            .catch(rej)
     })
 }
 
