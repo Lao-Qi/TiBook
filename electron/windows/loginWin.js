@@ -38,7 +38,7 @@ module.exports = async function createLoginWin() {
             .then(registerUserData => {
                 const data = registerUserData.data
                 if (data.code === 200) {
-                    UserStore.set("info", { ...data.body })
+                    UserStore.set("info", data.data)
                 }
                 loginWin.webContents.send("server-return-message", data.msg, data.code)
             })
@@ -56,11 +56,14 @@ module.exports = async function createLoginWin() {
      */
     ipcMain.on("login", (event, account, pw) => {
         LoginUser(account, pw)
-            .then(({ data: loginUserData }) => {
-                if (loginUserData.code === 200 && loginUserData.body.account === account) {
-                    UserStore.set("token", loginUserData.token)
+            .then(loginUserData => {
+                const data = loginUserData.data
+                const serverReponseData = data.data
+                if (data.code === 200 && data.body.account === account) {
+                    UserStore.set("info", serverReponseData.userDoc)
+                    UserStore.set("token", serverReponseData.token)
                 }
-                loginWin.webContents.send("server-return-message", loginUserData.msg, loginUserData.code)
+                loginWin.webContents.send("server-return-message", data.msg, data.code)
             })
             .catch(err => {
                 loginWin.webContents.send("server-return-message", "注册失败，可能是网络问题", 500)
