@@ -14,7 +14,7 @@ app.disableHardwareAcceleration()
 app.whenReady().then(async () => {
     const UserStore = new Store({ accessPropertiesByDotNotation: false })
     // token存在
-    if (UserStore.get("token") && false) {
+    if (UserStore.get("token")) {
         currentWin = require("./windows/mainWin")()
         currentWinName = "main"
         currentWin.on("maximize", () => currentWin.webContents.send("window-maximize"))
