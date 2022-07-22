@@ -14,24 +14,36 @@
 ### 如何在本地启动这个软件？
 
 ```git
-git clone https://github.com/Lao-Qi/TonYouLu.git
+git clone https://github.com/Lao-Qi/TiBook.git
 
-cd TonYouLu
+cd TiBook
 ```
 
 ```git
-# 启动后台服务器
-pnpm run server
-
-# 启动后台会话服务器
-pnpm run socket
-
-# 启动vite服务器
+# 启动软件
 pnpm run dev
 
-# 启动electron
-pnpm run electron
+# 打包软件
+pnpm run build
 ```
+
+
+这个项目的结构有借鉴vscode的开源仓库
+``build``是项目的打包区域
+``src``是项目源代码区域
+``pnpm run build``后会在``build``目录下面生成一个dist文件夹，这个文件夹里面的东西就是打包和压缩好了的源代码
+
+- ``app-main``：electron主进程中运行的资源
+- ``app-render``；electron渲染进程运行的资源
+
+那些源代码将被``electron-builder``打包进``app.asar``文件中。
+``app-render``通过``vite``打包和压缩。
+``app-main``通过``esbuild``打包和压缩，因为``esbuild``有把``app-main``中所需要的扩展打包进``main.js``文件中(除了``electron``模块)，所以打包后的资源中不存在``node_module``文件夹
+
+项目中采用多个``package.json``文件是为了合理的使用``node_module``中的包，有些包只在``build``中使用，所以只安装到了``build``目录内部，而有些包是``src``中要有到的，这里要区分开，方便管理，也方便查看。
+项目根目录下面的``package.json``是俩边在``开发环境``会用到的包，可以看到内部只有``devDependencies``没有``dependencies``
+
+``app.deploy.json``文件会该项目信息的集合，因为有多个``package.json``不太好区分具体的信息，所以创建了这个文件，这个文件的内部信息会被在软件打包后在``dist``目录转换成一个``package.json``，应用于``electron应用程序``的打包
 
 ## 开源协议
 
