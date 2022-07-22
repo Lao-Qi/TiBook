@@ -11,7 +11,7 @@ let currentWin = null,
 // 不使用硬件加速渲染软件，会导致软件有残影
 app.disableHardwareAcceleration()
 
-app.whenReady().then(async () => {
+app.once("ready", async () => {
     const UserStore = new Store({ accessPropertiesByDotNotation: false })
     // token存在
     if (UserStore.get("token")) {

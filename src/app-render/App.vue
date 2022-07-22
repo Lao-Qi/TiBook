@@ -1,15 +1,6 @@
 <template>
     <div id="title">
         <WindowTitle></WindowTitle>
-        <!-- <template v-if="SystemType === 'Windows_NT'">
-            <windows-title></windows-title>
-        </template>
-        <template v-if="SystemType === 'Darwin'">
-            <mac-title></mac-title>
-        </template>
-        <template v-if="SystemType === 'Linux'">
-            <linux-title></linux-title>
-        </template> -->
     </div>
     <div id="view">
         <router-view></router-view>

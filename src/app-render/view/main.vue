@@ -78,30 +78,6 @@ export default {
 }
 </script>
 
-<!-- <script setup>
-import { ref, reactive, watchEffect, provide } from "vue"
-import { useRouter } from "vue-router"
-import { SettingConfig, Comment, PersonalCollection, Home, Search } from "@icon-park/vue-next"
-
-const router = useRouter()
-const current = ref("message")
-const iconConfig = reactive({
-    size: "23",
-    fill: "#333",
-    theme: "outline",
-})
-
-provide("toggleOptions", "a")
-
-function toggleOptions(page) {
-    current.value = page
-}
-
-watchEffect(() => {
-    router.replace({ name: current.value })
-})
-</script> -->
-
 <style lang="less">
 #app {
     display: flex;

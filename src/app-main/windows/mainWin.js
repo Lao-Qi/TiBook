@@ -12,7 +12,7 @@ const {
     findLocalMessageCard,
     insertFriend,
     findLocalFriends,
-    findLocalFriend,
+    findLocalFriend
 } = require("../tools/LocalOperation")
 
 // 本地软件配置存储
@@ -32,10 +32,11 @@ module.exports = function createMainWin() {
         show: false,
         frame: false,
         webPreferences: {
+            sandbox: true,
             nodeIntegration: true,
             contextIsolation: false,
-            webSecurity: false, // 支持不同协议的资源
-        },
+            webSecurity: false // 支持不同协议的资源
+        }
     })
     mainWin.loadURL(process.env.LoadPath)
     mainWin.once("ready-to-show", () => mainWin.show())
@@ -71,9 +72,9 @@ module.exports = function createMainWin() {
     // 连接聊天功能服务器
     const socket = io.connect("http://127.0.0.1:6001", {
         auth: {
-            token: UserStore.get("token"),
+            token: UserStore.get("token")
         },
-        timeout: 4000,
+        timeout: 4000
     })
 
     // 与服务器连接成功
@@ -111,7 +112,6 @@ module.exports = function createMainWin() {
         // 更新本地好友消息卡片
         updateOrInsertMessageCard(insertMessageCardAccount, msg)
             .then(doc => {
-                console.log(doc, insertMessageCardAccount)
                 findLocalMessageCard(insertMessageCardAccount)
                     .then(doc => {
                         if (doc) {
@@ -123,7 +123,7 @@ module.exports = function createMainWin() {
                     .catch(err => {
                         mainWin.webContents.send(`new message to ${insertMessageCardAccount}`, {
                             content: "消息加载失败...",
-                            date: Date.now(),
+                            date: Date.now()
                         })
                         console.error(err)
                     })

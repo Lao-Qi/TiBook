@@ -2,64 +2,32 @@
     <div id="search-page-box">
         <div id="page-content" :class="{ 'is-show': Boolean(showUser) }">
             <div id="search-box">
-                <input
-                    id="search-input-box"
-                    placeholder="输入用户的ID，名称，关键词..."
-                    type="text"
-                    @keydown.enter="Search"
-                    ref="SearchInput"
-                />
+                <input id="search-input-box" placeholder="输入用户的ID，名称，关键词..." type="text" @keydown.enter="Search"
+                    ref="SearchInput" />
             </div>
             <div id="search-result-box">
                 <p v-if="searchData.length">用户:</p>
                 <div id="account-list-box">
                     <template v-if="searchData.length">
-                        <user-card
-                            v-for="item in searchData"
-                            :key="item.account"
-                            :account="item.account"
-                            :name="item.name"
-                            :avatar="item.avatar"
-                            @click="getShowUserInfo(item.account)"
-                        />
+                        <user-card v-for="item in searchData" :key="item.account" :account="item.account"
+                            :name="item.name" :avatar="item.avatar" @click="getShowUserInfo(item.account)" />
                     </template>
                 </div>
             </div>
         </div>
-        <div
-            id="search-user-info-box"
-            :class="{ 'is-show': Boolean(showUser) }"
-        >
+        <div id="search-user-info-box" :class="{ 'is-show': Boolean(showUser) }">
             <template v-if="showUser">
                 <div id="search-user-basic-info">
                     <span class="name">{{ showUser.name }}</span>
-                    <img
-                        :src="VerifyAvatar(showUser.avatar)"
-                        :alt="showUser.name"
-                    />
+                    <img :src="VerifyAvatar(showUser.avatar)" :alt="showUser.name" />
                 </div>
                 <div id="search-user-control">
-                    <a
-                        href="javascript:;"
-                        @click="addFriend"
-                        id="add-friend-btn"
-                        >添加好友</a
-                    >
+                    <a href="javascript:;" @click="addFriend" id="add-friend-btn">添加好友</a>
                 </div>
             </template>
         </div>
     </div>
 </template>
-
-<script>
-export default {
-    name: "search",
-    created() {
-        document.querySelector("#title>p").innerHTML = "Search"
-        this.$emit("pageChange", "search")
-    },
-}
-</script>
 
 <script setup>
 import { onMounted, ref } from "vue"

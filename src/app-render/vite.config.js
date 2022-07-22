@@ -5,28 +5,24 @@ import Components from "unplugin-vue-components/vite"
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers"
 
 export default defineConfig({
+    root: "./app-render",
+    base: "./",
     plugins: [
         vue(),
         AutoImport({
-            resolvers: [ElementPlusResolver()],
+            resolvers: [ElementPlusResolver()]
         }),
         Components({
-            resolvers: [ElementPlusResolver()],
-        }),
+            resolvers: [ElementPlusResolver()]
+        })
     ],
-    base: "./",
     resolve: {
         alias: {
-            "@": __dirname,
-        },
-    },
-    build: {
-        target: "modules",
-        assetsInlineLimit: 4096,
-        assetsDir: "./assets",
+            "@": __dirname
+        }
     },
     server: {
         host: true,
-        port: 3000,
-    },
+        port: 3000
+    }
 })

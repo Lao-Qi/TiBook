@@ -1,0 +1,28 @@
+{
+    "name": "tibook_src",
+    "version": "0.0.0",
+    "main": "./electron/main.js",
+    "author": {
+        "name": "王老柒",
+        "email": "Wang.Lao.Qi@qq.com",
+        "url": "https://github.com/Lao-Qi"
+    },
+    "license": "MIT",
+    "scripts": {
+        "dev": "npx concurrently -k \"pnpm run render:dev\" \"pnpm run electron\"",
+        "render:dev": "npx vite --config ./app-render/vite.config.js",
+        "electron": "npx wait-on tcp:3000 && npx cross-env IS_DEV=true electron ./app-main/main.js",
+        "electron:alone": "npx cross-env IS_DEV=true electron ./app-main/main.js"
+    },
+    "dependencies": {
+        "electron-store": "^8.0.1",
+        "nedb": "^1.8.0",
+        "axios": "^0.27.2",
+        "socket.io-client": "^4.5.0",
+        "vue": "^3.2.25",
+        "vue-router": "^4.0.13",
+        "@icon-park/vue-next": "^1.4.2",
+        "element-plus": "^2.2.0",
+        "moment": "^2.29.3"
+    }
+}

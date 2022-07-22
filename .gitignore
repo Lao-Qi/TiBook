@@ -9,7 +9,8 @@ lerna-debug.log*
 
 # dir
 node_modules
-electron_build
+electron_dist
+render-dist
 dist
 dist-ssr
 demo

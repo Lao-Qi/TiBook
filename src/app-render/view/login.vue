@@ -8,7 +8,7 @@
         ></div>
         <div class="slogan-text-box">
             <a href="javascript:;" class="register-btn" @click="changeCahtWindow">
-                <h1>{{ userInputInfo.slogan }}</h1>
+                <h1>前往{{ userInputInfo.slogan }}</h1>
             </a>
         </div>
         <div class="chat-window-container">
@@ -25,7 +25,7 @@
                                 'message-box': true,
                                 'is-me': message.isMe,
                                 'not-me': !message.isMe,
-                                'up-message-is-same-person': thisMessageIsMe(message.isMe),
+                                'up-message-is-same-person': (message.isMe === upMessageIsMe ? true : (upMessageIsMe = message.isMe), false),
                             }"
                         >
                             <div
@@ -101,13 +101,9 @@ let upMessageIsMe = false
 // 显示的消息列表
 let MessageList = ref([])
 
-/**
- * @example 改变聊天窗口的功能 login | register
- */
-function changeCahtWindow() {
-    MessageList.value = []
-
-    if (userInputInfo.state === "login") {
+// 切换聊天窗口功能的函数集合
+const changeChatWindowOperationFunMap = {
+    login: () => {
         // 改变为注册功能
         userInputInfo.title = "注册"
         userInputInfo.slogan = "登录"
@@ -120,7 +116,8 @@ function changeCahtWindow() {
             content: "请输入用户名称",
             isMe: false,
         })
-    } else if (userInputInfo.state === "register") {
+    },
+    register: () => {
         // 改变为登录功能
         userInputInfo.title = "登录"
         userInputInfo.slogan = "注册"
@@ -133,27 +130,115 @@ function changeCahtWindow() {
             content: "请输入账号",
             isMe: false,
         })
-    }
+    },
+}
 
-    // 清空用户输入的消息
+// 用户发送消息功能的操作函数集合
+const userSendMessageOperationFunMap = {
+    login: {
+        account: () => {
+            inputConfig.type = "password"
+            inputConfig.placeholder = "密码"
+            inputConfig.contentPurpose = "password"
+
+            MessageList.value.push({
+                content: "请输入账户密码",
+                isMe: false,
+            })
+        },
+        password: () => {
+            inputConfig.type = "text"
+            inputConfig.placeholder = "..."
+
+            // 调用后台登录事件
+            ipcRenderer.send("login", userInputInfo.account, userInputInfo.password)
+
+            MessageList.value.push({
+                content: "正在登录中...",
+                isMe: false,
+            })
+        },
+    },
+    register: {
+        name: () => {
+            inputConfig.type = "text"
+            inputConfig.contentPurpose = "account"
+            inputConfig.placeholder = "账号"
+
+            MessageList.value.push({
+                content: "请输入账户",
+                isMe: false,
+            })
+        },
+        account: () => {
+            inputConfig.type = "password"
+            inputConfig.contentPurpose = "password"
+            inputConfig.placeholder = "该账户的密码"
+
+            MessageList.value.push({
+                content: "请输入该账户的密码",
+                isMe: false,
+            })
+        },
+        password: () => {
+            inputConfig.type = "text"
+            inputConfig.contentPurpose = "text"
+            inputConfig.placeholder = "..."
+
+            ipcRenderer.send("register", userInputInfo.name, userInputInfo.account, userInputInfo.password)
+
+            MessageList.value.push({
+                content: "注册账户中，请稍等",
+                isMe: false,
+            })
+        },
+    },
+}
+
+// 服务器返回消息功能的操作函数集合
+const serverReturnOperationFunMap = {
+    login: () => {
+        MessageList.value.push({
+            content: "正在跳转主页...",
+            isMe: false,
+        })
+        ipcRenderer.send("login-complete-open-mainWin")
+    },
+    register: () => {
+        changeChatWindowOperationFunMap["register"]()
+
+        MessageList.value = []
+        userInputInfo.name = ""
+        userInputInfo.password = ""
+
+        inputConfig.contentPurpose = "password"
+        inputConfig.type = "password"
+        inputConfig.placeholder = "密码"
+
+        MessageList.value.push({
+            content: `账户已录入： { ${userInputInfo.account} }`,
+            isMe: false,
+        })
+        MessageList.value.push({
+            content: "请输入该账户的密码",
+            isMe: false,
+        })
+    },
+}
+
+/**
+ * @example 改变聊天窗口的功能 login | register
+ */
+function changeCahtWindow() {
+    // 清空聊天窗记录和用户输入的信息
+    MessageList.value = []
     userInputInfo.name = ""
     userInputInfo.account = ""
     userInputInfo.password = ""
     inputConfig.content = ""
-}
 
-/**
- * @example 判断上一条消息是否为同一人发送
- * @param {Boolean} isMe
- */
-function thisMessageIsMe(isMe) {
-    if (isMe === upMessageIsMe) {
-        return true
-    } else {
-        // 非同一人则修改为上一条消息为该人输入
-        upMessageIsMe = isMe
-        return false
-    }
+    // 改变窗口的功能
+    changeChatWindowOperationFunMap[userInputInfo.state]()
 }
 
 /**
@@ -164,48 +249,11 @@ function userSendMessage() {
         content: inputConfig.content,
         isMe: true,
     })
-    if (userInputInfo.state === "login") {
-        LoginUser()
-    } else if (userInputInfo.state === "register") {
-        RegisterUser()
-    }
+    userInputInfo[inputConfig.contentPurpose] = inputConfig.content
+
+    // 找到用户当前页面(userInputInfo.state)上的可操作方法，找到当前对应进度的操作方法(inputConfig.contentPurpose)
+    userSendMessageOperationFunMap[userInputInfo.state][inputConfig.contentPurpose]()
     inputConfig.content = ""
-}
-
-/**
- * @example 用户登录
- */
-function LoginUser() {
-    userInputInfo[inputConfig.contentPurpose] = inputConfig.content
-
-    if (inputConfig.type === "text") {
-        inputConfig.type = "password"
-        inputConfig.placeholder = "密码"
-        inputConfig.contentPurpose = "password"
-
-        MessageList.value.push({
-            content: "请输入账户密码",
-            isMe: false,
-        })
-    } else if (inputConfig.type === "password") {
-        inputConfig.type = "text"
-        inputConfig.placeholder = "..."
-
-        // 调用后台登录事件
-        ipcRenderer.send("login", userInputInfo.account, userInputInfo.password)
-    }
-}
-
-/**
- * @example 用户注册
- */
-function RegisterUser() {
-    userInputInfo[inputConfig.contentPurpose] = inputConfig.content
-
-    if (inputConfig.contentPurpose === "name") {
-        inputConfig.contentPurpose = "account"
-        inputConfig.placeholder = "账号"
-    }
 }
 
 onMounted(() => {
@@ -229,13 +277,8 @@ ipcRenderer.on("server-return-message", (event, msg, code) => {
         content: msg,
         isMe: false,
     })
-    if (code === 200) {
-        MessageList.value.push({
-            content: "正在跳转主页...",
-            isMe: false,
-        })
-        ipcRenderer.send("login-complete-open-mainWin")
-    }
+    console.log(code, userInputInfo.state)
+    code === 200 && serverReturnOperationFunMap[userInputInfo.state]()
 })
 </script>
 

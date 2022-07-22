@@ -1,0 +1,20 @@
+{
+    "name": "tibook",
+    "original": "题书",
+    "version": "0.0.0",
+    "description": "题书，一个简单好用的聊天软件",
+    "author": {
+        "name": "王老柒",
+        "email": "Wang.Lao.Qi@qq.com",
+        "url": "https://github.com/Lao-Qi"
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Lao-Qi/TiBook"
+    },
+    "engines": {
+        "node": ">=16",
+        "pnpm": ">=3"
+    }
+}
