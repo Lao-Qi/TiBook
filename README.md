@@ -26,7 +26,7 @@ pnpm run dev
 # 打包软件
 pnpm run build
 ```
-
+### 项目结构的思路
 
 这个项目的结构有借鉴vscode的开源仓库
 ``build``是项目的打包区域
