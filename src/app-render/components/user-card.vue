@@ -17,12 +17,9 @@ const { ipcRenderer } = require("electron")
 const props = defineProps({
     account: String,
     avatar: String,
-    name: String,
+    name: String
 })
-const avatar =
-    props.avatar === "none"
-        ? "/src/assets/img/DefaultAvatar.jpg"
-        : `http://127.0.0.1:8080/user/avatar/${props.avatar}`
+const avatar = props.avatar === "none" ? "/src/assets/img/DefaultAvatar.jpg" : `http://127.0.0.1:8080/user/avatar/${props.avatar}`
 
 function addFriend() {
     ipcRenderer.send("add-friend", props.account)

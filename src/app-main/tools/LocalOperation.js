@@ -20,18 +20,18 @@ const DB = {
     message: new Nedb({
         filename: path.join(app.getAppPath(), "./message.db"), // 文件路径
         autoload: true, // 自动连接
-        corruptAlertThreshold: 1, // 数据缺失多少报错， 1表示不报错
+        corruptAlertThreshold: 1 // 数据缺失多少报错， 1表示不报错
     }),
     friends: new Nedb({
         filename: path.join(app.getAppPath(), "./friends.db"),
         autoload: true,
-        corruptAlertThreshold: 1,
+        corruptAlertThreshold: 1
     }),
     messageCards: new Nedb({
         filename: path.join(app.getAppPath(), "./messageCards.db"),
         autoload: true,
-        corruptAlertThreshold: 1,
-    }),
+        corruptAlertThreshold: 1
+    })
 }
 
 /**
@@ -53,7 +53,7 @@ function findHistoryAccountMessage(account) {
         // 查询我发给他的 或 他发给我的
         DB.message.find(
             {
-                $or: [{ from: account }, { to: account }],
+                $or: [{ from: account }, { to: account }]
             },
             (err, docs) => {
                 if (err) {
@@ -108,19 +108,19 @@ function updateMessageCard(insertMessageCardAccount, { content, date }) {
         DB.messageCards.update(
             {
                 // 如果这条消息是我发送出去的，则修改接收方在本地的消息卡片
-                account: insertMessageCardAccount,
+                account: insertMessageCardAccount
             },
             {
                 $set: {
                     msg: {
                         content: content ?? "",
-                        date: date ?? Date.now(),
-                    },
-                },
+                        date: date ?? Date.now()
+                    }
+                }
             },
             {
                 multi: false,
-                returnUpdatedDocs: true,
+                returnUpdatedDocs: true
             },
             (err, ret, newDoc) => {
                 // 查询得到并且修改成功
@@ -141,7 +141,7 @@ function insertMessageCard(insertMessageCardAccount, { content, date }) {
         // 先查询本地好友列表查看有没有该条消息的来源用户
         DB.friends.findOne(
             {
-                account: insertMessageCardAccount,
+                account: insertMessageCardAccount
             },
             async (err, doc) => {
                 if (err) {
@@ -158,7 +158,7 @@ function insertMessageCard(insertMessageCardAccount, { content, date }) {
                         doc = {
                             name: SearchUserDate.name,
                             account: SearchUserDate.account,
-                            avatar: SearchUserDate.avatar,
+                            avatar: SearchUserDate.avatar
                         }
                     } catch (err) {
                         console.error(err)
@@ -170,8 +170,8 @@ function insertMessageCard(insertMessageCardAccount, { content, date }) {
                         ...doc,
                         msg: {
                             content,
-                            date,
-                        },
+                            date
+                        }
                     },
                     (err, doc) => {
                         err ? rej(err) : res(doc)
@@ -248,5 +248,5 @@ module.exports = {
     findLocalMessageCard,
     insertFriend,
     findLocalFriends,
-    findLocalFriend,
+    findLocalFriend
 }

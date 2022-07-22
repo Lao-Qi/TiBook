@@ -18,8 +18,8 @@ module.exports = async function createLoginWin() {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
-            webSecurity: false, // 支持不同协议的资源
-        },
+            webSecurity: false // 支持不同协议的资源
+        }
     })
 
     loginWin.loadURL(process.env.LoadPath)

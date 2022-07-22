@@ -2,15 +2,20 @@
     <div id="search-page-box">
         <div id="page-content" :class="{ 'is-show': Boolean(showUser) }">
             <div id="search-box">
-                <input id="search-input-box" placeholder="输入用户的ID，名称，关键词..." type="text" @keydown.enter="Search"
-                    ref="SearchInput" />
+                <input id="search-input-box" placeholder="输入用户的ID，名称，关键词..." type="text" @keydown.enter="Search" ref="SearchInput" />
             </div>
             <div id="search-result-box">
                 <p v-if="searchData.length">用户:</p>
                 <div id="account-list-box">
                     <template v-if="searchData.length">
-                        <user-card v-for="item in searchData" :key="item.account" :account="item.account"
-                            :name="item.name" :avatar="item.avatar" @click="getShowUserInfo(item.account)" />
+                        <user-card
+                            v-for="item in searchData"
+                            :key="item.account"
+                            :account="item.account"
+                            :name="item.name"
+                            :avatar="item.avatar"
+                            @click="getShowUserInfo(item.account)"
+                        />
                     </template>
                 </div>
             </div>
@@ -41,17 +46,11 @@ const showUser = ref(null)
 
 // 搜索函数
 async function Search() {
-    searchData.value = await ipcRenderer.invoke(
-        "search-users",
-        SearchInput.value.value
-    )
+    searchData.value = await ipcRenderer.invoke("search-users", SearchInput.value.value)
 }
 
 // 验证头像
-const VerifyAvatar = (avatar) =>
-    avatar === "none"
-        ? "/src/assets/img/DefaultAvatar.jpg"
-        : `http://127.0.0.1:8080/user/avatar/${avatar}`
+const VerifyAvatar = avatar => (avatar === "none" ? "/src/assets/img/DefaultAvatar.jpg" : `http://127.0.0.1:8080/user/avatar/${avatar}`)
 // 获取要显示的用户的详细信息
 async function getShowUserInfo(account) {
     const SearchUser = await ipcRenderer.invoke("get-user-info", account)
@@ -71,21 +70,21 @@ ipcRenderer.on("add-friend-return", (event, returnData) => {
             title: "成功消息",
             message: returnData.msg,
             type: "success",
-            offset: 20,
+            offset: 20
         })
     } else if (returnData.code >= 404) {
         ElNotification({
             title: "错误消息",
             message: returnData.msg,
             type: "error",
-            offset: 20,
+            offset: 20
         })
     } else {
         ElNotification({
             title: "警告提示消息",
             message: returnData.msg,
             type: "warning",
-            offset: 20,
+            offset: 20
         })
     }
 })

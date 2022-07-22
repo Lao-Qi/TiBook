@@ -29,16 +29,16 @@ const { ipcRenderer } = require("electron")
 const friendInfoWinVue = defineAsyncComponent({
     component: import("../components/friend-info-win.vue"),
     loadingComponent: {
-        template: "<h3>加载中...</h3>",
+        template: "<h3>加载中...</h3>"
     },
     errorComponent: {
-        template: "<h3>加载失败</h3>",
-    },
+        template: "<h3>加载失败</h3>"
+    }
 })
 export default {
     name: "contact",
     components: {
-        friendInfoWinVue,
+        friendInfoWinVue
     },
     async setup() {
         const friendList = ref([])
@@ -48,9 +48,9 @@ export default {
 
         return {
             friendList,
-            showFriendAccount,
+            showFriendAccount
         }
-    },
+    }
 }
 </script>
 

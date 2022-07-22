@@ -32,7 +32,7 @@ const { ipcRenderer } = require("electron")
 export default {
     name: "friendInfoWin",
     props: {
-        account: String,
+        account: String
     },
     async setup(props) {
         const toggleOptions = inject("toggleOptions")
@@ -58,9 +58,9 @@ export default {
             friendInfoOnServer,
             src,
             addTime,
-            GoChatWin,
+            GoChatWin
         }
-    },
+    }
 }
 </script>
 

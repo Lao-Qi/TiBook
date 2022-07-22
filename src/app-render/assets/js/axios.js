@@ -5,5 +5,5 @@ export default axios.create({
     // 请求地址
     baseURL: `http://127.0.0.1:8080/`,
     // 超时时间
-    timeout: 3000,
+    timeout: 3000
 })

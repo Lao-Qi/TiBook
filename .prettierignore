@@ -1,8 +1,5 @@
-build
 dist
 .idea
 .vscode
-coverage
-package.json
 package-lock.json
-build.txt
+pnpm-lock.yaml

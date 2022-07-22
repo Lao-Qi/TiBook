@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-const { ipcRenderer } = require("electron");
+const { ipcRenderer } = require("electron")
 </script>
 
 <style scoped lang="less">
@@ -42,7 +42,6 @@ const { ipcRenderer } = require("electron");
     #window-maximize::before {
         border: 2px solid rgb(39, 168, 75);
         background-color: rgb(26, 199, 74);
-
     }
 
     #window-minimize::before {

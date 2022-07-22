@@ -48,7 +48,7 @@ export default {
         Comment,
         PersonalCollection,
         Home,
-        Search,
+        Search
     },
     setup() {
         const router = useRouter()
@@ -56,7 +56,7 @@ export default {
         const iconConfig = reactive({
             size: "23",
             fill: "#333",
-            theme: "outline",
+            theme: "outline"
         })
 
         provide("toggleOptions", toggleOptions)
@@ -72,9 +72,9 @@ export default {
         return {
             current,
             iconConfig,
-            toggleOptions,
+            toggleOptions
         }
-    },
+    }
 }
 </script>
 

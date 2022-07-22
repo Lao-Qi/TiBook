@@ -24,7 +24,7 @@ const props = defineProps({
     account: String,
     avatar: String,
     message: String,
-    date: Number,
+    date: Number
 })
 
 const initAvatar = ref(props.avatar) // 初始头像

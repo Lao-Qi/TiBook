@@ -3,7 +3,7 @@
         <div
             :class="{
                 'background-box': true,
-                'background-box-transition': isBackgroundBoxStartPlayAnimation,
+                'background-box-transition': isBackgroundBoxStartPlayAnimation
             }"
         ></div>
         <div class="slogan-text-box">
@@ -25,7 +25,7 @@
                                 'message-box': true,
                                 'is-me': message.isMe,
                                 'not-me': !message.isMe,
-                                'up-message-is-same-person': (message.isMe === upMessageIsMe ? true : (upMessageIsMe = message.isMe), false),
+                                'up-message-is-same-person': (message.isMe === upMessageIsMe ? true : (upMessageIsMe = message.isMe), false)
                             }"
                         >
                             <div
@@ -33,7 +33,7 @@
                                     'message-content': true,
                                     'message-content-animation': isMessageListStartPlayAnimation,
                                     'not-me-message-animation': !message.isMe && isMessageListStartPlayAnimation,
-                                    'is-me-message-animation': message.isMe && isMessageListStartPlayAnimation,
+                                    'is-me-message-animation': message.isMe && isMessageListStartPlayAnimation
                                 }"
                             >
                                 {{ message.content }}
@@ -45,7 +45,7 @@
             <div
                 class="chat-input-container"
                 :class="{
-                    'changes-in-input-focus': inputConfig.focus,
+                    'changes-in-input-focus': inputConfig.focus
                 }"
             >
                 <div class="input-box">
@@ -77,7 +77,7 @@ const inputConfig = reactive({
     type: "text",
     contentPurpose: "account",
     placeholder: "账号",
-    content: "",
+    content: ""
 })
 
 // 用户输入的信息
@@ -90,7 +90,7 @@ const userInputInfo = reactive({
     // 页面标语 注册 | 登录
     slogan: "注册",
     // 聊天窗口标题 注册 | 登录
-    title: "登录",
+    title: "登录"
 })
 // 是否开启背景盒子动画
 const isBackgroundBoxStartPlayAnimation = ref(false)
@@ -114,7 +114,7 @@ const changeChatWindowOperationFunMap = {
 
         MessageList.value.push({
             content: "请输入用户名称",
-            isMe: false,
+            isMe: false
         })
     },
     register: () => {
@@ -128,9 +128,9 @@ const changeChatWindowOperationFunMap = {
 
         MessageList.value.push({
             content: "请输入账号",
-            isMe: false,
+            isMe: false
         })
-    },
+    }
 }
 
 // 用户发送消息功能的操作函数集合
@@ -143,7 +143,7 @@ const userSendMessageOperationFunMap = {
 
             MessageList.value.push({
                 content: "请输入账户密码",
-                isMe: false,
+                isMe: false
             })
         },
         password: () => {
@@ -155,9 +155,9 @@ const userSendMessageOperationFunMap = {
 
             MessageList.value.push({
                 content: "正在登录中...",
-                isMe: false,
+                isMe: false
             })
-        },
+        }
     },
     register: {
         name: () => {
@@ -167,7 +167,7 @@ const userSendMessageOperationFunMap = {
 
             MessageList.value.push({
                 content: "请输入账户",
-                isMe: false,
+                isMe: false
             })
         },
         account: () => {
@@ -177,7 +177,7 @@ const userSendMessageOperationFunMap = {
 
             MessageList.value.push({
                 content: "请输入该账户的密码",
-                isMe: false,
+                isMe: false
             })
         },
         password: () => {
@@ -189,10 +189,10 @@ const userSendMessageOperationFunMap = {
 
             MessageList.value.push({
                 content: "注册账户中，请稍等",
-                isMe: false,
+                isMe: false
             })
-        },
-    },
+        }
+    }
 }
 
 // 服务器返回消息功能的操作函数集合
@@ -200,7 +200,7 @@ const serverReturnOperationFunMap = {
     login: () => {
         MessageList.value.push({
             content: "正在跳转主页...",
-            isMe: false,
+            isMe: false
         })
         ipcRenderer.send("login-complete-open-mainWin")
     },
@@ -217,13 +217,13 @@ const serverReturnOperationFunMap = {
 
         MessageList.value.push({
             content: `账户已录入： { ${userInputInfo.account} }`,
-            isMe: false,
+            isMe: false
         })
         MessageList.value.push({
             content: "请输入该账户的密码",
-            isMe: false,
+            isMe: false
         })
-    },
+    }
 }
 
 /**
@@ -247,7 +247,7 @@ function changeCahtWindow() {
 function userSendMessage() {
     MessageList.value.push({
         content: inputConfig.content,
-        isMe: true,
+        isMe: true
     })
     userInputInfo[inputConfig.contentPurpose] = inputConfig.content
 
@@ -259,7 +259,7 @@ function userSendMessage() {
 onMounted(() => {
     MessageList.value.push({
         content: "请输入账号",
-        isMe: false,
+        isMe: false
     })
 
     // 延时添加动画，等到窗口加载完毕并显示出来时添加动画
@@ -275,7 +275,7 @@ onMounted(() => {
 ipcRenderer.on("server-return-message", (event, msg, code) => {
     MessageList.value.push({
         content: msg,
-        isMe: false,
+        isMe: false
     })
     console.log(code, userInputInfo.state)
     code === 200 && serverReturnOperationFunMap[userInputInfo.state]()

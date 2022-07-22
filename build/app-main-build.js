@@ -12,6 +12,6 @@ try {
         outdir: "./dist",
         external: ["electron"]
     })
-}catch(err) {
-    console.error(err);
+} catch (err) {
+    console.error(err)
 }

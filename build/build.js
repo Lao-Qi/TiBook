@@ -7,12 +7,12 @@ const { join } = require("path")
 /**
  * 先打包渲染资源后打包主资源，顺序不能颠倒
  * 渲染资源打包后资源存放于dist下面，直接存放，没有多包一层目录
- * 
+ *
  * 主资源打包后生成main.js文件，存放于dist下面，作为软件的入口文件
- * 
+ *
  * 所有软件运行时得用到的包都被会打包到文件里面，所有不需要node_module文件夹
  * 且打包后的文件内部有做了代码的压缩，所以体积也会小很多
- * 
+ *
  * 唯一导入就electron，但是在打包后的软件中electron已经内置，所有不需要
  */
 // 打包渲染资源
@@ -22,7 +22,7 @@ require("./app-main-build")
 
 /**
  * 在打包好了的dist文件夹内部中添加package.json文件，其中的信息来自跟目录下的app.deploy.json
- * 
+ *
  * dist将作为软件最终的资源被打包进electron应用的app.asar中
  */
 try {
@@ -30,7 +30,7 @@ try {
     // 配置打包好的资源的入口文件
     APP_DEPLOY["main"] = "main.js"
     writeFileSync(join(__dirname, "./dist/package.json"), JSON.stringify(APP_DEPLOY))
-}catch(err) {
+} catch (err) {
     throw err
 }
 

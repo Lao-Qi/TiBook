@@ -40,7 +40,7 @@ function RegisterUser(name, account, paw) {
                         name,
                         account,
                         type: type(),
-                        ping,
+                        ping
                     })
                     .then(registerData => {
                         res(registerData)
@@ -80,7 +80,7 @@ function FindUserFriendsList() {
         axios
             .get("/api/search/FriendsList", {
                 // token用户的身份认证
-                headers: { token: localToken },
+                headers: { token: localToken }
             })
             .then(res)
             .catch(rej)
@@ -99,7 +99,7 @@ function AddFriend(account) {
                 "/api/user/addFriend",
                 { account },
                 {
-                    headers: { token: localToken },
+                    headers: { token: localToken }
                 }
             )
             .then(res)
@@ -116,7 +116,7 @@ function SearchUser(account) {
     return new Promise((res, rej) => {
         axios
             .get("/api/search/searchUser", {
-                params: { account },
+                params: { account }
             })
             .then(res)
             .catch(rej)
@@ -151,5 +151,5 @@ module.exports = {
     AddFriend,
     SearchUser,
     SearchUsers,
-    VerifyTokenIsOut,
+    VerifyTokenIsOut
 }

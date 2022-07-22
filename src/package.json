@@ -1,7 +1,7 @@
 {
     "name": "tibook_src",
     "version": "0.0.0",
-    "main": "./electron/main.js",
+    "main": "./app-main/main.js",
     "author": {
         "name": "王老柒",
         "email": "Wang.Lao.Qi@qq.com",

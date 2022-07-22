@@ -14,7 +14,7 @@
                     @click="openThisCardChatWin(messageCard)"
                     :class="{
                         'message-card': true,
-                        'current-message-card': true,
+                        'current-message-card': true
                     }"
                 >
                 </message-card>

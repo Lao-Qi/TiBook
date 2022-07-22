@@ -13,10 +13,9 @@
                     :class="{
                         'not-me': chatMessage.from !== localUserInfo.account,
                         'is-me': chatMessage.from === localUserInfo.account,
-                        'up-message-is-same-person': thisMessageIsMe(chatMessage.from === localUserInfo.account),
+                        'up-message-is-same-person': thisMessageIsMe(chatMessage.from === localUserInfo.account)
                     }"
                 >
-                    <!-- <div class="avatar" :style="{ backgroundImage: `url('${avatar}')` }"></div> -->
                     <div class="message-content">
                         <span>{{ chatMessage.content }}</span>
                     </div>
@@ -45,7 +44,7 @@ const props = defineProps({
     name: String,
     account: String,
     avatar: String,
-    localUserInfo: Object,
+    localUserInfo: Object
 })
 
 const avatar = props.avatar === "none" ? "/src/assets/img/DefaultAvatar.jpg" : props.avatar

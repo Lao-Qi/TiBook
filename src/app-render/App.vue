@@ -36,7 +36,7 @@ const WindowTitle = defineAsyncComponent(() => {
 
 ipcRenderer.invoke("get-current-page").then(page => {
     router.push({
-        name: page,
+        name: page
     })
 })
 </script>
