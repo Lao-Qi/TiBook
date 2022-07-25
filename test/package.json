@@ -1,0 +1,14 @@
+{
+    "name": "tibook-test",
+    "version": "0.0.0",
+    "main": "./MultithreadingStart/main.js",
+    "scripts": {
+        "test": "npx electron ./MultithreadingStart/main.js"
+    },
+    "keywords": [],
+    "author": "WangLaoQi (https://github.com/Lao-Qi)",
+    "license": "MIT",
+    "dependencies": {
+        "socket.io-client": "^4.5.1"
+    }
+}
