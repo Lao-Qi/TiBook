@@ -20,6 +20,10 @@
 设计思路：添加一个用来开服务的线程，将页面的多个功能变成一个一个的服务，并再另一个线程中启动，以优化资源，分担一下electron的那俩个线程的负担
 
 参考了这篇文章[https://juejin.cn/post/7045081514597416991#heading-0](https://juejin.cn/post/7045081514597416991#heading-0)
-BrowerService为一个无ui无大小不显示可以运行electron和node的api和部分前端才有的对象(file, forch, window...)的线程，相当于一个万能的线程，除了操作不了dom
+
+BrowerService为一个无ui无大小不显示可以运行electron和node的api和部分前端才有的对象(file, forch, window...)的线程，相当于一个万能的进程，功能有很多提前加载资源，提前渲染部分页面...
 
 BrowerService之间还是使用ipcMain和ipcRender来通信(node原生的ipc试了很久还是不会，后面再看吧)
+
+#### 2022/07/25
+添加进程管理服务，结合进程集合表实现
