@@ -1,17 +1,21 @@
 /**
  * 软件的启动页
  *
- * 用来启动窗口，启动其他服务
+ * 用来启动窗口和启动其他服务
  *
- * 这个文件在app前置内容加载好后开始加载
+ * 这个文件在app前置内容加载好后开始运行
  */
 
 const { BrowserWindow, ipcMain } = require("electron")
-const { createBrowserService } = require("./lib/BrowserService")
+const { createBrowserService } = require("./lib/ProcessManagement/BrowserService")
 const { join } = require("path")
 
 /**
- * 第一步当然是启动窗口，加载软件页面的整体ui框架
+ * 启动窗口，加载软件页面的整体ui框架
+ *
+ * 俩个启动函数都是异步启动(应该可以加快吧...)
+ *
+ * windows文件夹里的窗口已经不想拿来用来，准备重构
  */
 startWindow()
 
@@ -38,11 +42,11 @@ async function startWindow() {
         }
     })
 
-    // 加载入口文件就配置好了的地址
+    // 加载app文件就配置好了的地址
     win.loadURL(process.env["TIBOOK_APP_PAGR_URL"])
     win.once("ready-to-show", () => win.show())
 
-    // 关闭就清楚相关事件
+    // 当窗口关闭清除相关事件
     win.once("close", () => {
         ipcMain.removeAllListeners(["window-minimize", "window-maximize", "window-destroy"])
     })
@@ -61,7 +65,7 @@ async function startWindow() {
 
 async function startServices() {
     /**
-     * 创建一个服务线程，并加载服务
+     * 创建一个服务进程，并加载服务
      */
     createBrowserService(join(__dirname, "./services-entrance.js"), "services")
 }

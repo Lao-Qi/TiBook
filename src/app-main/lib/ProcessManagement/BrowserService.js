@@ -137,9 +137,8 @@ function updateBrowserServiceTemplateHTMLFile(templateHtmlFilePath, filePath) {
 }
 
 /**
- *创建的进程会直接存储到进程集合中，而不会返回，如果要操作进程应该从进程集合中操纵
-
- 进程集合还封装了多个方便用来操作进程的方法
+ * 创建的进程会直接存储到进程集合中，而不会返回，如果要操作进程应该从进程集合中操纵
+ *
  * @param {String} filePath
  * @param {String} pid
  */

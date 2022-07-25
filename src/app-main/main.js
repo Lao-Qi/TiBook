@@ -5,7 +5,7 @@ const { app, protocol } = require("electron")
 // let currentWin = null,
 //     currentWinName = null
 
-// 不使用硬件加速渲染软件，会导致软件有残影
+// 不使用硬件加速渲染软件，使用了会导致软件有残影
 app.disableHardwareAcceleration()
 
 // 注册一个用来获取本地资源的协议
