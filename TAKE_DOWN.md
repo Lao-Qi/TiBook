@@ -26,4 +26,31 @@ BrowerService为一个无ui无大小不显示可以运行electron和node的api�
 BrowerService之间还是使用ipcMain和ipcRender来通信(node原生的ipc试了很久还是不会，后面再看吧)
 
 #### 2022/07/25
-添加进程管理服务，结合进程集合表实现
+
+- 添加进程管理服务，结合进程集合表实现
+- 准备实现服务的动态加载
+
+#### 2022/07/27
+
+隔了一天，再写进程可视化操作服务
+
+修改：
+- 将进程集合转移到主进程，所有进程的管理转移到主进程
+- 添加一个新的服务，ProcessVisualization(进程可视化)，它会在启动的时候打开一个管理的窗口(由服务进程打开)，会通过ipc把进程数据发送到该进程，在该进程进行进程操作，不过所有的操作都是通过ipc发送到主进程来进行的
+
+##### 优化部分代码：
+
+- 所有服务的加载使用了新的方法
+```js
+function loadService(filePath) {
+    const modulePath = join(dirname(dirname(__dirname)), "./services", filePath)
+
+    require(modulePath)
+    delete require.cache[modulePath]
+}
+```
+- 将进程的创建改为```new BorwserService()```且只能在主进程中调用，因为进程集合已经转移到了主进程，这样方便一点。当服务进程要开启新的服务的时候应该通过```ipcRenderer.send("createBrowserService")```或```ipcRenderer.send("createServiceWindow")```触发
+- 给服务进程实例对象添加多个信息属性，并实现一个类俩用，既可以是服务进程，也可以是服务窗口进程
+
+##### 现状
+还在实现进程管理可视化的功能，可视化功能还有一个bug，有时运行的时候会不触发事件，导致窗口没打开
