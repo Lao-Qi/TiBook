@@ -11,7 +11,9 @@ const { ipcMain } = require("electron")
 const { BrowserServiceProcess } = require("./lib/BorwserService/index")
 const { join } = require("path")
 const { cpus } = require("os")
+const ProcessAllMap = {}
 
+startBasicEventBinding()
 /**
  * 启动窗口，加载软件页面的整体ui框架
  *
@@ -20,17 +22,16 @@ const { cpus } = require("os")
  * windows文件夹里的窗口已经不想拿来用来，准备重构
  */
 // startWindow()
-
-/**
- * 启动进程存储
- */
-const ProcessAllMap = {}
 startProcessManage()
+startServices()
 
 /**
- * 启动服务线程
+ * 要和渲染进程传递基本数据的ipc事件绑定
  */
-startServices()
+async function startBasicEventBinding() {
+    // 获取主进程的对软件配置的环境变量
+    ipcMain.handle("get-env-of-app", () => process.env["TIBOOK"])
+}
 
 // async function startWindow() {
 //     const win = new BrowserWindow({
@@ -71,6 +72,9 @@ startServices()
 //     ipcMain.once("window-destroy", () => win.close())
 // }
 
+/**
+ * 启动服务进程
+ */
 async function startServices() {
     /**
      * 创建一个服务进程，并加载服务
@@ -80,11 +84,11 @@ async function startServices() {
     ProcessAllMap["services"] = new BrowserServiceProcess(join(__dirname, "./services/main.js"), "services")
     ProcessAllMap["services"].openDevTools()
     // 触发打开进程可视化服务
-    ProcessAllMap["services"].webContents.send("run-ProcessVisualization")
+    // ProcessAllMap["services"].webContents.send("run-ProcessVisualization")
 }
 
 /**
- * 进程管理方法
+ * 启动进程集合和进程操作集合操作服务
  */
 async function startProcessManage() {
     // 添加服务进程事件
@@ -95,7 +99,6 @@ async function startProcessManage() {
     // 添加服务窗口进程事件
     ipcMain.on("createServiceWindow", (_, filePath, pid, winConfig) => {
         ProcessAllMap[pid] = new BrowserServiceProcess(filePath, pid, "window", winConfig)
-        ProcessAllMap[pid].openDevTools()
     })
 
     /**
@@ -115,6 +118,9 @@ async function startProcessManage() {
     ipcMain.handle("operateProcess", async (_, pid, operate) => {
         const value = ProcessAllMap[pid][operate]
         return typeof value === "function" ? value() : value
+    })
+    ipcMain.on("operateProcessAllReload", () => {
+        Object.values(ProcessAllMap).map(process => process.reload())
     })
 }
 

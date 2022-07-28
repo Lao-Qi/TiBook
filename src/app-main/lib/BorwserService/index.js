@@ -123,11 +123,34 @@ const initConfig = (ProcessType, winConfig) => {
         show: false,
         webPreferences: {
             nodeIntegration: true,
-            contextIsolation: false
+            contextIsolation: false,
+            // 将主进程app环境变量发送到窗口的预加载脚本中
+            additionalArguments: parseObjectKeyAndValue(process.env["TIBOOK"]),
+            preload: join(__dirname, "./preload.js")
         }
     }
 
-    return ProcessType === "window" ? Object.assign(defaultConfig, winConfig) : defaultConfig
+    if (ProcessType == "window") {
+        defaultConfig.webPreferences.spellcheck = false
+        return Object.assign(defaultConfig, winConfig)
+    } else {
+        return defaultConfig
+    }
+}
+
+/**
+ * 解析对象数据
+ * {
+ *   key: "value" -> ["key", "value"]
+ * }
+ * @param {{}} obj
+ */
+function parseObjectKeyAndValue(obj) {
+    const ary = []
+    for (const [key, value] of Object.entries(obj)) {
+        ary.push(key, value)
+    }
+    return ary
 }
 
 /**
