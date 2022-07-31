@@ -7,6 +7,8 @@
  * 该文件运行于服务进程，而服务进程的底层是electron的渲染进程
  *
  * 加载的服务的文件都运行于该进程，除非服务中又开启了其他的服务，或者服务开启的服务开启的服务...
+ *
+ * 每个服务的入口文件为那个服务目录下的index.js
  */
 const { ipcRenderer } = require("electron")
 const { join, dirname } = require("path")
@@ -19,15 +21,13 @@ const { join, dirname } = require("path")
 /**
  * 服务进程启动的时候直接启动的服务
  */
-loadService("./ServerSocketCommunication/index.js")
-loadService("./ServerSocketCommunication/index.js")
+// loadService("./ServerSocketCommunication/index.js")
 
 /**
- * 通过事件触发运行的服务
+ * 通过事件加载服务
  */
-ipcRenderer.on("run-ProcessVisualization", () => {
-    console.log("run-ProcessVisualization")
-    loadService("./ProcessVisualization/index.js")
+ipcRenderer.on("load-service", (_, service) => {
+    loadService(`./${service}/index.js`)
 })
 
 /**
