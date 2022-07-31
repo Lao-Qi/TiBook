@@ -3,7 +3,7 @@ const { accessSync, writeFileSync } = require("fs")
 const path = require("path")
 const Nedb = require("nedb")
 const { app } = require("electron")
-const { SearchUser } = require("./ServerRequire")
+const { SearchUser } = require("./node/ServerRequire")
 
 // 验证本地数据库存储文件是否齐全
 const DBFiles = ["message.db", "messageCards.db", "friends.db"]
