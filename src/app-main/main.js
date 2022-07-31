@@ -19,21 +19,29 @@ protocol.registerSchemesAsPrivileged([
     }
 ])
 
-// 配置页面资源加载环境
-process.env["TIBOOK"] = {}
-process.env["TIBOOK"]["ENTRY_FILE"] = __filename
-if (process.env?.IS_DEV) {
-    process.env["TIBOOK"]["MAIN_PAGR_URL"] = "http://127.0.0.1:3000"
-    process.env["TIBOOK"]["PUBLIC_PATH"] = join(__dirname, "../../public")
+/**
+ * 配置页面资源加载环境
+ *
+ * 在进程对象上挂载一个软件特有的属性来存储软件中特有的环境变量
+ */
+process.TIBOOK = {}
+
+process.TIBOOK["ENTRY_FILE"] = __filename
+if (process.env["IS_DEV"]) {
+    process.TIBOOK["MAIN_PAGR_URL"] = "http://127.0.0.1:3000"
+    process.TIBOOK["PUBLIC_PATH"] = join(__dirname, "../../public")
 } else {
-    process.env["TIBOOK"]["MAIN_PAGR_URL"] = `file:///${join(__dirname, "../dist/index.html")}`
-    process.env["TIBOOK"]["PUBLIC_PATH"] = join(__dirname, "./dist/public")
+    process.TIBOOK["MAIN_PAGR_URL"] = `file:///${join(__dirname, "../dist/index.html")}`
+    process.TIBOOK["PUBLIC_PATH"] = join(__dirname, "./dist/public")
 }
 
 app.once("ready", () => {
     // https://www.electronjs.org/zh/docs/latest/api/menu#menusetapplicationmenumenu
     Menu.setApplicationMenu(null)
-    pros.env["USER_CONFIG_LOCATION"] = join(app.getPath("appData"), "./Local/TiBook/USERCONFIG")
+    process.TIBOOK["APP_LOCATION"] = join(app.getPath("appData"), "./tibook")
+    // 加载本地用户配置文件
+    require("./lib/LocalDatabase/user_config")
+    // 启动应用程序
     require("./bootstrap")
 })
 

@@ -1,19 +1,20 @@
 "use strict"
 /**
- * 软件的启动页
+ * 软件的启动文件
  *
  * 用来启动窗口和启动其他服务
  *
  * 这个文件在app前置内容加载好后开始运行(运行于主进程)
  */
 
-const { ipcMain } = require("electron")
+const { app, ipcMain } = require("electron")
 const { BrowserServiceProcess } = require("./lib/BorwserService/index")
-const { join } = require("path")
-const { cpus } = require("os")
+const { join, dirname } = require("path")
+
 const ProcessAllMap = {}
 
 startBasicEventBinding()
+startProcessManage()
 /**
  * 启动窗口，加载软件页面的整体ui框架
  *
@@ -22,7 +23,6 @@ startBasicEventBinding()
  * windows文件夹里的窗口已经不想拿来用来，准备重构
  */
 // startWindow()
-startProcessManage()
 startServices()
 
 /**
@@ -30,7 +30,7 @@ startServices()
  */
 async function startBasicEventBinding() {
     // 获取主进程的对软件配置的环境变量
-    ipcMain.handle("get-env-of-app", () => process.env["TIBOOK"])
+    ipcMain.handle("get-env-of-app", () => JSON.stringify(process["TIBOOK"]))
 }
 
 // async function startWindow() {
@@ -84,95 +84,56 @@ async function startServices() {
     ProcessAllMap["services"] = new BrowserServiceProcess(join(__dirname, "./services/main.js"), "services")
     ProcessAllMap["services"].openDevTools()
     // 触发打开进程可视化服务
-    // ProcessAllMap["services"].webContents.send("run-ProcessVisualization")
+    ProcessAllMap["services"].webContents.send("load-service", "ProcessVisualization")
 }
 
 /**
  * 启动进程集合和进程操作集合操作服务
  */
 async function startProcessManage() {
+    // 以进程id为索引的进行信息表
+    const ProcessAllPIDCorrespondMarkMap = {}
+
+    ProcessAllPIDCorrespondMarkMap[process.pid] = {
+        mark: "main",
+        loadFilePath: process.e,
+        ppid: process.ppid,
+        type: process.type
+    }
+
     // 添加服务进程事件
-    ipcMain.on("createBrowserService", (_, filePath, pid) => {
-        ProcessAllMap[pid] = new BrowserServiceProcess(filePath, pid)
+    ipcMain.on("createBrowserService", (_, filePath, mark) => {
+        ProcessAllMap[mark] = new BrowserServiceProcess(filePath, mark)
     })
 
     // 添加服务窗口进程事件
-    ipcMain.on("createServiceWindow", (_, filePath, pid, winConfig) => {
-        ProcessAllMap[pid] = new BrowserServiceProcess(filePath, pid, "window", winConfig)
+    ipcMain.on("createServiceWindow", (_, filePath, mark, winConfig) => {
+        ProcessAllMap[mark] = new BrowserServiceProcess(filePath, mark, "window", winConfig)
+        ProcessAllMap[mark].openDevTools()
     })
 
+    // https://www.electronjs.org/zh/docs/latest/api/app#appgetappmetrics
+    ipcMain.handle("getAppMetrics", async () => app.getAppMetrics())
     /**
-     * 因为进程之间传递不了JS函数，所以我们把进程解析信息的部分写到主进程，
-     * 再把解析好的可克隆的数据发送到渲染进程
+     * 将新创建的服务进程通过pid为key存储起来
+     *
+     * 这对在app.getAppMetrics()生成的性能信息数组中可以加快索引
      */
-    ipcMain.handle("getProcessAllInfo", async () => Object.values(ProcessAllMap).map(parseProcessData))
+    ipcMain.on("new-browser-service-info", (_, { mark, pid, ppid, URL, type }) => {
+        ProcessAllPIDCorrespondMarkMap[pid] = { mark, ppid, URL, type }
+    })
+    ipcMain.handle("getProcessAllPIDCorrespondMarkMap", () => ProcessAllPIDCorrespondMarkMap)
+
     /**
-     * 返回特定的进程信息
-     */
-    ipcMain.handle("getProcessInfo", async (_, pid) => parseProcessData(ProcessAllMap[pid]))
-    /**
-     * 通过发送进程的pid和进程实例对象上的属性名称来操作进程
+     * 通过发送进程的mark和进程实例对象上的属性名称来操作进程
      *
      * 如果属性名对应的格式是函数，则发送执行后的返回值
      */
-    ipcMain.handle("operateProcess", async (_, pid, operate) => {
-        const value = ProcessAllMap[pid][operate]
+    ipcMain.handle("operateProcess", async (_, mark, operate) => {
+        const value = ProcessAllMap[mark][operate]
         return typeof value === "function" ? value() : value
     })
     ipcMain.on("operateProcessAllReload", () => {
         Object.values(ProcessAllMap).map(process => process.reload())
     })
-}
-
-/**
- * 解析出线程数据，接着渲染到页面
- * @param {any} process 线程的实例对象
- */
-function parseProcessData(process) {
-    const processInfo = {}
-    // 这些属性是有在进程实例的时候就挂载好了的
-    // tibook\src\app-main\lib\BorwserService\index.js
-    processInfo["URL"] = process.filePath
-    processInfo["PID"] = process.PID
-    processInfo["OSPID"] = process.OSPID
-    processInfo["Mark"] = process.Mark
-    // 做一下单位转换
-    processInfo["Memory"] = convertMemoryUnits(process.processMemory)
-    processInfo["CPU"] = getProcessCPUUtilization(process.cpuUsage)
-    return processInfo
-}
-
-/**
- * 内存单位账户 b -> mb
- * @param {String} memory
- * @returns {String}
- */
-function convertMemoryUnits(memory) {
-    return String(memory / 1000000).slice(0, 5)
-}
-
-/**
- * 通过process.cpuUsage获取进程运行占用的百分比
- * @param {String} cpuInfo
- * @returns {String}
- */
-function getProcessCPUUtilization(cpuInfo) {
-    /**
-     * 按原本程序设计，是要获取运行该服务进程的内核的user运行时间
-     * 再除以该服务进程的user运行时间，解出运行占比
-     *
-     * 但是node貌似没有获取运行对应进程的内核位置，所以这里用了愚蠢至极的方法
-     * 找到系统中运行占用最高的内核，把它当作运行该服务进程的内核来计算占比
-     *
-     * 虽然可以命令行或调用其他语言的方式来获取，但是过于麻烦，暂时不考虑
-     */
-    let cpuUserModRunTime = 0
-    const cpusInfo = cpus()
-    for (let i = 0; i < cpusInfo.length; i++) {
-        if (cpuUserModRunTime < cpusInfo[i].times.user) {
-            cpuUserModRunTime = cpusInfo[i].times.user
-        }
-    }
-
-    return String(100 / (cpuUserModRunTime / cpuInfo.user)).slice(0, 5)
 }

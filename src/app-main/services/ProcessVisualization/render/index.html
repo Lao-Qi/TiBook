@@ -10,6 +10,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>进程可视化管理窗口</title>
     <style>
+        /*
+         标签初始化
+        */
         * {
             margin: 0;
             padding: 0;
@@ -31,122 +34,105 @@
             flex-direction: column;
             width: 100%;
             height: 100%;
+            font-size: 14px;
+            color: #fff;
+            background-color: rgb(40, 42, 54);
         }
 
-        .menu {
-            display: flex;
-            width: 100%;
-            height: 40px;
-            padding-inline: 10px;
-            align-items: center;
-            background-color: #dfdcdf;
-            justify-content: space-between;
-        }
-
-        .menu .controls a {
-            display: inline-block;
-            height: 70%;
-            width: auto;
-            padding-inline: 10px;
-            margin-block: 2px;
-            line-height: 150%;
-            text-decoration: none;
-            color: #213547;
-            background-color: #eee;
-            border: 1px #aaa solid;
-        }
-
-        .menu .controls a:nth-child(1) {
-            border-top-left-radius: 3px;
-            border-bottom-left-radius: 3px;
-        }
-
-        .menu .controls a:nth-last-child(1) {
-            border-top-right-radius: 3px;
-            border-bottom-right-radius: 3px;
-        }
-
-        .menu .controls a:hover {
-            background-color: #ddd;
-        }
-
+        /*
+         进程列表展示区域
+        */
         .process_list_container {
             display: flex;
             flex-direction: column;
             flex: 1;
         }
 
+        /* 进程信息字段 */
         .process_list_container .process_list_table_head {
             display: flex;
             width: 100%;
-            height: 28px;
+            height: 25px;
         }
 
         .process_list_container .process_list_table_head span {
-            flex: 1;
             float: left;
             height: 100%;
-            min-width: 120px;
-            line-height: 28px;
-            padding-inline: 20px;
-            border: 1px solid #aaa;
-            background-color: rgb(232, 228, 228);
+            width: 100px;
+            line-height: 25px;
+            padding-inline: 10px;
         }
 
         .process_list_container .process_list_table_head span:nth-child(1) {
-            min-width: 200px;
+            flex: 1;
         }
 
+        /* 展示进程数据 */
         .process_list_container .process_list_table_body {
             flex: 1;
-            background-color: rgb(241, 240, 240);
         }
 
         .process_list_container .process_list_table_body ul li {
             display: flex;
             width: 100%;
             height: 28px;
-            transition: all ease 0.2s;
+        }
+
+        .process_list_container .process_list_table_body ul li:hover {
+            background-color: rgba(255, 255, 255, 0.4)
+        }
+
+        .process_list_container .process_list_table_body ul li.current_process {
+            background-color: rgb(255, 255, 255, 0.8);
+            color: #eee;
         }
 
         .process_list_container .process_list_table_body ul li span {
-            flex: 1;
             float: left;
             height: 100%;
-            min-width: 120px;
+            width: 100px;
             line-height: 28px;
-            padding-inline: 20px;
+            padding-inline: 10px;
+            text-align: left;
         }
 
         .process_list_container .process_list_table_body ul li span:nth-child(1) {
-            min-width: 200px;
+            flex: 1;
             white-space: nowrap;
             text-overflow: ellipsis;
             overflow: hidden;
         }
 
-        .process_list_container .process_list_table_body ul li:nth-child(odd) {
-            background-color: #fff;
+        .process_list .child_process {}
+
+        /*
+         下拉三角
+        */
+        i.drop_down_triangle {
+            display: block;
+            width: 5px;
+            height: 5px;
+            border: none, 1px solid #fff, 1px solid #fff, none;
+            transform: rotate(-45deg);
+            transition: all ease 0.1s;
         }
 
-        .process_list_container .process_list_table_body ul li:nth-child(even) {
-            background-color: #eee;
-        }
-
-        .process_list_container .process_list_table_body ul li.current_process {
-            background-color: #177ad7;
-            color: #eee;
+        i.triangle_change {
+            transform: rotate(45deg);
         }
     </style>
 </head>
 
 <body>
-    <div class="menu">
-        <div class="controls"></div>
-        <span class="state">当前无选中进程</span>
-    </div>
     <div class="process_list_container">
-        <div class="process_list_table_head"></div>
+        <div class="process_list_table_head">
+            <span>资源地址</span>
+            <span>标记</span>
+            <span>类型</span>
+            <span>PID</span>
+            <span>内存(MB)</span>
+            <span>CPU(%)</span>
+        </div>
         <div class="process_list_table_body">
             <ul class="process_list"></ul>
         </div>
