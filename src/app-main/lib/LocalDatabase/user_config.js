@@ -1,0 +1,36 @@
+const { readFileSync, accessSync, constants, writeFileSync } = require("fs")
+const { join } = require("path")
+
+const user_config_file_path = join(process.TIBOOK["APP_LOCATION"], "./USER_CONFIG.json")
+let USER_CONFIG = {}
+
+try {
+    accessSync(user_config_file_path, constants.R_OK | constants.W_OK)
+} catch (err) {
+    // 有点**的写法
+    try {
+        /**
+         * 这里原本是用异步io来操作，但是会导致下面的文件读入报错
+         */
+        writeFileSync(user_config_file_path, "{}")
+    } catch (err) {
+        throw err
+    }
+}
+
+try {
+    USER_CONFIG = JSON.parse(readFileSync(user_config_file_path))
+} catch (err) {
+    console.error(err)
+}
+
+process.TIBOOK["USER_CONFIG"] = new Proxy(USER_CONFIG, {
+    get: Reflect.get,
+    set(target, key, value, receiver) {
+        Reflect.set(target, key, value, receiver)
+        // 异步更新配置文件
+        watchFile(user_config_file_path, JSON.stringify(USER_CONFIG), err => {
+            console.error(err)
+        })
+    }
+})
