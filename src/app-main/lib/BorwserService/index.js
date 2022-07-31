@@ -11,12 +11,12 @@ class BrowserServiceProcess {
     kernel
 
     /**
-     * @param {String} filePath 进程要加载的入口文件(绝对路径) type is window ? filePath is HtmlFile : filePath is JSFile
+     * @param {String} URL 进程要加载的入口文件(绝对路径) type is window ? URL is HtmlFile : URL is JSFile
      * @param {String} mark 进程的id
      * @param {String} ProcessType 要创建的进程的格式 window | default
      * @param {any} winConfig 如果ProcessType的配置为window，则需要配置窗口的属性
      */
-    constructor(filePath, mark, ProcessType = "default", winConfig) {
+    constructor(URL, mark, ProcessType = "default", winConfig) {
         winConfig = initConfig(ProcessType, winConfig)
         winConfig["title"] = `mark: ${mark}`
 
@@ -26,19 +26,19 @@ class BrowserServiceProcess {
         this.kernel = new BrowserWindow({ ...winConfig })
 
         if (ProcessType === "window") {
-            this.kernel.loadFile(filePath)
+            this.kernel.loadURL(URL)
             this.kernel.once("ready-to-show", () => this.kernel.show())
         } else {
             const templateHtmlFilePath = join(__dirname, "./BrowserService-template.html")
             /**
              * 更新进程要加载的模板内容
              */
-            updateBrowserServiceTemplateHTMLFile(templateHtmlFilePath, filePath, mark)
-            this.kernel.loadFile(templateHtmlFilePath)
+            updateBrowserServiceTemplateHTMLFile(templateHtmlFilePath, URL, mark)
+            this.kernel.loadURL(templateHtmlFilePath)
         }
         this.kernel.webContents.send("process-config-info", {
             mark,
-            URL: filePath
+            URL
         })
     }
 
@@ -95,9 +95,9 @@ const initConfig = (ProcessType, winConfig) => {
 /**
  * 修改进程要加载的模板，主要是修改进程加载入口文件的路径
  * @param {String} templateHtmlFilePath 进程的html模板文件路径
- * @param {String} filePath 要被进程加载的入口文件路径
+ * @param {String} URL 要被进程加载的入口文件路径
  */
-function updateBrowserServiceTemplateHTMLFile(templateHtmlFilePath, filePath, mark) {
+function updateBrowserServiceTemplateHTMLFile(templateHtmlFilePath, URL, mark) {
     const newTemplateHTMLText = `
         <!DOCTYPE html>
         <html lang="zh-cn">
@@ -106,7 +106,7 @@ function updateBrowserServiceTemplateHTMLFile(templateHtmlFilePath, filePath, ma
             <meta http-equiv="X-UA-Compatible" content="IE=edge">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>${mark}</title>
-            <script src="file:///${filePath}"></script>
+            <script src="file:///${URL}"></script>
         </head>
         <body>
         </body>
