@@ -1,18 +1,19 @@
-const { BrowserWindow } = require("electron")
+const { BrowserWindow, ipcMain } = require("electron")
 const { writeFileSync } = require("fs")
 const { join } = require("path")
 
 /**
  * 服务进程
  *
- * 直接new的服务进程不会被添加到进程集合中
+ * 其底层原理是调用了electron的BrowserWindow开启一个隐藏的渲染进程
  */
 class BrowserServiceProcess {
     kernel
+    webContents
 
     /**
-     * @param {String} URL 进程要加载的入口文件(绝对路径) type is window ? URL is HtmlFile : URL is JSFile
-     * @param {String} mark 进程的id
+     * @param {String} URL 进程要加载的入口文件(绝对路径) type is window ? URL is `file:///${HtmlFile}` || http://... : URL is JSFilePath
+     * @param {String} mark 进程的标记
      * @param {String} ProcessType 要创建的进程的格式 window | default
      * @param {any} winConfig 如果ProcessType的配置为window，则需要配置窗口的属性
      */
@@ -26,7 +27,6 @@ class BrowserServiceProcess {
         this.kernel = new BrowserWindow({ ...winConfig })
 
         if (ProcessType === "window") {
-            this.kernel.loadURL(URL)
             this.kernel.once("ready-to-show", () => this.kernel.show())
         } else {
             const templateHtmlFilePath = join(__dirname, "./BrowserService-template.html")
@@ -34,25 +34,38 @@ class BrowserServiceProcess {
              * 更新进程要加载的模板内容
              */
             updateBrowserServiceTemplateHTMLFile(templateHtmlFilePath, URL, mark)
-            this.kernel.loadURL(templateHtmlFilePath)
+            URL = `file:///${templateHtmlFilePath}`
         }
-        this.kernel.webContents.send("process-config-info", {
-            mark,
+
+        /**
+         * 临时加上进程的信息，这些信息会在预加载脚本中被调用并加载到渲染进程
+         */
+        process.TIBOOK["CURRENT_SERVICE_PROCESS_CONFIG"] = {
+            MARK: mark,
             URL
-        })
+        }
+
+        // this.kernel.webContents.send("get-process-config-info", {
+        //     MARK: mark,
+        //     URL
+        // })
+
+        // 如果ProcessType是window的话，加载是需要带上协议类型的，如果加载的是default那么就不需要协议，只需要地址就可以
+        this.kernel.loadURL(URL)
+        this.webContents = this.kernel.webContents
     }
 
     /**
      * 关闭这个进程
      */
-    close = () => {
+    close() {
         this.kernel.close()
     }
 
     /**
      * 打开开发者工具
      */
-    openDevTools = () => {
+    openDevTools() {
         this.kernel.webContents.openDevTools({
             mode: "detach"
         })
@@ -61,12 +74,12 @@ class BrowserServiceProcess {
     /**
      * 重启服务进程
      */
-    reload = () => {
+    reload() {
         this.kernel.webContents.reloadIgnoringCache()
     }
 
-    get webContents() {
-        return this.kernel.webContents
+    send() {
+        this.kernel.webContents.send(...arguments)
     }
 }
 
@@ -83,8 +96,11 @@ const initConfig = (ProcessType, winConfig) => {
         show: false,
         webPreferences: {
             nodeIntegration: true,
+            nodeIntegrationInWorker: true,
             contextIsolation: false,
             spellcheck: false,
+            webSecurity: true,
+            allowRunningInsecureContent: true,
             preload: join(__dirname, "./preload.js")
         }
     }
