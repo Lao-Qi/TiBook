@@ -38,7 +38,9 @@ if (process.env["IS_DEV"]) {
 app.once("ready", () => {
     // https://www.electronjs.org/zh/docs/latest/api/menu#menusetapplicationmenumenu
     Menu.setApplicationMenu(null)
+
     process.TIBOOK["APP_LOCATION"] = join(app.getPath("appData"), "./tibook")
+
     // 加载本地用户配置文件
     require("./lib/LocalDatabase/user_config")
     // 启动应用程序

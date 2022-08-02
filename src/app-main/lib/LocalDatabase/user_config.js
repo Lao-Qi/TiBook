@@ -1,3 +1,8 @@
+/**
+ * 这是一个用来获取本地用户配置文件信息的文件
+ *
+ * 因为涉及本地数据操作，所以也放到了这里
+ */
 const { readFileSync, accessSync, constants, writeFileSync } = require("fs")
 const { join } = require("path")
 
