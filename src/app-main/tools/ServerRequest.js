@@ -28,8 +28,11 @@ const axios = create({
  *
  * 主进程通过发送要请求的方法名来请求服务器
  */
-process.on("message", ({ request, argv = [], renderProcessMark }) => {
-    ServerRequestMethodAllMap[request](...argv)
+process.on("message", ({ request, args = [], renderProcessMark }) => {
+    if (!ServerRequestMethodAllMap[request]) {
+        throw Error(`接口请求函数不存在: (${request})`)
+    }
+    ServerRequestMethodAllMap[request](...args)
         .then(result => {
             process.send({
                 result,

@@ -8,21 +8,24 @@
  */
 
 const { app, ipcMain } = require("electron")
+const { join } = require("path")
 const { BrowserServiceProcess } = require("./lib/BorwserService/index")
-const { join, dirname } = require("path")
+const { ForkNodeProcess } = require("./lib/NodeForekProcess/index")
 
+// 进程信息集合表
 const ProcessAllMap = {}
+// 以进程id为索引的进行信息表
+const ProcessAllPIDCorrespondMarkMap = {}
 
 startBasicEventBinding()
 startProcessManage()
 /**
  * 启动窗口，加载软件页面的整体ui框架
  *
- * 俩个启动函数都是异步启动(应该可以加快吧...)
- *
  * windows文件夹里的窗口已经不想拿来用来，准备重构
  */
-// startWindow()
+// startMainWinService()
+startToolsProcess()
 startServices()
 
 /**
@@ -31,6 +34,7 @@ startServices()
 async function startBasicEventBinding() {
     // 获取主进程的对软件配置的环境变量
     ipcMain.handle("get-env-of-app", () => JSON.stringify(process["TIBOOK"]))
+    ipcMain.handle("getProcessAllPIDCorrespondMarkMap", () => ProcessAllPIDCorrespondMarkMap)
 }
 
 // async function startWindow() {
@@ -73,27 +77,41 @@ async function startBasicEventBinding() {
 // }
 
 /**
+ * 把软件的窗口也用服务进程来启动，但是是在主进程中单独的使用BrowserServiceProcess这个类来启动
+ *
+ * 这样可以把主窗口和其他的服务隔离开来，又可以顺带把主窗口的数据携带进进程集合表中
+ */
+async function startMainWinService() {
+    const mainWinService = new BrowserServiceProcess(process.TIBOOK["APP_MAIN_PAGE"], "app_main_win", "window", {
+        width: 800,
+        height: 600,
+        minWidth: 600,
+        minHeight: 450,
+        frame: false,
+        useContentSize: true
+    })
+
+    ProcessAllMap["app_main_win"] = mainWinService
+}
+
+/**
  * 启动服务进程
  */
 async function startServices() {
     /**
-     * 创建一个服务进程，并加载服务
-     *
-     * ServiceProcess: 加载服务的进程
+     * 所有服务的入口文件也使用BrowserServiceProcess这个类来单独的引用
+     * 目的也是隔离
      */
     ProcessAllMap["services"] = new BrowserServiceProcess(join(__dirname, "./services/main.js"), "services")
     ProcessAllMap["services"].openDevTools()
     // 触发打开进程可视化服务
-    ProcessAllMap["services"].webContents.send("load-service", "ProcessVisualization")
+    // ProcessAllMap["services"].webContents.send("load-service", "ProcessVisualization")
 }
 
 /**
  * 启动进程集合和进程操作集合操作服务
  */
 async function startProcessManage() {
-    // 以进程id为索引的进行信息表
-    const ProcessAllPIDCorrespondMarkMap = {}
-
     ProcessAllPIDCorrespondMarkMap[process.pid] = {
         mark: "main",
         loadFilePath: process.e,
@@ -119,21 +137,65 @@ async function startProcessManage() {
      *
      * 这对在app.getAppMetrics()生成的性能信息数组中可以加快索引
      */
-    ipcMain.on("new-browser-service-info", (_, { mark, pid, ppid, URL, type }) => {
-        ProcessAllPIDCorrespondMarkMap[pid] = { mark, ppid, URL, type }
-    })
-    ipcMain.handle("getProcessAllPIDCorrespondMarkMap", () => ProcessAllPIDCorrespondMarkMap)
-
+    ipcMain.on("new-browser-service-info", (_, { mark, pid, ppid, URL, type }) => (ProcessAllPIDCorrespondMarkMap[pid] = { mark, ppid, URL, type }))
     /**
-     * 通过发送进程的mark和进程实例对象上的属性名称来操作进程
-     *
-     * 如果属性名对应的格式是函数，则发送执行后的返回值
+     * 通过ipc让进程使用方法
      */
-    ipcMain.handle("operateProcess", async (_, mark, operate) => {
-        const value = ProcessAllMap[mark][operate]
-        return typeof value === "function" ? value() : value
+    ipcMain.handle("operateProcess", async (_, mark, operate) => ProcessAllMap[mark][operate]())
+    /**
+     * 刷新所有进程
+     */
+    ipcMain.on("operateProcessAllReload", () => Object.values(ProcessAllMap).map(process => process.reload()))
+}
+
+/**
+ * 启动工具进程，顾名思义就是只用来运行工具的进程
+ */
+async function startToolsProcess() {
+    startServerRequireTools()
+    startLocalOperationTools()
+}
+
+/**
+ * 启动服务端请求工具
+ */
+async function startServerRequireTools() {
+    /**
+     * fork一个进程来运行工具文件
+     */
+    const ServerRequestProcess = new ForkNodeProcess(join(__dirname, "./tools/ServerRequest.js"), "ServerRequest")
+
+    ipcMain.on("server-request-send", (_, renderProcessMark, request, ...args) => {
+        ServerRequestProcess.send({
+            request, // 请求的方法名
+            args, // 传递的参数
+            renderProcessMark // 渲染进程为此绑定的事件
+        })
     })
-    ipcMain.on("operateProcessAllReload", () => {
-        Object.values(ProcessAllMap).map(process => process.reload())
+
+    ServerRequestProcess.onmessage(({ result, request, state, renderProcessMark }) => {
+        ProcessAllMap[renderProcessMark].send("server-request-retrun", request, state, result)
     })
+
+    ProcessAllMap["ServerRequest"] = ServerRequestProcess
+    ProcessAllPIDCorrespondMarkMap[ServerRequestProcess.pid] = ServerRequestProcess
+}
+
+async function startLocalOperationTools() {
+    const LocalOperationProcess = new ForkNodeProcess(join(__dirname, "./tools/LocalOperation.js"), "LocalOperation")
+
+    ipcMain.on("local-operation-send", (_, renderProcessMark, request, ...args) => {
+        LocalOperationProcess.send({
+            request, // 请求的方法名
+            args, // 传递的参数
+            renderProcessMark // 渲染进程为此绑定的事件
+        })
+    })
+
+    LocalOperationProcess.onmessage(({ result, request, state, renderProcessMark }) => {
+        ProcessAllMap[renderProcessMark].send("local-operation-retrun", request, result, state)
+    })
+
+    ProcessAllMap["LocalOperation"] = LocalOperationProcess
+    ProcessAllPIDCorrespondMarkMap[LocalOperationProcess.pid] = LocalOperationProcess
 }
