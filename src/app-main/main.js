@@ -52,27 +52,3 @@ app.on("window-all-closed", () => {
         app.quit()
     }
 })
-
-// async function onReady() {
-//     currentWin = await require("./windows/loginWin")()
-//     currentWinName = "login"
-//     currentWin.on("maximize", () => currentWin.webContents.send("window-maximize"))
-//     currentWin.on("unmaximize", () => currentWin.webContents.send("window-unmaximize"))
-
-//     ipcMain.on("login-complete-open-mainWin", () => {
-//         currentWin.close()
-//         currentWin = null
-//         currentWin = require("./windows/mainWin")()
-//         currentWinName = "main"
-//         currentWin.on("maximize", () => currentWin.webContents.send("window-maximize"))
-//         currentWin.on("unmaximize", () => currentWin.webContents.send("window-unmaximize"))
-//     })
-
-//     ipcMain.handle("get-current-page", () => currentWinName)
-//     ipcMain.on("window-minimize", () => currentWin.minimize())
-//     ipcMain.on("window-maximize", () => (currentWin.isMaximized() ? currentWin.unmaximize() : currentWin.maximize()))
-//     ipcMain.on("window-destroy", () => {
-//         currentWin.destroy()
-//         currentWin = null
-//     })
-// }
