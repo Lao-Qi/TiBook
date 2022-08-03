@@ -1,3 +1,4 @@
+"use strict"
 /**
  * 服务器接口请求的方法集合
  *
@@ -6,7 +7,6 @@
  * 这样可以把部分资源转移到子进程，但是请求的过程会变得比较繁琐
  * 因为不管是主进程告诉子进程要发送请求，还是子进程把请求结构进行返回，都是比较繁琐的
  */
-"use strict"
 const {
     default: { create }
 } = require("axios")
@@ -27,6 +27,8 @@ const axios = create({
  * }
  *
  * 主进程通过发送要请求的方法名来请求服务器
+ *
+ * 这里接收renderProcessMark(渲染进程的标注)是为了判断是那个进程要执行的操作
  */
 process.on("message", ({ request, args = [], renderProcessMark }) => {
     if (!ServerRequestMethodAllMap[request]) {

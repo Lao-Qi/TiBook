@@ -1,3 +1,4 @@
+"use strict"
 const { BrowserWindow, ipcMain } = require("electron")
 const { writeFileSync } = require("fs")
 const { join } = require("path")
