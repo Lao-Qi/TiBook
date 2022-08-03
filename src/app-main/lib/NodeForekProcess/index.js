@@ -30,6 +30,7 @@ class ForkNodeProcess {
 
         this.pid = this.#subprocess.pid
         this.mark = mark
+        this.type = "Node"
     }
 
     kill() {

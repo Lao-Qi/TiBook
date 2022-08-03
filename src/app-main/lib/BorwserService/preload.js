@@ -12,6 +12,7 @@ const { ipcRenderer } = require("electron")
  */
 const ServerRequestCallbackMap = {}
 const LocalOperationCallbackMap = {}
+const SocketCommunicateCallbackMap = {}
 
 /**
  * 获取主进程上的软件特有的环境变量，绑定到渲染进程的process上
@@ -51,6 +52,10 @@ ipcRenderer.invoke("get-env-of-app").then(tibookEnv => {
         RequestMessageSend("local-operation-send", LocalOperationCallbackMap, request, ...args)
     }
 
+    window.process.TIBOOK.SocketCommunicate = function (request, ...args) {
+        RequestMessageSend("socket-communicate-send", SocketCommunicateCallbackMap, request, ...args)
+    }
+
     function RequestMessageSend(SendEvent, requestCallbackMap, request, ...args) {
         /**
          * 如果数组最后一个参数是函数则把它视为请求接口后的回调函数
@@ -84,4 +89,8 @@ ipcRenderer.on("server-request-retrun", (_, request, result, state) => {
 
 ipcRenderer.on("local-operation-return", (_, request, result, state) => {
     LocalOperationCallbackMap[request]?.shift()(result, state)
+})
+
+ipcRenderer.on("socket-communicate-return", (_, request, result, state) => {
+    SocketCommunicateCallbackMap[request]?.shift()(result, state)
 })

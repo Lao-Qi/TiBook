@@ -14,7 +14,7 @@ const { ForkNodeProcess } = require("./lib/NodeForekProcess/index")
 
 // 进程信息集合表
 const ProcessAllMap = {}
-// 以进程id为索引的进行信息表
+// 以进程id为索引的进程信息表
 const ProcessAllPIDCorrespondMarkMap = {}
 
 startBasicEventBinding()
@@ -36,45 +36,6 @@ async function startBasicEventBinding() {
     ipcMain.handle("get-env-of-app", () => JSON.stringify(process["TIBOOK"]))
     ipcMain.handle("getProcessAllPIDCorrespondMarkMap", () => ProcessAllPIDCorrespondMarkMap)
 }
-
-// async function startWindow() {
-//     const win = new BrowserWindow({
-//         width: 800,
-//         height: 600,
-//         minWidth: 600,
-//         minHeight: 450,
-//         show: false,
-//         frame: false,
-//         useContentSize: true,
-//         webPreferences: {
-//             // 安全的沙盒模式是需要的
-//             sandbox: true,
-//             // 需要使用node的api，嗯...最少得可以导入electron的渲染进程工具
-//             nodeIntegration: true,
-//             contextIsolation: true
-//         }
-//     })
-
-//     // 加载app文件就配置好了的地址
-//     win.loadURL(process.env["TIBOOK_APP_PAGR_URL"])
-//     win.once("ready-to-show", () => win.show())
-
-//     // 当窗口关闭清除相关事件
-//     win.once("close", () => {
-//         ipcMain.removeAllListeners(["window-minimize", "window-maximize", "window-destroy"])
-//     })
-
-//     // 窗口事件转接到前端事件
-//     win.on("enter-full-screen", () => win.webContents.send("window-enter-full-screen"))
-//     win.on("leave-full-screen", () => win.webContents.send("window-leave-full-screen"))
-//     win.on("enter-html-full-screen", () => win.webContents.send("window-enter-full-screen"))
-//     win.on("leave-html-full-screen", () => win.webContents.send("window-leave-full-screen"))
-
-//     // 绑定窗口的控件信息
-//     ipcMain.on("window-minimize", () => win.minimize())
-//     ipcMain.on("window-maximize", () => (win.isMaximized() ? win.unmaximize() : win.maximize()))
-//     ipcMain.once("window-destroy", () => win.close())
-// }
 
 /**
  * 把软件的窗口也用服务进程来启动，但是是在主进程中单独的使用BrowserServiceProcess这个类来启动
@@ -152,12 +113,13 @@ async function startProcessManage() {
  * 启动工具进程，顾名思义就是只用来运行工具的进程
  */
 async function startToolsProcess() {
-    startServerRequireTools()
-    startLocalOperationTools()
+    startServerRequireTools() // 服务端接口请求工具
+    startLocalOperationTools() // 本地数据操作工具
+    startSocketCommunication() // 套接字通讯工具
 }
 
 /**
- * 启动服务端请求工具
+ * 服务端接口请求工具
  */
 async function startServerRequireTools() {
     /**
@@ -181,6 +143,9 @@ async function startServerRequireTools() {
     ProcessAllPIDCorrespondMarkMap[ServerRequestProcess.pid] = ServerRequestProcess
 }
 
+/**
+ * 本地数据操作工具
+ */
 async function startLocalOperationTools() {
     const LocalOperationProcess = new ForkNodeProcess(join(__dirname, "./tools/LocalOperation.js"), "LocalOperation")
 
@@ -193,9 +158,39 @@ async function startLocalOperationTools() {
     })
 
     LocalOperationProcess.onmessage(({ result, request, state, renderProcessMark }) => {
-        ProcessAllMap[renderProcessMark].send("local-operation-retrun", request, result, state)
+        ProcessAllMap[renderProcessMark].send("local-operation-return", request, result, state)
     })
 
     ProcessAllMap["LocalOperation"] = LocalOperationProcess
     ProcessAllPIDCorrespondMarkMap[LocalOperationProcess.pid] = LocalOperationProcess
+}
+
+/**
+ * 套接字通讯工具
+ */
+async function startSocketCommunication() {
+    const SocketProcess = new ForkNodeProcess(join(__dirname, "./tools/SocketCommunicate.js"), "SocketCommunicate")
+
+    ipcMain.on("socket-communicate-send", (_, renderProcessMark, request, ...args) => {
+        SocketProcess.send({
+            request,
+            args,
+            renderProcessMark
+        })
+    })
+
+    SocketProcess.onmessage(msg => {
+        // 消息的类型为服务端请求
+        if (msg.type === "request") {
+            const { request, result, state, renderProcessMark } = msg
+            ProcessAllMap[renderProcessMark].send("socket-communicate-return", request, result, state)
+        } else {
+            // 消息的类型为服务端或socket主动触发事件后的参数
+            const { event, state, content } = msg
+            ipcMain.emit(event, content, state)
+        }
+    })
+
+    ProcessAllMap["SocketCommunicate"] = SocketProcess
+    ProcessAllPIDCorrespondMarkMap[SocketProcess.pid] = SocketProcess
 }
