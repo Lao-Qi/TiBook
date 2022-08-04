@@ -10,11 +10,12 @@
  * 3秒，如果用户网络差的话可能永远也用不了这个软件
  */
 const { io } = require("socket.io-client")
+const USER_CONFIG = JSON.parse(process.env["TIBOOK_USER_CONFIG"])
 
 const socket = io("ws://127.0.0.1:6001", {
     auth: {
         // E:\工程文件\项目\tibook\src\app-main\lib\LocalDatabase\user_config.js
-        token: process.TIBOOK["USER_CONFIG"]["token"]
+        token: USER_CONFIG["token"]
     },
     timeout: 4000,
     autoConnect: true
@@ -114,7 +115,7 @@ process.on("message", msg => {
 socket.on("connect", () => {
     process.send({
         type: "proactive",
-        event: "connect",
+        event: "socket-connect",
         state: 0,
         content: ""
     })
@@ -130,7 +131,7 @@ socket.on("connect", () => {
 socket.on("receive-message", msg => {
     process.send({
         type: "proactive",
-        event: "receive-message",
+        event: "socket-receive-message",
         state: 0,
         content: msg
     })
@@ -139,7 +140,7 @@ socket.on("receive-message", msg => {
 socket.on("connect_error", err => {
     process.send({
         type: "proactive",
-        event: "connect_error",
+        event: "socket-connect_error",
         state: 1,
         content: err
     })
@@ -148,7 +149,7 @@ socket.on("connect_error", err => {
 socket.on("disconnect", reason => {
     process.send({
         type: "proactive",
-        event: "disconnect",
+        event: "socket-disconnect",
         state: 0,
         content: reason
     })

@@ -1,4 +1,8 @@
 "use strict"
+/**
+ * 服务进程的预加载脚本，在这里会封装所有更后台相关的事件和方法
+ * 会封装ipcRenderer的功能到window.process.TIBOOK对象上
+ */
 const { ipcRenderer } = require("electron")
 
 /**
@@ -44,18 +48,56 @@ ipcRenderer.invoke("get-env-of-app").then(tibookEnv => {
         }
     })
 
-    window.process.TIBOOK.ServerRequest = function (request, ...args) {
+    /**
+     * 服务端接口请求工具封装
+     * @param {string} request
+     * @param  {...any} args
+     */
+    window.process.TIBOOK.serverRequest = function (request, ...args) {
         RequestMessageSend("server-request-send", ServerRequestCallbackMap, request, ...args)
     }
 
-    window.process.TIBOOK.LocalOperation = function (request, ...args) {
+    /**
+     * 本地数据操作工具封装
+     * @param {string} request
+     * @param  {...any} args
+     */
+    window.process.TIBOOK.localOperation = function (request, ...args) {
         RequestMessageSend("local-operation-send", LocalOperationCallbackMap, request, ...args)
     }
 
-    window.process.TIBOOK.SocketCommunicate = function (request, ...args) {
+    /**
+     * socket通讯工具封装
+     * @param {string} request
+     * @param  {...any} args
+     */
+    window.process.TIBOOK.socketCommunicate = function (request, ...args) {
         RequestMessageSend("socket-communicate-send", SocketCommunicateCallbackMap, request, ...args)
     }
 
+    /**
+     * 对ipcRenderer进行一个小封装
+     * @param {string} event
+     * @param {Function} callback
+     */
+    window.process.TIBOOK.onSocket = function (event, callback) {
+        ipcRenderer.send("render-listener-socket-event", tibookEnv.CURRENT_SERVICE_PROCESS_CONFIG.MARK, event)
+        ipcRenderer.on(event, (_, ...args) => {
+            callback(...args)
+        })
+    }
+
+    window.process.TIBOOK.send = function (event, ...args) {
+        ipcRenderer.send(event, ...args)
+    }
+
+    /**
+     * 对工具的相同部分进行封装
+     * @param {string} SendEvent
+     * @param {Function} requestCallbackMap
+     * @param {string} request
+     * @param  {...any} args
+     */
     function RequestMessageSend(SendEvent, requestCallbackMap, request, ...args) {
         /**
          * 如果数组最后一个参数是函数则把它视为请求接口后的回调函数

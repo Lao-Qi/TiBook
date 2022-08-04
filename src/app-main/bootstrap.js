@@ -169,6 +169,17 @@ async function startLocalOperationTools() {
  * 套接字通讯工具
  */
 async function startSocketCommunication() {
+    /**
+     * 有绑定socket事件的渲染进程标记列表
+     *
+     * 当有渲染进程使用预加载脚本中的onSockt来绑定事件的时候，那个进程的标记就会添加到对应的事件中，再触发那个事件的时候会使用对应的进程实对象进行发送
+     *
+     * {
+     *  event: [RenderMark, RenderMark]
+     * }
+     */
+    const RenderWithBoundSocketEvents = {}
+
     const SocketProcess = new ForkNodeProcess(join(__dirname, "./tools/SocketCommunicate.js"), "SocketCommunicate")
 
     ipcMain.on("socket-communicate-send", (_, renderProcessMark, request, ...args) => {
@@ -179,6 +190,11 @@ async function startSocketCommunication() {
         })
     })
 
+    ipcMain.on("render-listener-socket-event", (_, RenderMark, event) => {
+        RenderWithBoundSocketEvents[event] ??= []
+        RenderWithBoundSocketEvents[event].push(RenderMark)
+    })
+
     SocketProcess.onmessage(msg => {
         // 消息的类型为服务端请求
         if (msg.type === "request") {
@@ -187,8 +203,13 @@ async function startSocketCommunication() {
         } else {
             // 消息的类型为服务端或socket主动触发事件后的参数
             const { event, state, content } = msg
-            // 发送给所有有在监听socket状态的地方
-            ipcMain.emit(event, content, state)
+            // 有监听此事件的渲染进程 Listener This Event Renderer Process s Mark
+            const LTERPSM = RenderWithBoundSocketEvents[event]
+            if (LTERPSM) {
+                for (let i = 0; i < LTERPSM.length; i++) {
+                    ProcessAllMap[LTERPSM[i]]?.send(event, content, state)
+                }
+            }
         }
     })
 
