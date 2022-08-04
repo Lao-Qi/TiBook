@@ -51,9 +51,7 @@ pnpm run build
 
 这个文件的内部信息会被在软件打包后在``dist``目录转换成一个``package.json``，应用于``electron应用程序``的打包
 
-### 计划
-- 修改为单窗口应用
-- 添加多线程处理
+### [笔记](https://github.com/Lao-Qi/TiBook/blob/master/TAKE_DOWN.md)
 
 ## 开源协议
 
