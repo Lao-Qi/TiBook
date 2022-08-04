@@ -20,6 +20,11 @@ const socket = io("ws://127.0.0.1:6001", {
     autoConnect: true
 })
 
+/**
+ * 用存储socket还没连接上就发送过来的要求
+ * 这些存储起来的要求会在socket触发connect事件后执行
+ */
+const SendMethods = []
 const requestMethodAllMap = {
     /**
      * 切换房间的方法(用户切换聊天窗)
@@ -74,16 +79,14 @@ function listenerMethodReturns(event, method) {
     })
 }
 
-process.on("message", ({ request, args = [], renderProcessMark }) => {
-    if (!requestMethodAllMap[request]) {
-        throw Error(`请求的方法不存在：{${request}}`)
-    }
+function runSendRequest({ request, args, renderProcessMark }) {
     requestMethodAllMap[request](...args)
         .then(result => {
             process.send({
                 type: "request",
                 request,
                 state: 0,
+                renderProcessMark,
                 content: result
             })
         })
@@ -92,9 +95,20 @@ process.on("message", ({ request, args = [], renderProcessMark }) => {
                 type: "request",
                 request,
                 state: 1,
+                renderProcessMark,
                 content: result
             })
         })
+}
+
+process.on("message", msg => {
+    if (!socket.connected) {
+        SendMethods.push(msg)
+    } else if (!requestMethodAllMap[msg.request]) {
+        throw Error(`请求的方法不存在：{${msg.request}}`)
+    } else {
+        runSendRequest(msg)
+    }
 })
 
 socket.on("connect", () => {
@@ -104,6 +118,10 @@ socket.on("connect", () => {
         state: 0,
         content: ""
     })
+
+    for (let i = 0; i < SendMethods.length; i++) {
+        runSendRequest(SendMethods[i])
+    }
 })
 
 /**

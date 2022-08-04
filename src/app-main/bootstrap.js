@@ -187,6 +187,7 @@ async function startSocketCommunication() {
         } else {
             // 消息的类型为服务端或socket主动触发事件后的参数
             const { event, state, content } = msg
+            // 发送给所有有在监听socket状态的地方
             ipcMain.emit(event, content, state)
         }
     })
