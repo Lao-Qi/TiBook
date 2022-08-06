@@ -7,13 +7,17 @@
  * 这里接收renderProcessMark(渲染进程的标注)是为了判断是那个进程要执行的操作
  */
 const { USER_CHATLIST, USER_MESSAGE } = require("../lib/LocalDatabase/index")
-process.on("message", ({ request, args, renderProcessMark }) => {
+
+/**
+ * onLoadMsg传递一个回调函数，用来监听发送给该工具的消息
+ */
+process.onLoadMsg(({ request, args, renderProcessMark }) => {
     if (!LocalOperationMethodAllMap[request]) {
         throw Error(`本地操作函数不存在: (${request})`)
     }
     LocalOperationMethodAllMap[request](...args)
         .then(result => {
-            process.send({
+            process.loadSend({
                 result,
                 request,
                 state: 0,
@@ -21,7 +25,7 @@ process.on("message", ({ request, args, renderProcessMark }) => {
             })
         })
         .catch(result => {
-            process.send({
+            process.loadSend({
                 result,
                 request,
                 state: 1,

@@ -8,6 +8,9 @@
 const { fork } = require("child_process")
 const { join } = require("path")
 
+let onMsgCB = null
+const preloadMsgCBS = {}
+
 /**
  * 只能运行原生代码的进程
  */
@@ -16,11 +19,13 @@ class ForkNodeProcess {
      * @param {String} URL 进程入口文件
      * @param {String} mark 进程标记
      */
-    #subprocess
+    #child
     pid
+    mark
+    type
 
     constructor(URL, mark) {
-        this.#subprocess = fork(URL, {
+        const child = fork(join(__dirname, "./preload.js"), {
             cwd: join(URL, "../"),
             env: {
                 ...process.env,
@@ -28,13 +33,27 @@ class ForkNodeProcess {
             }
         })
 
-        this.pid = this.#subprocess.pid
+        child.send({ type: "load", URL })
+
+        child.on("message", msg => {
+            switch (msg.env) {
+                case "preload":
+                    preloadMsgCBS[msg.type] && preloadMsgCBS[msg.type](msg.content)
+                    break
+                case "load":
+                    onMsgCB ?? onMsgCB(...msg.content)
+                    break
+            }
+        })
+
+        this.pid = child.pid
         this.mark = mark
-        this.type = "Node"
+        this.type = "Node Tool"
+        this.#child = child
     }
 
     kill() {
-        this.#subprocess.kill()
+        this.#child.kill()
     }
 
     /**
@@ -42,11 +61,27 @@ class ForkNodeProcess {
      * @param {(message: any) => void} onMessageCB
      */
     onmessage(onMessageCB) {
-        this.#subprocess.on("message", onMessageCB)
+        onMsgCB = onMessageCB
     }
 
     send(message) {
-        this.#subprocess.send(message)
+        this.#child.send({
+            type: "send-load",
+            content: message
+        })
+    }
+
+    /**
+     * 获取进程的使用信息
+     * @returns {Promise<any>}
+     */
+    GetProcessMetric() {
+        return new Promise(res => {
+            preloadMsgCBS["process_metric"] = content => {
+                res(...content)
+            }
+            this.#child.send({ type: "use_info" })
+        })
     }
 }
 

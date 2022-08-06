@@ -83,7 +83,7 @@ function listenerMethodReturns(event, method) {
 function runSendRequest({ request, args, renderProcessMark }) {
     requestMethodAllMap[request](...args)
         .then(result => {
-            process.send({
+            process.loadSend({
                 type: "request",
                 request,
                 state: 0,
@@ -92,7 +92,7 @@ function runSendRequest({ request, args, renderProcessMark }) {
             })
         })
         .catch(result => {
-            process.send({
+            process.loadSend({
                 type: "request",
                 request,
                 state: 1,
@@ -102,7 +102,7 @@ function runSendRequest({ request, args, renderProcessMark }) {
         })
 }
 
-process.on("message", msg => {
+process.onLoadMsg(msg => {
     if (!socket.connected) {
         SendMethods.push(msg)
     } else if (!requestMethodAllMap[msg.request]) {
@@ -113,7 +113,7 @@ process.on("message", msg => {
 })
 
 socket.on("connect", () => {
-    process.send({
+    process.loadSend({
         type: "proactive",
         event: "socket-connect",
         state: 0,
@@ -129,7 +129,7 @@ socket.on("connect", () => {
  * 接收服务端发送过来的消息，包括用户发送出去的和其他用户发送过来的
  */
 socket.on("receive-message", msg => {
-    process.send({
+    process.loadSend({
         type: "proactive",
         event: "socket-receive-message",
         state: 0,
@@ -138,7 +138,7 @@ socket.on("receive-message", msg => {
 })
 
 socket.on("connect_error", err => {
-    process.send({
+    process.loadSend({
         type: "proactive",
         event: "socket-connect_error",
         state: 1,
@@ -147,7 +147,7 @@ socket.on("connect_error", err => {
 })
 
 socket.on("disconnect", reason => {
-    process.send({
+    process.loadSend({
         type: "proactive",
         event: "socket-disconnect",
         state: 0,

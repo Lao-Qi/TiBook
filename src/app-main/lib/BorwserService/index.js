@@ -46,11 +46,6 @@ class BrowserServiceProcess {
             URL
         }
 
-        // this.kernel.webContents.send("get-process-config-info", {
-        //     MARK: mark,
-        //     URL
-        // })
-
         // 如果ProcessType是window的话，加载是需要带上协议类型的，如果加载的是default那么就不需要协议，只需要地址就可以
         this.kernel.loadURL(URL)
         this.webContents = this.kernel.webContents
@@ -116,18 +111,18 @@ const initConfig = (ProcessType, winConfig) => {
  */
 function updateBrowserServiceTemplateHTMLFile(templateHtmlFilePath, URL, mark) {
     const newTemplateHTMLText = `
-        <!DOCTYPE html>
-        <html lang="zh-cn">
-        <head>
-            <meta charset="UTF-8">
-            <meta http-equiv="X-UA-Compatible" content="IE=edge">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>${mark}</title>
-            <script src="file:///${URL}"></script>
-        </head>
-        <body>
-        </body>
-        </html>
+    <!DOCTYPE html>
+    <html lang="zh-cn">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${mark}</title>
+        <script src="file:///${URL}"></script>
+    </head>
+    <body>
+    </body>
+    </html>
     `
     writeFileSync(templateHtmlFilePath, newTemplateHTMLText)
 }

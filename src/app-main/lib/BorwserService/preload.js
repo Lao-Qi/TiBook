@@ -82,13 +82,26 @@ ipcRenderer.invoke("get-env-of-app").then(tibookEnv => {
      */
     window.process.TIBOOK.onSocket = function (event, callback) {
         ipcRenderer.send("render-listener-socket-event", tibookEnv.CURRENT_SERVICE_PROCESS_CONFIG.MARK, event)
-        ipcRenderer.on(event, (_, ...args) => {
-            callback(...args)
-        })
+        ipcRenderer.on(event, (_, ...args) => callback(...args))
     }
 
     window.process.TIBOOK.send = function (event, ...args) {
         ipcRenderer.send(event, ...args)
+    }
+
+    /**
+     * ipcRenderer的进一步封装，如果参数的最后一位是个函数类型的数据，则将它视作本次invoke结果的回调函数
+     * @param {string} event
+     * @param  {...any} args
+     * @returns
+     */
+    window.process.TIBOOK.invoke = async function (event, ...args) {
+        if (typeof args[args.length - 1] === "function") {
+            const cb = args.shift()
+            cb(await ipcRenderer.invoke(event, args))
+        } else {
+            return await ipcRenderer.invoke(event)
+        }
     }
 
     /**

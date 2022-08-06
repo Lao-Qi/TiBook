@@ -30,13 +30,13 @@ const axios = create({
  *
  * 这里接收renderProcessMark(渲染进程的标注)是为了判断是那个进程要执行的操作
  */
-process.on("message", ({ request, args = [], renderProcessMark }) => {
+process.onLoadMsg(({ request, args = [], renderProcessMark }) => {
     if (!ServerRequestMethodAllMap[request]) {
         throw Error(`接口请求函数不存在: (${request})`)
     }
     ServerRequestMethodAllMap[request](...args)
         .then(result => {
-            process.send({
+            process.loadSend({
                 result,
                 request,
                 state: 0,
@@ -44,7 +44,7 @@ process.on("message", ({ request, args = [], renderProcessMark }) => {
             })
         })
         .catch(result => {
-            process.send({
+            process.loadSend({
                 result,
                 request,
                 state: 1,
