@@ -15,14 +15,13 @@
         "electron:alone": "npx cross-env IS_DEV=true electron ./app-main/main.js"
     },
     "dependencies": {
-        "electron-store": "^8.0.1",
-        "nedb": "^1.8.0",
+        "@icon-park/vue-next": "^1.4.2",
         "axios": "^0.27.2",
+        "element-plus": "^2.2.0",
+        "moment": "^2.29.3",
+        "nedb": "^1.8.0",
         "socket.io-client": "^4.5.0",
         "vue": "^3.2.25",
-        "vue-router": "^4.0.13",
-        "@icon-park/vue-next": "^1.4.2",
-        "element-plus": "^2.2.0",
-        "moment": "^2.29.3"
+        "vue-router": "^4.0.13"
     }
 }
