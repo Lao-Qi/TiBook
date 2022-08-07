@@ -4,9 +4,9 @@ export const Router = createRouter({
     history: createWebHashHistory(),
     routes: [
         {
-            path: "/login", // 软件登录页
-            name: "login",
-            component: () => import("../view/login.vue")
+            path: "/account-help", // 软件登录页
+            name: "account-help",
+            component: () => import("../view/accountHelp.vue")
         },
         {
             path: "/main", // 软件主页

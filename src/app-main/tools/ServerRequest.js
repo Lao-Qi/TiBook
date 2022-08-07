@@ -230,7 +230,7 @@ const ServerRequestMethodAllMap = {
         return new Promise((res, rej) => {
             axios
                 .post("/api/verifyToken", {
-                    token: process.env["TIBOOK_USER_CONFIG"]["token"]
+                    token: process["TIBOOK"]["USER_CONFIG"]["token"]
                 })
                 .then(result => {
                     res(result.data)

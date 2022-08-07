@@ -20,7 +20,7 @@ const DBFilesName = {
 }
 
 for (const [key, _] of Object.entries(DBFilesName)) {
-    const filePath = join(process.env["TIBOOK_APP_LOCATION"], `${key}.db`)
+    const filePath = join(process["TIBOOK"]["APP_LOCATION"], `${key}.db`)
 
     /**
      * 验证文件是否存在

@@ -4,8 +4,11 @@
  *
  * 这个进程会被Node的child_process的fork方法进行创建
  * 创建好了之后会通过ipc进行发送要加载的文件，这边会使用require进行加载
+ *
+ * 这个文件运行于fork出来的子进程
  */
 
+process["TIBOOK"] = JSON.parse(process.env["TIBOOK"])
 /**
  * msg.URL为要加载的资源入口文件，是一个绝对地址
  *

@@ -8,7 +8,6 @@
 const { fork } = require("child_process")
 const { join } = require("path")
 
-let onMsgCB = null
 const preloadMsgCBS = {}
 
 /**
@@ -20,6 +19,7 @@ class ForkNodeProcess {
      * @param {String} mark 进程标记
      */
     #child
+    #onMessageCB
     pid
     mark
     type
@@ -29,7 +29,7 @@ class ForkNodeProcess {
             cwd: join(URL, "../"),
             env: {
                 ...process.env,
-                ...parseProcessAPPENV()
+                TIBOOK: JSON.stringify(process.TIBOOK)
             }
         })
 
@@ -41,7 +41,7 @@ class ForkNodeProcess {
                     preloadMsgCBS[msg.type] && preloadMsgCBS[msg.type](msg.content)
                     break
                 case "load":
-                    onMsgCB ?? onMsgCB(...msg.content)
+                    this.#onMessageCB && this.#onMessageCB(...msg.content)
                     break
             }
         })
@@ -60,8 +60,8 @@ class ForkNodeProcess {
      * 当子进程触发消息事件调用回调
      * @param {(message: any) => void} onMessageCB
      */
-    onmessage(onMessageCB) {
-        onMsgCB = onMessageCB
+    onmessage(onMsgCB) {
+        this.#onMessageCB = onMsgCB
     }
 
     send(message) {
@@ -83,14 +83,6 @@ class ForkNodeProcess {
             this.#child.send({ type: "use_info" })
         })
     }
-}
-
-function parseProcessAPPENV() {
-    const obj = {}
-    for (const [key, value] of Object.entries(process.TIBOOK)) {
-        obj[`TIBOOK_${key}`] = value.constructor === Object ? JSON.stringify(value) : value
-    }
-    return obj
 }
 
 module.exports = { ForkNodeProcess }

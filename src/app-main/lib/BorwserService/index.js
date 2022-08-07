@@ -1,14 +1,26 @@
 "use strict"
-const { BrowserWindow, ipcMain } = require("electron")
+const { BrowserWindow } = require("electron")
 const { writeFileSync } = require("fs")
 const { join } = require("path")
+
+/**
+ * 以Mark作为索引来存储服务进程的集合
+ *
+ * {
+ *  Mark: {
+ *      URL: "链接",
+ *      process: BrowserWindow实例对象
+ *  }
+ * }
+ */
+const MarkType_ServerProcessMap = {}
 
 /**
  * 服务进程
  *
  * 其底层原理是调用了electron的BrowserWindow开启一个隐藏的渲染进程
  */
-class BrowserServiceProcess {
+class ServiceProcess {
     kernel
     webContents
 
@@ -20,62 +32,60 @@ class BrowserServiceProcess {
      */
     constructor(URL, mark, ProcessType = "default", winConfig) {
         winConfig = initConfig(ProcessType, winConfig)
-        winConfig["title"] = `mark: ${mark}`
+        this.loadURL = URL
 
         /**
-         * 创建一个BrowserWindow，相当于创建了一个新的进程
+         * 创建一个BrowserWindow，相当于创建了一个新的服务进程
          */
         this.kernel = new BrowserWindow({ ...winConfig })
 
         if (ProcessType === "window") {
             this.kernel.once("ready-to-show", () => this.kernel.show())
         } else {
-            const templateHtmlFilePath = join(__dirname, "./BrowserService-template.html")
+            const templateHtmlFilePath = join(__dirname, "./service-process-template.html")
             /**
              * 更新进程要加载的模板内容
              */
-            updateBrowserServiceTemplateHTMLFile(templateHtmlFilePath, URL, mark)
-            URL = `file:///${templateHtmlFilePath}`
-        }
-
-        /**
-         * 临时加上进程的信息，这些信息会在预加载脚本中被调用并加载到渲染进程
-         */
-        process.TIBOOK["CURRENT_SERVICE_PROCESS_CONFIG"] = {
-            MARK: mark,
-            URL
+            updateServiceProcessTemplateHTMLFile(templateHtmlFilePath, URL, mark)
+            this.loadURL = `file:///${templateHtmlFilePath}`
         }
 
         // 如果ProcessType是window的话，加载是需要带上协议类型的，如果加载的是default那么就不需要协议，只需要地址就可以
-        this.kernel.loadURL(URL)
+        // 通过资源地址后面追加参数，一种主进程在渲染进程开始加载的时候就可转递参的一种方式，且是同步的
+        this.kernel.loadURL(`${this.loadURL}?Mark=${mark}`)
         this.webContents = this.kernel.webContents
+
+        MarkType_ServerProcessMap[mark] = {
+            URL,
+            process: this.kernel
+        }
     }
 
-    /**
-     * 关闭这个进程
-     */
+    // 关闭这个进程
     close() {
         this.kernel.close()
     }
 
-    /**
-     * 打开开发者工具
-     */
+    // 打开开发者工具
     openDevTools() {
-        this.kernel.webContents.openDevTools({
-            mode: "detach"
-        })
+        this.webContents.openDevTools({ mode: "detach" })
     }
 
-    /**
-     * 重启服务进程
-     */
+    // 重启服务进程
     reload() {
-        this.kernel.webContents.reloadIgnoringCache()
+        this.webContents.reloadIgnoringCache()
     }
 
     send() {
-        this.kernel.webContents.send(...arguments)
+        this.webContents.send(...arguments)
+    }
+
+    /**
+     * @param {string} mark
+     * @returns {BrowserWindow}
+     */
+    static GetServiceProcess(mark) {
+        return MarkType_ServerProcessMap[mark].process
     }
 }
 
@@ -109,7 +119,7 @@ const initConfig = (ProcessType, winConfig) => {
  * @param {String} templateHtmlFilePath 进程的html模板文件路径
  * @param {String} URL 要被进程加载的入口文件路径
  */
-function updateBrowserServiceTemplateHTMLFile(templateHtmlFilePath, URL, mark) {
+function updateServiceProcessTemplateHTMLFile(templateHtmlFilePath, URL, mark) {
     const newTemplateHTMLText = `
     <!DOCTYPE html>
     <html lang="zh-cn">
@@ -118,7 +128,7 @@ function updateBrowserServiceTemplateHTMLFile(templateHtmlFilePath, URL, mark) {
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${mark}</title>
-        <script src="file:///${URL}"></script>
+        <script src="file:///${URL}" id="service_window_load_file"></script>
     </head>
     <body>
     </body>
@@ -127,4 +137,4 @@ function updateBrowserServiceTemplateHTMLFile(templateHtmlFilePath, URL, mark) {
     writeFileSync(templateHtmlFilePath, newTemplateHTMLText)
 }
 
-module.exports = { BrowserServiceProcess }
+module.exports = { ServiceProcess }

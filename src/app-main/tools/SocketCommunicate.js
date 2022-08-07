@@ -10,7 +10,7 @@
  * 3秒，如果用户网络差的话可能永远也用不了这个软件
  */
 const { io } = require("socket.io-client")
-const USER_CONFIG = JSON.parse(process.env["TIBOOK_USER_CONFIG"])
+const USER_CONFIG = process["TIBOOK"]["USER_CONFIG"]
 
 const socket = io("ws://127.0.0.1:6001", {
     auth: {
