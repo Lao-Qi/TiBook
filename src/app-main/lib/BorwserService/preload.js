@@ -87,7 +87,7 @@ window.TIBOOK.send = function (event, ...args) {
  * ipcRenderer的进一步封装，如果参数的最后一位是个函数类型的数据，则将它视作本次invoke结果的回调函数
  * @param {string} event
  * @param  {...any} args
- * @returns
+ * @returns {Promise<any>}
  */
 window.TIBOOK.invoke = async function (event, ...args) {
     if (typeof args[args.length - 1] === "function") {
@@ -96,6 +96,13 @@ window.TIBOOK.invoke = async function (event, ...args) {
     } else {
         return await ipcRenderer.invoke(event)
     }
+}
+
+window.TIBOOK.on = function (event, callback) {
+    ipcRenderer.on(event, callback)
+}
+window.TIBOOK.once = function (event, callback) {
+    ipcRenderer.once(event, callback)
 }
 
 /**

@@ -7,13 +7,10 @@ const { join } = require("path")
  * 以Mark作为索引来存储服务进程的集合
  *
  * {
- *  Mark: {
- *      URL: "链接",
- *      process: BrowserWindow实例对象
- *  }
+ *  Mark: process: ServiceProcess实例对象
  * }
  */
-const MarkType_ServerProcessMap = {}
+const AllServiceProcess = {}
 
 /**
  * 服务进程
@@ -54,24 +51,25 @@ class ServiceProcess {
         // 通过资源地址后面追加参数，一种主进程在渲染进程开始加载的时候就可转递参的一种方式，且是同步的
         this.kernel.loadURL(`${this.loadURL}?Mark=${mark}`)
         this.webContents = this.kernel.webContents
-
-        MarkType_ServerProcessMap[mark] = {
-            URL,
-            process: this.kernel
-        }
     }
 
-    // 关闭这个进程
+    /**
+     * 关闭这个进程
+     */
     close() {
         this.kernel.close()
     }
 
-    // 打开开发者工具
+    /**
+     * 打开开发者工具
+     */
     openDevTools() {
         this.webContents.openDevTools({ mode: "detach" })
     }
 
-    // 重启服务进程
+    /**
+     * 重启服务进程
+     */
     reload() {
         this.webContents.reloadIgnoringCache()
     }
@@ -86,6 +84,15 @@ class ServiceProcess {
      */
     static GetServiceProcess(mark) {
         return MarkType_ServerProcessMap[mark].process
+    }
+
+    /**
+     * 关闭所有的服务进程，包括主窗口
+     */
+    static CloseAllServiceProcess() {
+        for (const [_, value] of Object.entries(MarkType_ServerProcessMap)) {
+            value.process.close()
+        }
     }
 }
 
@@ -137,4 +144,15 @@ function updateServiceProcessTemplateHTMLFile(templateHtmlFilePath, URL, mark) {
     writeFileSync(templateHtmlFilePath, newTemplateHTMLText)
 }
 
-module.exports = { ServiceProcess }
+function CreateServiceProcess(URL, mark, ProcessType, winConfig) {
+    AllServiceProcess[mark] = new ServiceProcess(URL, mark, ProcessType, winConfig)
+    return AllServiceProcess[mark]
+}
+
+function CloseAllServiceProcess() {
+    for (const [_, ServiceProcess] of Object.entries(AllServiceProcess)) {
+        ServiceProcess.close()
+    }
+}
+
+module.exports = { CreateServiceProcess, CloseAllServiceProcess, AllServiceProcess }

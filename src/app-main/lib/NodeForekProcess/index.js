@@ -8,18 +8,26 @@
 const { fork } = require("child_process")
 const { join } = require("path")
 
-const preloadMsgCBS = {}
+/**
+ * 存储所有开启的工具进程
+ * {
+ *  mark: ToolProcess
+ * }
+ */
+const AllToolProcess = {}
 
 /**
- * 只能运行原生代码的进程
+ * 提供一个Node环境给工具使用的进程
  */
-class ForkNodeProcess {
+class ToolProcess {
     /**
      * @param {String} URL 进程入口文件
      * @param {String} mark 进程标记
      */
-    #child
+
     #onMessageCB
+    #child
+    #preloadMsgCBS
     pid
     mark
     type
@@ -38,7 +46,7 @@ class ForkNodeProcess {
         child.on("message", msg => {
             switch (msg.env) {
                 case "preload":
-                    preloadMsgCBS[msg.type] && preloadMsgCBS[msg.type](msg.content)
+                    this.#preloadMsgCBS[msg.type] && this.#preloadMsgCBS[msg.type](msg.content)
                     break
                 case "load":
                     this.#onMessageCB && this.#onMessageCB(...msg.content)
@@ -50,6 +58,8 @@ class ForkNodeProcess {
         this.mark = mark
         this.type = "Node Tool"
         this.#child = child
+
+        AllToolProcess[mark] = { URL, process: child }
     }
 
     kill() {
@@ -77,7 +87,7 @@ class ForkNodeProcess {
      */
     GetProcessMetric() {
         return new Promise(res => {
-            preloadMsgCBS["process_metric"] = content => {
+            this.#preloadMsgCBS["process_metric"] = content => {
                 res(...content)
             }
             this.#child.send({ type: "use_info" })
@@ -85,4 +95,34 @@ class ForkNodeProcess {
     }
 }
 
-module.exports = { ForkNodeProcess }
+/**
+ * 创建一个工具进程
+ * @param {string} URL
+ * @param {string} mark
+ * @returns {ToolProcess}
+ */
+function CreateToolProcess(URL, mark) {
+    AllToolProcess[mark] = new ToolProcess(URL, mark)
+    return AllToolProcess[mark]
+}
+
+/**
+ * 关闭所有的工具进程
+ */
+function CloseAllToolProcess() {
+    for (const [_, ToolProcess] of Object.entries(AllToolProcess)) {
+        ToolProcess.kill()
+    }
+}
+
+/**
+ * 获取所有工具进程的占用数据
+ */
+async function GetAllToolProcessMetric() {
+    const obj = {}
+    for (const [mark, vlaue] of Object.entries(AllToolProcess)) {
+        obj[mark] = await vlaue.GetProcessMetric()
+    }
+}
+
+module.exports = { CreateToolProcess, CloseAllToolProcess, GetAllToolProcessMetric }

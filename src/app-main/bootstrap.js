@@ -13,8 +13,8 @@
 
 const { app, ipcMain } = require("electron")
 const { join } = require("path")
-const { ServiceProcess } = require("./lib/BorwserService/index")
-const { ForkNodeProcess } = require("./lib/NodeForekProcess/index")
+const { CreateServiceProcess, AllServiceProcess, CloseAllServiceProcess } = require("./lib/BorwserService/index")
+const { CreateToolProcess, GetAllToolProcessMetric, CloseAllToolProcess } = require("./lib/NodeForekProcess/index")
 
 /**
  * 服务进程会被所有的服务入口和窗口所使用，这俩个是属于主进程中主动创建的，分布于多个方法中，因此声明在了顶部
@@ -39,15 +39,17 @@ async function startBasicEventBinding() {
      * app.getAppMetrics获取到的进程包含了主进程，渲染用的CPU，内置的工具，所有渲染进程(包括ServerProcess进程)
      */
     ipcMain.handle("get-app-metrics", async () => app.getAppMetrics())
+    // 返回全部工具进程的CPU和内存使用信息
+    ipcMain.handle("get-tools-process-metric", async () => GetAllToolProcessMetric())
 }
 
 /**
- * 把软件的窗口也用服务进程来启动，但是是在主进程中单独的使用BrowserServiceProcess这个类来启动
+ * 把软件的窗口也用服务进程来启动，但是是在主进程中单独的使用ServiceProcess这个类来启动
  *
  * 这样可以把主窗口和其他的服务隔离开来，又可以顺带把主窗口的数据携带进进程集合表中
  */
 async function startMainWinService() {
-    const mainWinService = new ServiceProcess(process.TIBOOK["MAIN_PAGR_URL"], "appMainWin", "window", {
+    const mainWinService = CreateServiceProcess(process.TIBOOK["MAIN_PAGR_URL"], "appMainWin", "window", {
         width: 800,
         height: 600,
         minWidth: 600,
@@ -56,43 +58,38 @@ async function startMainWinService() {
         useContentSize: true
     })
 
+    mainWinService.kernel.on("unmaximize", () => mainWinService.send("window-unmaximize"))
+    mainWinService.kernel.on("maximize", () => mainWinService.send("window-maximize"))
+    mainWinService.kernel.on("focus", () => mainWinService.send("window-focus"))
+    mainWinService.kernel.on("blur", () => mainWinService.send("window-blur"))
+    ipcMain.on("window-minimize", () => mainWinService.kernel.minimize())
+    ipcMain.on("window-close", () => mainWinService.kernel.close())
+    ipcMain.on("window-maximize", () => (mainWinService.kernel.isMaximized() ? mainWinService.kernel.unmaximize() : mainWinService.kernel.maximize()))
+
     mainWinService.openDevTools()
+
+    mainWinService.kernel.once("close", () => {
+        CloseAllServiceProcess()
+        CloseAllToolProcess()
+    })
 }
 
 // 启动进程集合和进程操作集合操作服务
 async function startServiceProcessManage() {
     // 添加服务进程事件
-    ipcMain.on("create-service-process", (_, filePath, mark) => new ServiceProcess(filePath, mark))
+    ipcMain.on("create-service-process", (_, filePath, mark) => CreateServiceProcess(filePath, mark))
 
     // 添加服务窗口进程事件
-    ipcMain.on("create-service-window", (_, filePath, mark, winConfig) => new ServiceProcess(filePath, mark, "window", winConfig))
+    ipcMain.on("create-service-window", (_, filePath, mark, winConfig) => CreateServiceProcess(filePath, mark, "window", winConfig))
 }
 
 // 启动工具进程，顾名思义就是只用来运行工具的进程
 async function startToolsProcess() {
-    const ToolsProcess = {}
+    startServerRequireTools()
+    startLocalOperationTools()
 
-    const ServerRequestProcess = startServerRequireTools() // 服务端接口请求工具
-    ToolsProcess[ServerRequestProcess[1]] = ServerRequestProcess[0]
-
-    const LocalOperationProcess = startLocalOperationTools() // 本地数据操作工具
-    ToolsProcess[LocalOperationProcess[1]] = LocalOperationProcess[0]
-
-    const SocketProcess = startSocketCommunication() // 套接字通讯工具
-    ToolsProcess[SocketProcess[1]] = SocketProcess[0]
-
-    /**
-     * 返回全部工具进程的CPU和内存使用信息
-     */
-    ipcMain.handle("get-tools-process-metric", async () => {
-        const toolsProcessMetric = {}
-        for (const [mark, process] of Object.entries(ToolsProcess)) {
-            // src\app-main\lib\NodeForekProcess\index.js GetProcessMetric
-            toolsProcessMetric[mark] = await process.GetProcessMetric()
-        }
-
-        return toolsProcessMetric
-    })
+    // 按需加载工具，再账户帮助页不需要socket通讯
+    ipcMain.on("start-socket-communication", () => startSocketCommunication())
 }
 
 // 服务端接口请求工具
@@ -100,7 +97,7 @@ function startServerRequireTools() {
     /**
      * fork一个进程来运行工具文件
      */
-    const ServerRequestProcess = new ForkNodeProcess(join(__dirname, "./tools/ServerRequest.js"), "ServerRequest")
+    const ServerRequestProcess = CreateToolProcess(join(__dirname, "./tools/ServerRequest.js"), "ServerRequest")
 
     ipcMain.on("server-request-send", (_, renderProcessMark, request, ...args) => {
         ServerRequestProcess.send({
@@ -111,30 +108,22 @@ function startServerRequireTools() {
     })
 
     ServerRequestProcess.onmessage(({ result, request, state, renderProcessMark }) => {
-        ServiceProcess.GetServiceProcess(renderProcessMark).webContents.send("server-request-return", request, result, state)
+        AllServiceProcess[renderProcessMark].send("server-request-return", request, result, state)
     })
-
-    return [ServerRequestProcess, "ServerRequest"]
 }
 
 // 本地数据操作工具
 function startLocalOperationTools() {
-    const LocalOperationProcess = new ForkNodeProcess(join(__dirname, "./tools/LocalOperation.js"), "LocalOperation")
+    const LocalOperationProcess = CreateToolProcess(join(__dirname, "./tools/LocalOperation.js"), "LocalOperation")
 
     ipcMain.on("local-operation-send", (_, renderProcessMark, request, ...args) => {
-        LocalOperationProcess.send({
-            request, // 请求的方法名
-            args, // 传递的参数
-            renderProcessMark // 要发送该请求的渲染进程标记
-        })
+        LocalOperationProcess.send({ request, args, renderProcessMark })
     })
 
     LocalOperationProcess.onmessage(({ result, request, state, renderProcessMark }) => {
         // 通过渲染进程标记发送数据
-        ServiceProcess.GetServiceProcess(renderProcessMark).webContents.send("local-operation-return", request, result, state)
+        AllServiceProcess[renderProcessMark].send("local-operation-return", request, result, state)
     })
-
-    return [LocalOperationProcess, "LocalOperation"]
 }
 
 // 套接字通讯工具
@@ -149,15 +138,10 @@ function startSocketCommunication() {
      * }
      */
     const RenderWithBoundSocketEvents = {}
-
-    const SocketProcess = new ForkNodeProcess(join(__dirname, "./tools/SocketCommunicate.js"), "SocketCommunicate")
+    const SocketProcess = CreateToolProcess(join(__dirname, "./tools/SocketCommunicate.js"), "SocketCommunicate")
 
     ipcMain.on("socket-communicate-send", (_, renderProcessMark, request, ...args) => {
-        SocketProcess.send({
-            request,
-            args,
-            renderProcessMark
-        })
+        SocketProcess.send({ request, args, renderProcessMark })
     })
 
     ipcMain.on("render-listener-socket-event", (_, RenderMark, event) => {
@@ -169,7 +153,7 @@ function startSocketCommunication() {
         // 消息的类型为服务端请求
         if (msg.type === "request") {
             const { request, result, state, renderProcessMark } = msg
-            ServiceProcess.GetServiceProcess(renderProcessMark).webContents.send("socket-communicate-return", request, result, state)
+            AllServiceProcess[renderProcessMark].send("socket-communicate-return", request, result, state)
         } else {
             // 消息的类型为服务端或socket主动触发事件后的参数
             const { event, state, content } = msg
@@ -177,13 +161,11 @@ function startSocketCommunication() {
             const LTERPSM = RenderWithBoundSocketEvents[event]
             if (LTERPSM) {
                 for (let i = 0; i < LTERPSM.length; i++) {
-                    ServiceProcess.GetServiceProcess(LTERPSM[i]).webContents.send("socket-communicate-return", content, state)
+                    AllServiceProcess[LTERPSM[i]].send("socket-communicate-return", content, state)
                 }
             }
         }
     })
-
-    return [SocketProcess, "SocketCommunicate"]
 }
 
 // 启动服务进程
@@ -192,7 +174,7 @@ async function startServicesProcess() {
      * 所有服务的入口文件也使用BrowserServiceProcess这个类来单独的引用
      * 目的也是隔离
      */
-    const services = new ServiceProcess(join(__dirname, "./services/main.js"), "services")
+    const services = CreateServiceProcess(join(__dirname, "./services/main.js"), "services")
     // services.openDevTools()
     // 触发打开进程可视化服务
     // ProcessAllMap["services"].webContents.send("load-service", "ProcessVisualization")
