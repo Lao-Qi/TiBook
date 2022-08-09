@@ -34,6 +34,7 @@ startServicesProcess() // 服务进程
 async function startBasicEventBinding() {
     // 获取主进程的对软件配置的环境变量
     ipcMain.handle("get-env-of-app", () => JSON.stringify(process["TIBOOK"]))
+    ipcMain.on("update-user-config-file", (_, key, value) => (process["TIBOOK"]["USER_CONFIG"][key] = value))
     /**
      * https://www.electronjs.org/zh/docs/latest/api/app#appgetappmetrics
      * app.getAppMetrics获取到的进程包含了主进程，渲染用的CPU，内置的工具，所有渲染进程(包括ServerProcess进程)

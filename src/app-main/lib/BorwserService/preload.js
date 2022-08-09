@@ -25,19 +25,21 @@ window.TIBOOK = { ...ParseURLParameters() }
  */
 ipcRenderer.invoke("get-env-of-app").then(tibookEnv => {
     tibookEnv = JSON.parse(tibookEnv)
+    const USER_CONFIG = tibookEnv["USER_CONFIG"]
+    delete tibookEnv["USER_CONFIG"]
     /**
      * 配置软件独有的环境变量
      */
-    window.TIBOOK.env = new Proxy(tibookEnv, {
-        get() {
-            return Reflect.get(...arguments)
-        },
-        set(target, key) {
-            if (target[key]) {
-                throw Error("从主进程上获取到的软件环境变量不可更改")
-            } else {
-                return Reflect.set(...arguments)
-            }
+    window.TIBOOK.env = tibookEnv
+    /**
+     * 单独给USER_CONFIG配置代理，当渲染进程发生变化的时候本地文件异步更改
+     */
+    window.TIBOOK.env["USER_CONFIG"] = new Proxy(USER_CONFIG, {
+        get: Reflect.get,
+        set(_, key, value) {
+            const b = Reflect.set(...arguments)
+            b && ipcRenderer.send("update-user-config-file", key, value)
+            return b
         }
     })
 })

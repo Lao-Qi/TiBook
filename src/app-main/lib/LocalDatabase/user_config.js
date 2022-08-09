@@ -4,7 +4,7 @@
  *
  * 因为涉及本地数据操作，所以也放到了这里
  */
-const { readFileSync, accessSync, constants, writeFileSync } = require("fs")
+const { readFileSync, accessSync, constants, writeFile } = require("fs")
 const { join } = require("path")
 
 const user_config_file_path = join(process.TIBOOK["APP_LOCATION"], "./USER_CONFIG.json")
@@ -33,10 +33,13 @@ try {
 process.TIBOOK["USER_CONFIG"] = new Proxy(USER_CONFIG, {
     get: Reflect.get,
     set(target, key, value, receiver) {
-        Reflect.set(target, key, value, receiver)
-        // 异步更新配置文件
-        watchFile(user_config_file_path, JSON.stringify(USER_CONFIG), err => {
-            console.error(err)
-        })
+        const b = Reflect.set(target, key, value, receiver)
+        if (b) {
+            // 异步更新配置文件
+            writeFile(user_config_file_path, JSON.stringify(USER_CONFIG), err => {
+                if (err) console.error(err)
+            })
+        }
+        return b
     }
 })
