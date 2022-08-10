@@ -69,6 +69,27 @@ const LocalOperationMethodAllMap = {
     },
 
     /**
+     * 按需查询聊天记录，节省内存占用
+     * @param {string} account
+     * @param {number} start
+     * @param {number} end
+     * @returns {Promise<[] | string>}
+     */
+    OnDemandFindCorrespondAccountMessage(account, start = 0, amount = 50) {
+        return new Promise((res, rej) => {
+            this.FindCorrespondAccountMessage(account)
+                .then(messageDocs => {
+                    res(messageDocs.slice(start, amount))
+                    // 及时清除这个巨大的内存占用量
+                    messageDocs = null
+                })
+                .catch(err => {
+                    rej(err)
+                })
+        })
+    },
+
+    /**
      * @example 删除某条消息记录
      * @param {String} id
      * @returns {Promise<number | string>}
@@ -94,7 +115,7 @@ const LocalOperationMethodAllMap = {
     GetChatList() {
         return new Promise((res, rej) => {
             USER_CHATLIST.find({}, (err, docs) => {
-                err ? rej(err) : res(docs)
+                err ? rej(err) : res(docs ?? [])
             })
         })
     },
