@@ -1,14 +1,14 @@
 <template>
     <div id="window-controls-container">
-        <div class="window-controls" id="window-closure" @click="() => ipcRenderer.send('window-destroy')"></div>
-        <div class="window-controls" id="window-minimize" @click="() => ipcRenderer.send('window-minimize')"></div>
-        <div class="window-controls" id="window-maximize" @click="() => ipcRenderer.send('window-maximize')"></div>
+        <div class="window-controls" id="window-closure" @click="() => TIBOOK.send('window-close')"></div>
+        <div class="window-controls" id="window-minimize" @click="() => TIBOOK.send('window-minimize')"></div>
+        <div class="window-controls" id="window-maximize" @click="() => TIBOOK.send('window-maximize')"></div>
     </div>
     <p></p>
 </template>
 
 <script setup>
-const { ipcRenderer } = require("electron")
+const TIBOOK = window.TIBOOK
 </script>
 
 <style scoped lang="less">

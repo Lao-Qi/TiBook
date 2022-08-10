@@ -4,24 +4,19 @@
     </div>
     <p></p>
     <div class="window-controls-container">
-        <div class="window-icon window-minimize" @click="() => ipcRenderer.send('window-minimize')"></div>
-        <div class="window-icon" :class="isMaximize ? 'window-unmaximize' : 'window-maximize'" ref="maximizeBtn" @click="() => ipcRenderer.send('window-maximize')"></div>
-        <div class="window-icon window-close" @click="MainWinDestroy"></div>
+        <div class="window-icon window-minimize" @click="() => TIBOOK.send('window-minimize')"></div>
+        <div class="window-icon" :class="isMaximize ? 'window-unmaximize' : 'window-maximize'" ref="maximizeBtn" @click="() => TIBOOK.send('window-maximize')"></div>
+        <div class="window-icon window-close" @click="() => TIBOOK.send('window-close')"></div>
     </div>
 </template>
 
 <script setup>
 import { ref } from "vue"
-const { ipcRenderer } = require("electron")
 
+const TIBOOK = window.TIBOOK
 const isMaximize = ref(false)
-ipcRenderer.on("window-maximize", () => (isMaximize.value = true))
-ipcRenderer.on("window-unmaximize", () => (isMaximize.value = false))
-
-function MainWinDestroy() {
-    ipcRenderer.send("window-destroy")
-    ipcRenderer.send("mainWin-destroy")
-}
+TIBOOK.on("window-maximize", () => (isMaximize.value = true))
+TIBOOK.on("window-unmaximize", () => (isMaximize.value = false))
 </script>
 
 <style scoped lang="less">
