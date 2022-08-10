@@ -4,7 +4,7 @@
  *
  * 因为涉及本地数据操作，所以也放到了这里
  */
-const { readFileSync, accessSync, constants, writeFile } = require("fs")
+const { readFileSync, accessSync, constants, writeFile, writeFileSync } = require("fs")
 const { join } = require("path")
 
 const user_config_file_path = join(process.TIBOOK["APP_LOCATION"], "./USER_CONFIG.json")

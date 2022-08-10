@@ -10,12 +10,12 @@
  * 3秒，如果用户网络差的话可能永远也用不了这个软件
  */
 const { io } = require("socket.io-client")
-const USER_CONFIG = process["TIBOOK"]["USER_CONFIG"]
+const USER_DATA = process["TIBOOK"]["USER_CONFIG"]["user_data"]
 
 const socket = io("ws://127.0.0.1:6001", {
     auth: {
         // E:\工程文件\项目\tibook\src\app-main\lib\LocalDatabase\user_config.js
-        token: USER_CONFIG["token"]
+        token: USER_DATA["token"]
     },
     timeout: 4000,
     autoConnect: true

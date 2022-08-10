@@ -125,4 +125,4 @@ async function GetAllToolProcessMetric() {
     }
 }
 
-module.exports = { CreateToolProcess, CloseAllToolProcess, GetAllToolProcessMetric }
+module.exports = { CreateToolProcess, CloseAllToolProcess, GetAllToolProcessMetric, AllToolProcess }
