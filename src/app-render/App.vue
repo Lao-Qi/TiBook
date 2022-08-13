@@ -8,17 +8,24 @@
 </template>
 
 <script setup>
+/**
+ * 页面展示逻辑
+ *
+ * 窗口控件(最小化，最大化，关闭) -> 账号帮助页 -> 登录用户 -> 主页
+ *
+ * 主页和登录注册页分别是俩个路由，App进行判断后跳转对应路由
+ */
 import { useRouter } from "vue-router"
-import { defineAsyncComponent } from "vue"
-const { type } = require("os")
-const { ipcRenderer } = require("electron")
-
+import { defineAsyncComponent, provide } from "vue"
 const router = useRouter()
-const SystemType = type()
+
+provide("render", {
+    loginUser: false
+})
 
 const WindowTitle = defineAsyncComponent(() => {
     let windowTitleComponent = null
-    switch (SystemType) {
+    switch (process.env.OS) {
         case "Windows_NT":
             windowTitleComponent = import("./components/title/windows-title.vue")
             break
@@ -34,11 +41,8 @@ const WindowTitle = defineAsyncComponent(() => {
     return windowTitleComponent
 })
 
-ipcRenderer.invoke("get-current-page").then(page => {
-    router.push({
-        name: page
-    })
-})
+// 直接跳转到账号帮助页
+router.replace({ path: "/account-help" })
 </script>
 
 <style lang="less">
@@ -52,17 +56,17 @@ ipcRenderer.invoke("get-current-page").then(page => {
 #title {
     display: flex;
     width: 100%;
-    height: 30px;
-    justify-content: space-between;
-    text-align: center;
+    height: 40px;
     font-size: 16px;
-    line-height: 30px;
-    background-color: var(--background-color);
+    justify-content: space-between;
+    background-color: var(--peripheral-menu-background-color);
 }
 
 #view {
     flex: 1;
     display: flex;
+    margin: 10px;
+    margin-bottom: 0;
     justify-content: center;
     z-index: 1;
 }
