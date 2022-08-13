@@ -64,8 +64,8 @@ onMounted(() => {
                 @keydown.enter="accountInput.focus"
                 @keydown.down="accountInput.focus"
             />
-            <p :class="{'input-focus-ing': input.name.focus || input.name.value}">名称</p>
-            <i v-if="input.name.focus"></i>
+            <p :class="{'input-focus-ing': input.name.focus || input.name.value }">名称</p>
+            <i v-if="input.name.focus || input.name.value"></i>
             <div class="box-underscore" v-if="input.name.focus"></div>
         </div>
         <div 
@@ -82,8 +82,8 @@ onMounted(() => {
                 @keydown.down="passwordInput.focus"
                 @keydown.up="nameInput.focus"
             />
-            <p :class="{'input-focus-ing': input.account.focus || input.account.value}">账号</p>
-            <i v-if="input.account.focus"></i>
+            <p :class="{'input-focus-ing': input.account.focus || input.account.value }">账号</p>
+            <i v-if="input.account.focus || input.account.value"></i>
             <div class="box-underscore" v-if="input.account.focus"></div>
         </div>
         <div 
@@ -101,7 +101,7 @@ onMounted(() => {
                 @keydown.up="accountInput.focus"
             />
             <p :class="{ 'input-focus-ing': input.password.focus || input.password.value }">密码</p>
-            <i v-if="input.password.focus"></i>
+            <i v-if="input.password.focus || input.password.value"></i>
             <div class="box-underscore" v-if="input.password.focus"></div>
         </div>
         <div 
@@ -117,8 +117,8 @@ onMounted(() => {
                 @keydown.enter="runOperstionButton.click"
                 @keydown.up="passwordInput.focus"
             />
-            <p :class="{'input-focus-ing': input.tpassword.focus || input.tpassword.value}">确认密码</p>
-            <i v-if="input.tpassword.focus" style="width: 58px"></i>
+            <p :class="{'input-focus-ing': input.tpassword.focus || input.tpassword.value }">确认密码</p>
+            <i v-if="input.tpassword.focus || input.tpassword.value" style="width: 58px"></i>
             <div class="box-underscore" v-if="input.tpassword.focus"></div>
         </div>
     </div>
