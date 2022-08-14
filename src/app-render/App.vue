@@ -1,12 +1,3 @@
-<template>
-    <div id="title">
-        <WindowTitle></WindowTitle>
-    </div>
-    <div id="view">
-        <router-view></router-view>
-    </div>
-</template>
-
 <script setup>
 /**
  * 页面展示逻辑
@@ -17,7 +8,10 @@
  */
 import { useRouter } from "vue-router"
 import { defineAsyncComponent, provide } from "vue"
+import { Terminal } from "@icon-park/vue-next"
+
 const router = useRouter()
+const TIBOOK = window.TIBOOK
 
 provide("render", {
     loginUser: false
@@ -41,9 +35,33 @@ const WindowTitle = defineAsyncComponent(() => {
     return windowTitleComponent
 })
 
+function openMainWindowCli() {
+    TIBOOK.send("operation-service-window", TIBOOK.Mark, "openDevTools")
+}
+
 // 直接跳转到账号帮助页
 router.replace({ path: "/account-help" })
 </script>
+
+<template>
+    <header id="title">
+        <WindowTitle></WindowTitle>
+    </header>
+    <main id="view">
+        <router-view></router-view>
+    </main>
+    <footer id="statusbar">
+        <div class="left-items items-container">
+            <div class="statusbar-item version-item">{{ TIBOOK.env.APP_INFO.version }}</div>
+        </div>
+        <div class="right-items items-container">
+            <div class="statysbar-item operational-item open-cli-item" @click="openMainWindowCli">
+                <terminal></terminal>
+                <span>控制台</span>
+            </div>
+        </div>
+    </footer>
+</template>
 
 <style lang="less">
 #app {
@@ -65,9 +83,37 @@ router.replace({ path: "/account-help" })
 #view {
     flex: 1;
     display: flex;
-    margin: 10px;
+    margin-top: 3px;
     margin-bottom: 0;
     justify-content: center;
     z-index: 1;
+}
+
+#statusbar {
+    display: flex;
+    width: 100%;
+    height: 20px;
+    padding-inline: 10px;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    background-color: var(--input-box-background-color);
+
+    .statusbar-item {
+        user-select: none;
+        width: fit-content;
+    }
+
+    .operational-item {
+        span {
+            margin-left: 4px;
+        }
+    }
+
+    .operational-item:hover {
+        text-align: center;
+        cursor: pointer;
+        background-color: rgba(0, 0, 0, 0.2);
+    }
 }
 </style>
