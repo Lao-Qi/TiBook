@@ -16,7 +16,11 @@ function loginUser(account, password) {
     if (account && password) {
         TIBOOK.serverRequest("LoginUser", account, password, result => {
             if (result.code === 200) {
-                TIBOOK.env["USER_CONFIG"]["user_data"] = { info: result.data.userDoc, token: result.data.token }
+                TIBOOK.env["USER_CONFIG"]["user_data"] = {
+                    info: result.data.userDoc,
+                    token: result.data.token,
+                    upLoginDate: Date.now()
+                }
                 router.replace({ path: "/main" })
             }
         })
@@ -57,6 +61,7 @@ function registerUser(name, account, password) {
     position: relative;
     width: 100%;
     height: 100%;
+    margin: 0 10px 0 10px;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     box-shadow: var(--box-inset-show);

@@ -52,9 +52,9 @@ watch(
 
     #logo {
         display: inline-block;
-        width: 30px;
-        height: 30px;
-        margin-left: 5px;
+        width: 33px;
+        height: 33px;
+        margin-left: 8px;
 
         margin-right: 25px;
 
