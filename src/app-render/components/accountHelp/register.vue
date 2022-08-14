@@ -137,6 +137,7 @@ onMounted(() => {
 .operate-title {
     font-size: 20px;
     margin-bottom: 30px;
+    user-select: none;
 }
 
 .user-input-form {
@@ -173,6 +174,7 @@ onMounted(() => {
             background-color: transparent;
             z-index: 3;
             transition: all ease 0.2s;
+            user-select: none;
         }
 
         .input-focus-ing {
@@ -235,6 +237,7 @@ onMounted(() => {
             font-size: 14px;
             color: var(--cue--line-color);
             cursor: pointer;
+            user-select: none;
 
             .toggle-href-underscore {
                 width: 100%;
