@@ -6,16 +6,15 @@
  *
  * 主页和登录注册页分别是俩个路由，App进行判断后跳转对应路由
  */
+import { defineAsyncComponent } from "vue"
 import { useRouter } from "vue-router"
-import { defineAsyncComponent, provide } from "vue"
-import { Terminal } from "@icon-park/vue-next"
+import { CodeOne } from "@icon-park/vue-next"
 
 const router = useRouter()
 const TIBOOK = window.TIBOOK
 
-provide("render", {
-    loginUser: false
-})
+// 配置renderEnv环境变量
+TIBOOK.renderEnv.login = false
 
 const WindowTitle = defineAsyncComponent(() => {
     let windowTitleComponent = null
@@ -56,7 +55,7 @@ router.replace({ path: "/account-help" })
         </div>
         <div class="right-items items-container">
             <div class="statysbar-item operational-item open-cli-item" @click="openMainWindowCli">
-                <terminal></terminal>
+                <code-one></code-one>
                 <span>控制台</span>
             </div>
         </div>
