@@ -40,6 +40,11 @@ app.once("ready", () => {
     Menu.setApplicationMenu(null)
 
     process.TIBOOK["APP_LOCATION"] = join(app.getPath("appData"), "./tibook")
+    process.TIBOOK["APP_INFO"] = {
+        version: app.getVersion(),
+        name: "tibook",
+        ch_Name: "题书"
+    }
 
     // 加载本地用户配置文件
     require("./lib/LocalDatabase/user_config")
