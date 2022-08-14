@@ -17,9 +17,36 @@ const { ipcRenderer } = require("electron")
 const ServerRequestCallbackMap = {}
 const LocalOperationCallbackMap = {}
 const SocketCommunicateCallbackMap = {}
+const ListenerSocketEventsMap = {}
+const WatchRenderEnvKeySetterMap = {}
 
 // 配置软件独有的对象
 window.TIBOOK = { ...ParseURLParameters() }
+
+/**
+ * 配置渲染进程的环境变量存储，类似pinia提供的公共存储空间
+ * 不用pinia做管理主要是为了省！省空间，省内存，省占用
+ */
+window.TIBOOK.renderEnv = new Proxy(
+    {},
+    {
+        get: Reflect.get,
+        set(target, key, value) {
+            const CurrentKeyWatchSetter = WatchRenderEnvKeySetterMap[key]
+            if (CurrentKeyWatchSetter?.length) {
+                for (let i = 0; i < CurrentKeyWatchSetter.length; i++) {
+                    CurrentKeyWatchSetter[i](value, target[key])
+                }
+            }
+            return Reflect.set(...arguments)
+        }
+    }
+)
+// 写一个专门来做渲染进程变量监听的watch方法
+window.TIBOOK.watchRenderEnv = function (key, callback) {
+    WatchRenderEnvKeySetterMap[key] ??= []
+    WatchRenderEnvKeySetterMap[key].push(callback)
+}
 /**
  * 从主进程获取环境变量并挂载到软件独有对象上的env属性上
  */
@@ -78,11 +105,8 @@ window.TIBOOK.socketCommunicate = function (request, ...args) {
  */
 window.TIBOOK.onSocket = function (event, callback) {
     ipcRenderer.send("render-listener-socket-event", window.TIBOOK["Mark"], event)
-    ipcRenderer.on(event, (_, ...args) => callback(...args))
-}
-
-window.TIBOOK.send = function (event, ...args) {
-    ipcRenderer.send(event, ...args)
+    ListenerSocketEventsMap[event] ??= []
+    ListenerSocketEventsMap[event].push(callback)
 }
 
 /**
@@ -100,12 +124,9 @@ window.TIBOOK.invoke = async function (event, ...args) {
     }
 }
 
-window.TIBOOK.on = function (event, callback) {
-    ipcRenderer.on(event, callback)
-}
-window.TIBOOK.once = function (event, callback) {
-    ipcRenderer.once(event, callback)
-}
+window.TIBOOK.send = (event, ...args) => ipcRenderer.send(event, ...args)
+window.TIBOOK.on = (event, callback) => ipcRenderer.on(event, callback)
+window.TIBOOK.once = (event, callback) => ipcRenderer.once(event, callback)
 
 /**
  * 三个工具的数据返回事件
@@ -122,8 +143,17 @@ ipcRenderer.on("local-operation-return", (_, request, result, state) => {
     LocalOperationCallbackMap[request]?.shift()(result, state)
 })
 
-ipcRenderer.on("socket-communicate-return", (_, request, result, state) => {
+ipcRenderer.on("socket-communicate-request-return", (_, request, result, state) => {
     SocketCommunicateCallbackMap[request]?.shift()(result, state)
+})
+
+ipcRenderer.on("socket-communicate-proactive-return", (_, event, content, state) => {
+    const ListenerSocketEventList = ListenerSocketEventsMap[event]
+    if (ListenerSocketEventList?.length) {
+        for (let i = 0; i < ListenerSocketEventList.length; i++) {
+            ListenerSocketEventList[i](content, state)
+        }
+    }
 })
 
 /**

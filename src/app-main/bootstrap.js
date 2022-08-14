@@ -170,15 +170,15 @@ function startSocketCommunication() {
         // 消息的类型为服务端请求
         if (msg.type === "request") {
             const { request, result, state, renderProcessMark } = msg
-            AllServiceProcess[renderProcessMark].send("socket-communicate-return", request, result, state)
+            AllServiceProcess[renderProcessMark].send("socket-communicate-request-return", request, result, state)
         } else {
             // 消息的类型为服务端或socket主动触发事件后的参数
             const { event, state, content } = msg
             // 有监听此事件的渲染进程 Listener This Event Renderer Process s Mark
             const LTERPSM = RenderWithBoundSocketEvents[event]
-            if (LTERPSM) {
+            if (LTERPSM?.length) {
                 for (let i = 0; i < LTERPSM.length; i++) {
-                    AllServiceProcess[LTERPSM[i]].send("socket-communicate-return", content, state)
+                    AllServiceProcess[LTERPSM[i]].send("socket-communicate-proactive-return", event, content, state)
                 }
             }
         }
