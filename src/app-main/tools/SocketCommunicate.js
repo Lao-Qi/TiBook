@@ -55,6 +55,16 @@ const requestMethodAllMap = {
          * 该事件与被动的receive-message事件不同，该事件是为了验证该条消息发送出去的状态
          */
         return await listenerMethodReturns("send-message-return", "SendMessage")
+    },
+
+    /**
+     * 添加好友
+     * @param {string} friendAccount 要添加的好友的账号
+     * @returns {any}
+     */
+    async AddFriend(friendAccount) {
+        socket.emit("add-friend", { account: friendAccount })
+        return await listenerMethodReturns("add-friend-return", "AddFriend")
     }
 }
 
@@ -71,7 +81,11 @@ function listenerMethodReturns(event, method) {
          * 如果触发了则删除定时器，判断为成功
          */
         const time = setTimeout(() => {
-            rej(Error(`请求超时，请求的方法为{${method}}`))
+            rej({
+                code: 404,
+                data: {},
+                msg: `请求超时，请求的方法：${method}`
+            })
         }, 3000)
         socket.once(event, result => {
             clearTimeout(time)
@@ -132,6 +146,15 @@ socket.on("receive-message", msg => {
     process.loadSend({
         type: "proactive",
         event: "socket-receive-message",
+        state: 0,
+        content: msg
+    })
+})
+
+socket.on("add-friend", msg => {
+    process.loadSend({
+        type: "proactive",
+        event: "sockey-add-friend",
         state: 0,
         content: msg
     })
