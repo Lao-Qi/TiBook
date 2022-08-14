@@ -1,44 +1,55 @@
 <script setup>
-import { ref } from "vue"
+import { ref, watch } from "vue"
 import { useRouter } from "vue-router"
-import loginVue from "../components/accountHelp/login.vue"
-import registerVue from "../components/accountHelp/register.vue"
 
 const TIBOOK = window.TIBOOK
 const router = useRouter()
 const userState = ref("login")
 
-function ToggleUserState() {
-    userState.value = userState.value === "login" ? "register" : "login"
-}
+const ToggleUserState = () => (userState.value = userState.value === "login" ? "register" : "login")
+const runStateOperate = (operate, ...args) => operateMap[operate](...args)
 
-function loginUser(account, password) {
-    if (account && password) {
-        TIBOOK.serverRequest("LoginUser", account, password, result => {
-            if (result.code === 200) {
-                TIBOOK.env["USER_CONFIG"]["user_data"] = {
-                    info: result.data.userDoc,
-                    token: result.data.token,
-                    upLoginDate: Date.now()
+watch(
+    userState,
+    value => {
+        router.replace({ name: value })
+    },
+    { immediate: true }
+)
+
+const operateMap = {
+    conciseLogin() {
+        TIBOOK.renderEnv.login = true
+        router.replace({ path: "/main" })
+    },
+    loginUser(account, password) {
+        if (account && password) {
+            TIBOOK.serverRequest("LoginUser", account, password, result => {
+                if (result.code === 200) {
+                    TIBOOK.env["USER_CONFIG"]["user_data"] = {
+                        info: result.data.userDoc,
+                        token: result.data.token,
+                        upLoginDate: Date.now()
+                    }
+                    TIBOOK.renderEnv.login = true
+                    router.replace({ path: "/main" })
                 }
-                router.replace({ path: "/main" })
-            }
-        })
-    } else {
-        alert("请完整的填写表单信息")
-    }
-}
-
-function registerUser(name, account, password) {
-    if (name && account && password) {
-        TIBOOK.serverRequest("RegisterUser", name, account, password, result => {
-            alert(result.msg)
-            if (result.code === 200) {
-                ToggleUserState()
-            }
-        })
-    } else {
-        alert("请填写完整的填写表单信息")
+            })
+        } else {
+            alert("请完整的填写表单信息")
+        }
+    },
+    registerUser(name, account, password) {
+        if (name && account && password) {
+            TIBOOK.serverRequest("RegisterUser", name, account, password, result => {
+                alert(result.msg)
+                if (result.code === 200) {
+                    ToggleUserState()
+                }
+            })
+        } else {
+            alert("请填写完整的填写表单信息")
+        }
     }
 }
 </script>
@@ -48,10 +59,8 @@ function registerUser(name, account, password) {
         <div class="big-background-logo-img">
             <img src="../assets/img/tibook-transparent-logo.png" alt="" />
         </div>
-        <!-- 主要功能容器 -->
         <div class="account-operate-body-container">
-            <login-vue v-if="userState === 'login'" @toggleUserState="ToggleUserState" @loginUser="loginUser"></login-vue>
-            <register-vue v-else-if="userState === 'register'" @toggleUserState="ToggleUserState" @registerUser="registerUser"></register-vue>
+            <router-view @toggleUserState="ToggleUserState" @runStateOperate="runStateOperate"></router-view>
         </div>
     </div>
 </template>

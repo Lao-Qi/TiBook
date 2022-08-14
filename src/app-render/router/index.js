@@ -6,7 +6,19 @@ export const Router = createRouter({
         {
             path: "/account-help", // 软件登录页
             name: "account-help",
-            component: () => import("../view/accountHelp.vue")
+            component: () => import("../view/accountHelp.vue"),
+            children: [
+                {
+                    path: "login",
+                    name: "login",
+                    component: () => import("../view/accountHelp/login.vue")
+                },
+                {
+                    path: "register",
+                    name: "register",
+                    component: () => import("../view/accountHelp/register.vue")
+                }
+            ]
         },
         {
             path: "/main", // 软件主页
@@ -14,29 +26,29 @@ export const Router = createRouter({
             component: () => import("../view/main.vue"),
             children: [
                 {
-                    path: "/message",
+                    path: "message",
                     name: "message",
-                    component: () => import("../view/message.vue")
+                    component: () => import("../view/main/message.vue")
                 },
                 {
-                    path: "/home", // 用户信息页
+                    path: "home", // 用户信息页
                     name: "home",
-                    component: () => import("../view/home.vue")
+                    component: () => import("../view/main/home.vue")
                 },
                 {
-                    path: "/contact", // 联系人页
+                    path: "contact", // 联系人页
                     name: "contact",
-                    component: () => import("../view/contact.vue")
+                    component: () => import("../view/main/contact.vue")
                 },
                 {
-                    path: "/search", // 搜索页
+                    path: "search", // 搜索页
                     name: "search",
-                    component: () => import("../view/search.vue")
+                    component: () => import("../view/main/search.vue")
                 },
                 {
-                    path: "/config", // 设置页
+                    path: "config", // 设置页
                     name: "config",
-                    component: () => import("../view/config.vue")
+                    component: () => import("../view/main/config.vue")
                 }
             ]
         }
