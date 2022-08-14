@@ -82,6 +82,22 @@ async function startServiceProcessManage() {
 
     // 添加服务窗口进程事件
     ipcMain.on("create-service-window", (_, filePath, mark, winConfig) => CreateServiceProcess(filePath, mark, "window", winConfig))
+    // 操作服务进程事件
+    ipcMain.on("operation-service-window", (_, mark, operation) => {
+        AllServiceProcess[mark] && AllServiceProcess[mark][operation]()
+    })
+}
+
+// 启动服务进程
+async function startServicesProcess() {
+    /**
+     * 所有服务的入口文件也使用BrowserServiceProcess这个类来单独的引用
+     * 目的也是隔离
+     */
+    const services = CreateServiceProcess(join(__dirname, "./services/main.js"), "services")
+    // services.openDevTools()
+    // 触发打开进程可视化服务
+    // ProcessAllMap["services"].webContents.send("load-service", "ProcessVisualization")
 }
 
 // 启动工具进程，顾名思义就是只用来运行工具的进程
@@ -167,16 +183,4 @@ function startSocketCommunication() {
             }
         }
     })
-}
-
-// 启动服务进程
-async function startServicesProcess() {
-    /**
-     * 所有服务的入口文件也使用BrowserServiceProcess这个类来单独的引用
-     * 目的也是隔离
-     */
-    const services = CreateServiceProcess(join(__dirname, "./services/main.js"), "services")
-    // services.openDevTools()
-    // 触发打开进程可视化服务
-    // ProcessAllMap["services"].webContents.send("load-service", "ProcessVisualization")
 }
