@@ -1,21 +1,3 @@
-<template>
-    <div class="search-box" :class="{ 'search-box-hover': !searchInputFoucs, 'search-input-foucs': searchInputFoucs }" v-if="renderSearchBox">
-        <div class="search-icon" @click="searchInput.focus">
-            <search size="23" />
-        </div>
-        <input
-            type="text"
-            placeholder="搜索"
-            class="search-input"
-            ref="searchInput"
-            v-model="searchKeyWord"
-            @focus="searchInputFoucs = true"
-            @blur="SearchInputBlur"
-            @keydown.enter="SearchContent"
-        />
-    </div>
-</template>
-
 <script setup>
 import { ref } from "vue"
 import { useRouter } from "vue-router"
@@ -41,6 +23,24 @@ const SearchInputBlur = () => !searchKeyWord.value.length && (searchInputFoucs.v
 TIBOOK.watchRenderEnv("login", value => (renderSearchBox.value = value))
 </script>
 
+<template>
+    <div class="search-box" :class="{ 'search-box-hover': !searchInputFoucs, 'search-input-foucs': searchInputFoucs }" v-if="renderSearchBox">
+        <div class="search-icon" @click="searchInput.focus">
+            <search size="23" />
+        </div>
+        <input
+            type="text"
+            placeholder="搜索"
+            class="search-input"
+            ref="searchInput"
+            v-model="searchKeyWord"
+            @focus="searchInputFoucs = true"
+            @blur="SearchInputBlur"
+            @keydown.enter="SearchContent"
+        />
+    </div>
+</template>
+
 <style lang="less" scoped>
 .search-box {
     display: flex;
@@ -51,7 +51,7 @@ TIBOOK.watchRenderEnv("login", value => (renderSearchBox.value = value))
     justify-content: left;
     align-items: center;
     border-radius: 20px;
-    box-shadow: var(--box-inset-show);
+    box-shadow: var(--container-inset-show);
     background-color: var(--input-box-background-color);
     transition: all ease 0.3s;
     overflow: hidden;
