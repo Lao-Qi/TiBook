@@ -60,7 +60,7 @@ process.onLoadMsg(({ request, args = [], renderProcessMark }) => {
 const ServerRequestMethodAllMap = {
     /**
      * @example 获取服务器公钥
-     * @returns { Promise<any>}
+     * @returns { Promise<string>}
      */
     GetPublicKey() {
         return new Promise((res, rej) => {
@@ -137,13 +137,13 @@ const ServerRequestMethodAllMap = {
      * @example 查询当前登录用户的好友列表
      * @returns { Promise<Object | Boolean> }
      */
-    FindUserFriendsList() {
+    FindUserFriends() {
         return new Promise((res, rej) => {
             axios
                 .get("/api/search/FriendsList", {
                     // token用户的身份认证
                     headers: {
-                        token: process.env["TIBOOK_USER_CONFIG"]["token"]
+                        token: process.TIBOOK["USER_CONFIG"]["user_data"]["token"]
                     }
                 })
                 .then(result => {
@@ -170,7 +170,7 @@ const ServerRequestMethodAllMap = {
                     },
                     {
                         headers: {
-                            token: process.env["TIBOOK_USER_CONFIG"]["token"]
+                            token: process.TIBOOK["USER_CONFIG"]["user_data"]["token"]
                         }
                     }
                 )
@@ -191,7 +191,7 @@ const ServerRequestMethodAllMap = {
     SearchUser(account) {
         return new Promise((res, rej) => {
             axios
-                .get("/api/search/searchUser", {
+                .get("/api/search/SearchUser", {
                     params: { account }
                 })
                 .then(result => {
@@ -230,7 +230,7 @@ const ServerRequestMethodAllMap = {
         return new Promise((res, rej) => {
             axios
                 .post("/api/verifyToken", {
-                    token: process["TIBOOK"]["USER_CONFIG"]["token"]
+                    token: process.TIBOOK["USER_CONFIG"]["user_data"]["token"]
                 })
                 .then(result => {
                     res(result.data)

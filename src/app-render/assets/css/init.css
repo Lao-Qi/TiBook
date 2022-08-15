@@ -22,10 +22,11 @@
 html {
     --text-color: #3d3d3d; /* 软件字体颜色 */
     --peripheral-menu-background-color: #ffffff;
-    --page-background-color: rgba(64, 115, 255, 0.06);
-    --box-show: 3px 3px rgba(57, 96, 164, 0.38);
-    --box-inset-show: 2px 2px 2px rgba(57, 96, 164, 0.38) inset;
-    --box-background-color: #ffffff;
+    --container-title-background-color: #f6f6f6;
+    --view-background-color: rgba(64, 115, 255, 0.06);
+    --container-show: 3px 3px 2px rgba(57, 96, 164, 0.38);
+    --container-inset-show: 2px 2px 2px rgba(57, 96, 164, 0.38) inset;
+    --container-background-color: #ffffff;
     --input-box-background-color: #f6f6f6;
     --user-list-element-background-color: #f6f6f6;
     --not-me-message-background-color: #f6f6f6;
@@ -44,4 +45,24 @@ body {
 
 li {
     list-style: none;
+}
+
+img {
+    width: 100%;
+    height: 100%;
+}
+
+.view-element-container {
+    border-radius: 10px;
+    box-shadow: var(--container-show);
+    background-color: var(--container-background-color);
+}
+
+.view-element-container .container-title {
+    border-radius: 10px 0 10px 0;
+    background-color: var(--container-title-background-color);
+}
+
+.cue-line-color {
+    background-color: var(--cue--line-color);
 }

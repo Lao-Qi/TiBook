@@ -14,13 +14,19 @@ const { ipcRenderer } = require("electron")
  *
  * 创建俩个集合表是为了避免再俩个操作方法中有相同名称的可能
  */
+
+/** 服务端请求回调集合表 */
 const ServerRequestCallbackMap = {}
+/** 本地操作回调集合表 */
 const LocalOperationCallbackMap = {}
+/** 套接字操作回调集合表 */
 const SocketCommunicateCallbackMap = {}
+/** 套接字事件管理方法集合表 */
 const ListenerSocketEventsMap = {}
+/** 监听渲染进程的环境变量变化回调的集合表 */
 const WatchRenderEnvKeySetterMap = {}
 
-// 配置软件独有的对象
+/** 配置软件独有的对象 */
 window.TIBOOK = { ...ParseURLParameters() }
 
 /**
@@ -32,6 +38,7 @@ window.TIBOOK.renderEnv = new Proxy(
     {
         get: Reflect.get,
         set(target, key, value) {
+            // 循环执行有监听这个key的回调函数
             const CurrentKeyWatchSetter = WatchRenderEnvKeySetterMap[key]
             if (CurrentKeyWatchSetter?.length) {
                 for (let i = 0; i < CurrentKeyWatchSetter.length; i++) {
@@ -42,25 +49,26 @@ window.TIBOOK.renderEnv = new Proxy(
         }
     }
 )
-// 写一个专门来做渲染进程变量监听的watch方法
+
+/**
+ * 添加这个key的监听回调函数
+ * @param {string} key
+ * @param {Function} callback
+ */
 window.TIBOOK.watchRenderEnv = function (key, callback) {
     WatchRenderEnvKeySetterMap[key] ??= []
     WatchRenderEnvKeySetterMap[key].push(callback)
 }
-/**
- * 从主进程获取环境变量并挂载到软件独有对象上的env属性上
- */
+
+/** 从主进程获取环境变量并挂载到软件独有对象上的env属性上 */
 ipcRenderer.invoke("get-env-of-app").then(tibookEnv => {
     tibookEnv = JSON.parse(tibookEnv)
     const USER_CONFIG = tibookEnv["USER_CONFIG"]
     delete tibookEnv["USER_CONFIG"]
-    /**
-     * 配置软件独有的环境变量
-     */
+
+    /** 配置软件独有的环境变量 */
     window.TIBOOK.env = tibookEnv
-    /**
-     * 单独给USER_CONFIG配置代理，当渲染进程发生变化的时候本地文件异步更改
-     */
+    /** 单独给USER_CONFIG配置代理，当渲染进程修改配置对象的时候本地文件异步更新 */
     window.TIBOOK.env["USER_CONFIG"] = new Proxy(USER_CONFIG, {
         get: Reflect.get,
         set(_, key, value) {
@@ -128,14 +136,9 @@ window.TIBOOK.send = (event, ...args) => ipcRenderer.send(event, ...args)
 window.TIBOOK.on = (event, callback) => ipcRenderer.on(event, callback)
 window.TIBOOK.once = (event, callback) => ipcRenderer.once(event, callback)
 
-/**
- * 三个工具的数据返回事件
- */
+/** 三个工具的数据返回事件 */
 ipcRenderer.on("server-request-return", (_, request, result, state) => {
-    /**
-     * 调用对应操作函数的回调数组中的第一个回调
-     * 并将下一个回调置为第一个
-     */
+    /** 调用对应操作函数的回调数组中的第一个回调，并将下一个回调置为第一个 */
     ServerRequestCallbackMap[request]?.shift()(result, state)
 })
 
@@ -163,17 +166,11 @@ ipcRenderer.on("socket-communicate-proactive-return", (_, event, content, state)
  * @param  {...any} args
  */
 function RequestMessageSend(event, requestCallbackMap, request, ...args) {
-    /**
-     * 如果数组最后一个参数是函数则把它视为请求接口后的回调函数
-     */
+    /** 如果数组最后一个参数是函数则把它视为请求接口后的回调函数 */
     if (typeof args[args.length - 1] === "function") {
-        /**
-         * 异步的执行添加回调的操作，不去阻塞消息的发送
-         */
+        /** 异步的执行添加回调的操作，不去阻塞消息的发送 */
         ;(async () => {
-            /**
-             * 将最后一位数据作为本次请求执行后的回调，数组中要剔除这个参数
-             */
+            /** 将最后一位数据作为本次请求执行后的回调，数组中要剔除这个参数 */
             const cb = args.pop()
             requestCallbackMap[request] ??= []
             requestCallbackMap[request].push(cb)
