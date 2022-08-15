@@ -169,8 +169,8 @@ function startSocketCommunication() {
     SocketProcess.onmessage(msg => {
         // 消息的类型为服务端请求
         if (msg.type === "request") {
-            const { request, result, state, renderProcessMark } = msg
-            AllServiceProcess[renderProcessMark].send("socket-communicate-request-return", request, result, state)
+            const { request, content, state, renderProcessMark } = msg
+            AllServiceProcess[renderProcessMark].send("socket-communicate-request-return", request, content, state)
         } else {
             // 消息的类型为服务端或socket主动触发事件后的参数
             const { event, state, content } = msg

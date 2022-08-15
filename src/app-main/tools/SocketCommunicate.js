@@ -9,16 +9,64 @@
  *
  * 3秒，如果用户网络差的话可能永远也用不了这个软件
  */
+const { readFile } = require("fs/promises")
+const { win32: path } = require("path")
 const { io } = require("socket.io-client")
+const { uid } = require("uid/secure")
+
 const USER_DATA = process["TIBOOK"]["USER_CONFIG"]["user_data"]
+const timeout = 3000 // 所有请求的超时时间
 
 const socket = io("ws://127.0.0.1:6001", {
     auth: {
         // E:\工程文件\项目\tibook\src\app-main\lib\LocalDatabase\user_config.js
         token: USER_DATA["token"]
     },
-    timeout: 4000,
+    timeout,
     autoConnect: true
+})
+
+process.onLoadMsg(msg => {
+    // 请求过来的时候检查socket有没有连接，如果没有则将请求占时存储到SendMethods中
+    if (!socket.connected) {
+        SendMethods.push(msg)
+    } else if (!requestMethodAllMap[msg.request]) {
+        throw Error(`请求的方法不存在：{${msg.request}}`)
+    } else {
+        runSendRequest(msg)
+    }
+})
+
+socket.on("connect", () => {
+    process.loadSend({
+        type: "socket-passive",
+        event: "socket-connect",
+        state: 0,
+        content: ""
+    })
+
+    // socket连接成功后，运行占存的请求
+    while (SendMethods.length) {
+        runSendRequest(SendMethods.shift())
+    }
+})
+
+socket.on("connect_error", err => {
+    process.loadSend({
+        type: "socket-passive",
+        event: "socket-connect_error",
+        state: 1,
+        content: err
+    })
+})
+
+socket.on("disconnect", reason => {
+    process.loadSend({
+        type: "socket-passive",
+        event: "socket-disconnect",
+        state: 0,
+        content: reason
+    })
 })
 
 /**
@@ -28,33 +76,55 @@ const socket = io("ws://127.0.0.1:6001", {
 const SendMethods = []
 const requestMethodAllMap = {
     /**
-     * 切换房间的方法(用户切换聊天窗)
+     * 切换消息接收者
      * @param {String} tuc 要切换的用户账号 Toggle User Account
      */
-    async ToggleRoom(tuc) {
-        socket.emit("toggle-room", tuc)
-        return await listenerMethodReturns("toggle-room-return", "ToggleRoom")
+    async ToggleRecipient(tuc) {
+        socket.emit("client-toggle-recipient", tuc)
+        return await listenerMethodReturns("client-toggle-recipient-return", "ToggleRoom")
     },
 
     /**
-     * 用户发送消息
-     *
-     * from 谁发的
-     * to 给谁的
-     * content 内容是什么
-     * @param {{ from: string, to: string, content: string}}
+     * 发送消息
+     * @param {string} content 发送的文字内容
      */
-    async SendMessage({ from, to, content }) {
-        socket.emit("send-message", {
-            from,
-            to,
+    async SendTextMessage(content) {
+        const uid = uid(20)
+        socket.emit("client-send-message", {
+            uid,
+            type: "text",
             content,
             date: Date.now()
         })
-        /**
-         * 该事件与被动的receive-message事件不同，该事件是为了验证该条消息发送出去的状态
-         */
-        return await listenerMethodReturns("send-message-return", "SendMessage")
+
+        /** 该事件与被动的receive-message事件不同，该事件是为了验证该条消息发送出去的状态 */
+        return await listenerMethodReturns(`client-send-message-return-${uid}`, "SendMessage")
+    },
+
+    /**
+     * 发送图片
+     * @param {string} url 图片路径，绝对路径
+     * @param {string} ext 图片的编码
+     */
+    async SendImageMessage(url) {
+        try {
+            const imageData = await readFile(path.normalize(url), "binary")
+            const uid = uid(20)
+            socket.emit("client-send-message", {
+                uid,
+                type: "image",
+                content: imageData,
+                img_attribute: {
+                    name: path.basename(url),
+                    extname: path.extname(url),
+                    encode: "binary"
+                },
+                date: Date.now()
+            })
+            return await listenerMethodReturns(`client-send-message-return-${uid}`, "SendImageMessage")
+        } catch (err) {
+            console.error(err)
+        }
     },
 
     /**
@@ -63,8 +133,8 @@ const requestMethodAllMap = {
      * @returns {any}
      */
     async AddFriend(friendAccount) {
-        socket.emit("add-friend", { account: friendAccount })
-        return await listenerMethodReturns("add-friend-return", "AddFriend")
+        socket.emit("clinet-add-friend", { account: friendAccount })
+        return await listenerMethodReturns("client-add-friend-return", "AddFriend")
     }
 }
 
@@ -72,24 +142,26 @@ const requestMethodAllMap = {
  * 监听服务器返回事件
  * @param {string} event 服务器要触发的返回事件
  * @param {string} method // 使用的方法名
- * @returns {Promise<Error | {}>}
+ * @returns {Promise<{}>}
  */
 function listenerMethodReturns(event, method) {
-    return new Promise((res, rej) => {
+    return new Promise(res => {
         /**
          * 3秒后Promise没有调用res即事件没有触发，判定为超时
          * 如果触发了则删除定时器，判断为成功
          */
-        const time = setTimeout(() => {
-            rej({
+        const RequestTiming = setTimeout(() => {
+            res({
                 code: 404,
-                data: {},
                 msg: `请求超时，请求的方法：${method}`
             })
-        }, 3000)
-        socket.once(event, result => {
-            clearTimeout(time)
-            res(result)
+        }, timeout)
+        socket.once(event, recipient => {
+            clearTimeout(RequestTiming)
+            res({
+                ...recipient,
+                msg: "请求成功"
+            })
         })
     })
 }
@@ -116,64 +188,23 @@ function runSendRequest({ request, args, renderProcessMark }) {
         })
 }
 
-process.onLoadMsg(msg => {
-    if (!socket.connected) {
-        SendMethods.push(msg)
-    } else if (!requestMethodAllMap[msg.request]) {
-        throw Error(`请求的方法不存在：{${msg.request}}`)
-    } else {
-        runSendRequest(msg)
-    }
-})
-
-socket.on("connect", () => {
-    process.loadSend({
-        type: "proactive",
-        event: "socket-connect",
-        state: 0,
-        content: ""
-    })
-
-    for (let i = 0; i < SendMethods.length; i++) {
-        runSendRequest(SendMethods[i])
-    }
-})
-
 /**
- * 接收服务端发送过来的消息，包括用户发送出去的和其他用户发送过来的
+ * 接收服务端发送过来的所有类型的消息，包括用户发送出去的和其他用户发送过来的
  */
 socket.on("receive-message", msg => {
     process.loadSend({
-        type: "proactive",
+        type: "socket-passive",
         event: "socket-receive-message",
         state: 0,
         content: msg
     })
 })
 
-socket.on("add-friend", msg => {
+socket.on("add-friend-message", msg => {
     process.loadSend({
-        type: "proactive",
-        event: "sockey-add-friend",
+        type: "socket-passive",
+        event: "socket-add-friend-message",
         state: 0,
         content: msg
-    })
-})
-
-socket.on("connect_error", err => {
-    process.loadSend({
-        type: "proactive",
-        event: "socket-connect_error",
-        state: 1,
-        content: err
-    })
-})
-
-socket.on("disconnect", reason => {
-    process.loadSend({
-        type: "proactive",
-        event: "socket-disconnect",
-        state: 0,
-        content: reason
     })
 })
