@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUpdated, onMounted } from "vue"
+import { ref, watch } from "vue"
 import { useRoute } from "vue-router"
 import { PeoplePlusOne } from "@icon-park/vue-next"
 
@@ -8,7 +8,9 @@ const route = useRoute()
 const serverMatchUsers = ref([])
 
 function AddUser(account) {
-    TIBOOK.socketCommunicate("AddFriend", result => {})
+    TIBOOK.socketCommunicate("AddFriend", account, result => {
+        console.log(result)
+    })
 }
 
 // 服务器关键词搜索用户
@@ -20,15 +22,13 @@ function SearchKeyWordMatchInfo(keyWord) {
     })
 }
 
-// 执行查询函数
-onMounted(() => {
-    SearchKeyWordMatchInfo(route.query.keyWord)
-})
-
-// 更新搜索关键词重新执行查询函数
-onUpdated(() => {
-    SearchKeyWordMatchInfo(route.query.keyWord)
-})
+watch(
+    () => route.query.keyWord,
+    value => {
+        SearchKeyWordMatchInfo(value)
+    },
+    { immediate: true }
+)
 </script>
 
 <template>
