@@ -55,7 +55,7 @@ const operateMap = {
 </script>
 
 <template>
-    <div class="page-container">
+    <div class="view-container">
         <div class="big-background-logo-img">
             <img src="../assets/img/tibook-transparent-logo.png" alt="" />
         </div>
@@ -66,15 +66,15 @@ const operateMap = {
 </template>
 
 <style lang="less" scoped>
-.page-container {
+.view-container {
     position: relative;
     width: 100%;
     height: 100%;
     margin: 0 10px 0 10px;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
-    box-shadow: var(--box-inset-show);
-    background-color: var(--page-background-color);
+    box-shadow: var(--container-inset-show);
+    background-color: var(--view-background-color);
 
     .big-background-logo-img {
         position: absolute;

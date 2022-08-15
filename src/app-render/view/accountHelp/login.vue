@@ -135,7 +135,7 @@ onMounted(() => {
         height: 35px;
         margin-bottom: 20px;
         border-radius: 10px;
-        box-shadow: var(--box-inset-show);
+        box-shadow: var(--container-inset-show);
         background-color: var(--input-box-background-color);
 
         input {
