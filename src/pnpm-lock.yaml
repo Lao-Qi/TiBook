@@ -7,6 +7,7 @@ specifiers:
   moment: ^2.29.3
   nedb: ^1.8.0
   socket.io-client: ^4.5.0
+  uid: ^2.0.0
   vue: ^3.2.25
   vue-router: ^4.0.13
 
@@ -17,6 +18,7 @@ dependencies:
   moment: 2.29.4
   nedb: 1.8.0
   socket.io-client: 4.5.1
+  uid: 2.0.0
   vue: 3.2.37
   vue-router: 4.1.2_vue@3.2.37
 
@@ -73,6 +75,11 @@ packages:
       vue: 3.x
     dependencies:
       vue: 3.2.37
+    dev: false
+
+  /@lukeed/csprng/1.0.1:
+    resolution: {integrity: sha512-uSvJdwQU5nK+Vdf6zxcWAY2A8r7uqe+gePwLWzJ+fsQehq18pc0I2hJKwypZ2aLM90+Er9u1xn4iLJPZ+xlL4g==}
+    engines: {node: '>=8'}
     dev: false
 
   /@socket.io/component-emitter/3.1.0:
@@ -502,6 +509,13 @@ packages:
   /to-fast-properties/2.0.0:
     resolution: {integrity: sha512-/OaKK0xYrs3DmxRYqL/yDc+FxFUVYhDlXMhRmv3z915w2HF1tnN1omB354j8VUGO/hbRzyD6Y3sA7v7GS/ceog==}
     engines: {node: '>=4'}
+    dev: false
+
+  /uid/2.0.0:
+    resolution: {integrity: sha512-hFw+zKBA1szYdbZWj6FjTxZzJnKNf+wTDcsxlJaXS64MCy9LQEmJUVieGYHCKek/WRyFIcs0cEXtGIQmfvHe2A==}
+    engines: {node: '>=8'}
+    dependencies:
+      '@lukeed/csprng': 1.0.1
     dev: false
 
   /underscore/1.4.4:
