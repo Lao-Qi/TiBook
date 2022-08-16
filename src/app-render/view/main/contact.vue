@@ -1,62 +1,100 @@
 <script setup>
 import { DropDownList } from "@icon-park/vue-next"
-import { ref } from "vue"
-import friendInfoWin from "../../components/friend-info-win.vue"
+import { ref, reactive } from "vue"
+import moment from "moment"
+import userInfoContainer from "../../components/user-info-container.vue"
 
 const TIBOOK = window.TIBOOK
-const newFriendsPartition = ref(null)
-const friendsPartition = ref(null)
-const friends = ref([])
-const newfriends = ref([
-    {
-        account: "1230000000",
-        name: "老A",
-        avatar: "http://192.168.3.8:8080/resource/defaultAvater.jpg"
-    }
-])
-const showFriend = ref(null)
 
-const toggleShowFrien = (type, friend) => {
-    showFriend.value = {
-        account: friend.account,
-        date: friend.date ?? 0,
-        type
-    }
+const friends = ref([])
+const newfriends = ref([])
+const showUser = ref(null)
+const areaShowManage = reactive({
+    "new-friends-area": false,
+    "friends-area": false
+})
+
+/**
+ * 展示对应的用户列表
+ * @param {string} area
+ */
+function showListArea(area) {
+    areaShowManage[area] = !areaShowManage[area]
 }
 
-TIBOOK.serverRequest("FindUserFriends", result => result.code === 200 && (friends.value = result.firendsList))
-TIBOOK.onSocket("sockey-add-friend", result => newfriends.value.push(result))
+/**
+ * 展示用户详细信息
+ * @param {any} userBaseInfo
+ * @param {string} AddTime
+ */
+async function showUserInfo(userBaseInfo, AddTime) {
+    const userInfo = await getUserInfo(userBaseInfo.account)
+    userInfo.showType = "newfriend"
+    if (AddTime) {
+        userInfo.AddTime = moment(AddTime).format("YYYY-MM-DD HH:mm:ss")
+        userInfo.showType = "friend"
+    }
+    console.log(userInfo)
+    showUser.value = userInfo
+}
+
+/**
+ * 获取用户详细信息
+ * @param {string} account
+ */
+function getUserInfo(account) {
+    return new Promise(res => {
+        TIBOOK.serverRequest("SearchUserInfo", account, result => {
+            res(result.data)
+        })
+    })
+}
+
+/**
+ * 添加好友
+ */
+function addFriend() {
+    TIBOOK.serverRequest("AddFriend", showUser.value.account, result => {
+        console.log(result)
+    })
+}
+
+// 获取用户的好友列表
+TIBOOK.serverRequest("FindUserFriends", result => {
+    if (result.code === 200) {
+        friends.value = result.firendsList
+    }
+})
+
+// 监听服务器发过来的添加好友申请
+TIBOOK.onSocket("socket-add-friend", result => {
+    newfriends.value.push(result)
+})
 </script>
 
 <template>
     <div class="contact-view-container">
         <div class="friends-list-container view-element-container">
-            <div class="list-partition-title list-partition-title-focus" data-ele-partition="new-friends-partition">
-                <p>新朋友</p>
+            <div class="list-area-title" :class="{ 'list-area-title-focus': areaShowManage['new-friends-area'] }" @click="showListArea('new-friends-area')">
+                <p>新朋友{{ newfriends.length ? `: (${newfriends.length})` : "" }}</p>
                 <drop-down-list size="20" />
             </div>
-            <div class="new-friends-partition list-partition">
+            <div class="new-friends-area list-area" :class="{ 'show-list-area': areaShowManage['new-friends-area'] }">
                 <template v-if="newfriends.length">
-                    <div
-                        v-for="newfriend in newfriends"
-                        :key="newfriend.account"
-                        ref="newFriendsPartition"
-                        class="list-partition-ele"
-                        @click="toggleShowFrien('newFriend', newfriend)"
-                    >
+                    <div v-for="newfriend in newfriends" :key="newfriend.account" class="list-area-ele" @click="showUserInfo(newfriend)">
                         <img :alt="newfriend.name" :src="newfriend.avatar" />
                         <div class="friend-name">{{ newfriend.name }}</div>
                         <div class="friend-account">{{ newfriend.account }}</div>
                     </div>
                 </template>
             </div>
-            <div class="list-partition-title list-partition-title-focus" data-ele-partition="friends-partition">
-                <p>好友</p>
+            <div class="list-area-title" :class="{ 'list-area-title-focus': areaShowManage['friends-area'] }" @click="showListArea('friends-area')">
+                <p>好友{{ friends.length ? `: (${friends.length})` : "" }}</p>
                 <drop-down-list size="20" />
             </div>
-            <div class="friends-partition list-partition">
+            <div class="friends-area list-area" :class="{ 'show-list-area': areaShowManage['friends-area'] }">
                 <template v-if="friends.length">
-                    <div v-for="friend in friends" :key="friend.account" ref="friendsPartition" class="list-partition-ele" @click="toggleShowFrien('friend', friend)">
+                    <div v-for="friend in friends" :key="friend.account" ref="friendsArea" class="list-area-ele" @click="showUserInfo(friend, friend.AddTime)">
                         <img :alt="friend.name" :src="friend.avatar" />
                         <div class="friend-name">{{ friend.name }}</div>
                         <div class="friend-account">{{ friend.account }}</div>
@@ -64,11 +102,15 @@ TIBOOK.onSocket("sockey-add-friend", result => newfriends.value.push(result))
                 </template>
             </div>
         </div>
-        <div class="contact-info-box">
-            <template v-if="showFriend">
-                <friend-info-win :account="showFriend.account" :show-friend-type="showFriend.type" :add-time="showFriend.date" />
-            </template>
-        </div>
+        <template v-if="showUser">
+            <user-info-container :user-info="showUser">
+                <template v-slot:user-operate>
+                    <div class="operate-button" @click="toggleChatWindow()" v-if="showUser.showType === 'friend'">切换到聊天窗</div>
+                    <div class="remove-friend operate-button" @click="pullFriend()" v-if="showUser.showType === 'friend'">删除好友</div>
+                    <div class="operate-button" @click="addFriend()" v-if="showUser.showType === 'newfriend'">通过好友申请</div>
+                </template>
+            </user-info-container>
+        </template>
     </div>
 </template>
 
@@ -77,22 +119,32 @@ TIBOOK.onSocket("sockey-add-friend", result => newfriends.value.push(result))
     display: flex;
     width: 100%;
     height: 100%;
+    justify-content: space-between;
+    user-select: none;
 
     .friends-list-container {
-        max-width: 250px;
-        min-width: 170px;
-        width: 20vw;
+        width: 230px;
         height: 100%;
-        border-radius: 10px;
-        background-color: var(--box-background-color);
 
-        .list-partition-title {
+        .list-area-title {
+            position: relative;
             display: flex;
-            justify-content: space-between;
             width: 100%;
             height: 25px;
             padding-inline: 10px;
-            background-color: var(--input-box-background-color);
+            justify-content: space-between;
+            background-color: var(--container-title-background-color);
+            cursor: pointer;
+
+            &::after {
+                content: "";
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 2px;
+                background-color: var(--cue--line-color);
+            }
 
             .i-icon-drop-down-list {
                 transform: rotateZ(90deg);
@@ -100,19 +152,21 @@ TIBOOK.onSocket("sockey-add-friend", result => newfriends.value.push(result))
             }
         }
 
-        .list-partition-title-focus {
+        .list-area-title-focus {
             .i-icon-drop-down-list {
                 transform: rotateZ(0);
             }
         }
 
-        .list-partition {
+        .list-area {
             width: 100%;
-            height: auto;
-            padding: 5px 8px;
+            height: 0;
+            opacity: 0;
             box-shadow: var(--box-inset-show);
+            overflow: hidden;
+            transition: all ease 0.3s;
 
-            .list-partition-ele {
+            .list-area-ele {
                 position: relative;
                 width: 100%;
                 height: 55px;
@@ -145,16 +199,34 @@ TIBOOK.onSocket("sockey-add-friend", result => newfriends.value.push(result))
                 }
             }
 
-            .current-list-partition-ele {
+            .current-list-area-ele {
                 border: 2px solid var(--cue--line-color);
             }
         }
+
+        .show-list-area {
+            opacity: 1;
+            height: auto;
+            padding: 5px 8px;
+        }
     }
 
-    .contact-info-box {
-        display: flex;
-        flex: 1;
-        justify-content: center;
+    .operate-button {
+        width: max-content;
+        min-width: 100px;
+        height: 35px;
+        padding-inline: 10px;
+        text-align: center;
+        line-height: 35px;
+        color: #fff;
+        border-radius: 7px;
+        background-color: var(--cue--line-color);
+        cursor: pointer;
+    }
+
+    .remove-friend {
+        background-color: #d51324;
+        margin-left: 120px;
     }
 }
 </style>

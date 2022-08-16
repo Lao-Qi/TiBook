@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, ref } from "vue"
+import { defineProps, computed } from "vue"
 
 const props = defineProps({
     userInfo: {
@@ -17,7 +17,7 @@ const props = defineProps({
     }
 })
 
-const showUser = ref(props.userInfo)
+const showUser = computed(() => props.userInfo)
 </script>
 
 <template>
@@ -26,7 +26,7 @@ const showUser = ref(props.userInfo)
             <div class="left-content">
                 <div class="user-basic-info-container">
                     <div class="user-avatar">
-                        <img :src="showUser.avatar" />
+                        <img :src="userInfo.avatar" />
                     </div>
                     <div class="user-name">
                         <p>{{ showUser.name }}</p>
@@ -101,7 +101,7 @@ const showUser = ref(props.userInfo)
 
         .left-content {
             display: flex;
-            width: 300px;
+            width: 320px;
             flex-direction: column;
 
             .user-basic-info-container {
