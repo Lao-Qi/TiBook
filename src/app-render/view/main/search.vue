@@ -2,18 +2,17 @@
 import { ref, watch } from "vue"
 import { useRoute } from "vue-router"
 import { PeoplePlusOne } from "@icon-park/vue-next"
+import userInfoContainer from "../../components/user-info-container.vue"
 
 const TIBOOK = window.TIBOOK
 const route = useRoute()
 const serverMatchUsers = ref([])
+const showUser = ref(null)
 
-function AddUser(account) {
-    TIBOOK.socketCommunicate("AddFriend", account, result => {
-        console.log(result)
-    })
-}
-
-// 服务器关键词搜索用户
+/**
+ * 关键词搜索用户
+ * @param {string} keyWord
+ */
 function SearchKeyWordMatchInfo(keyWord) {
     TIBOOK.serverRequest("SearchUsers", keyWord, result => {
         if (result.code === 200) {
@@ -29,10 +28,41 @@ watch(
     },
     { immediate: true }
 )
+
+/**
+ * 添加好友
+ * @param {string} account
+ */
+function AddUser(account) {
+    TIBOOK.socketCommunicate("AddFriend", account, result => {
+        console.log(result)
+    })
+}
+
+/**
+ * 渲染详细信息
+ * @param {string} account
+ */
+async function showUserInfo(account) {
+    const userInfo = await getUserInfo(account)
+    showUser.value = userInfo
+}
+
+/**
+ * 获取用户详细信息
+ * @param {string} account
+ */
+function getUserInfo(account) {
+    return new Promise(res => {
+        TIBOOK.serverRequest("SearchUserInfo", account, result => {
+            res(result.data)
+        })
+    })
+}
 </script>
 
 <template>
-    <div class="search-view-container">
+    <div class="search-view-container" :class="{ 'exist-show-user': showUser }">
         <div class="server-match-users-container view-element-container">
             <div class="container-title">
                 <p>匹配用户: ({{ serverMatchUsers.length }})</p>
@@ -40,19 +70,26 @@ watch(
             </div>
             <div class="container-content">
                 <template v-if="serverMatchUsers.length">
-                    <div v-for="user in serverMatchUsers" :key="user.account" class="user-info-container">
+                    <div v-for="user in serverMatchUsers" :key="user.account" class="user-info-container" @click="showUserInfo(user.account)">
                         <div class="user-avatar">
                             <img :src="user.avatar" />
                         </div>
                         <div class="user-name user-text-info">{{ user.name }}</div>
                         <div class="user-account user-text-info">{{ user.account }}</div>
                         <div class="add-this-user-icon" @click="AddUser(user.account)">
-                            <people-plus-one size="20"></people-plus-one>
+                            <people-plus-one size="20" title="添加好友"></people-plus-one>
                         </div>
                     </div>
                 </template>
             </div>
         </div>
+        <template v-if="showUser">
+            <user-info-container :user-info="showUser">
+                <template v-slot:user-operate>
+                    <div class="add-friend operate-button" @click="AddUser(showUser.account)">添加好友</div>
+                </template>
+            </user-info-container>
+        </template>
     </div>
 </template>
 
@@ -65,9 +102,10 @@ watch(
 
     .server-match-users-container {
         position: relative;
-        width: 40%;
-        min-width: 220px;
+        width: 480px;
+        min-width: 250px;
         height: 100%;
+        transition: all ease 0.2s;
 
         .container-title {
             width: 100%;
@@ -91,16 +129,16 @@ watch(
             display: flex;
             width: 100%;
             height: auto;
-            padding-inline: 10px;
+            padding-inline: 5px;
             flex-wrap: wrap;
-            align-items: flex-start;
             justify-content: space-between;
 
             .user-info-container {
                 position: relative;
-                width: 46%;
-                min-width: 200px;
+                width: 230px;
                 height: 60px;
+                max-width: 300px;
+                min-width: 200px;
                 margin-top: 10px;
                 border-radius: 10px;
                 background-color: var(--user-list-element-background-color);
@@ -145,6 +183,29 @@ watch(
                 }
             }
         }
+    }
+}
+
+.exist-show-user {
+    justify-content: space-between;
+
+    .server-match-users-container {
+        width: 230px;
+
+        .container-content {
+            justify-content: center;
+        }
+    }
+
+    .operate-button {
+        width: 100px;
+        height: 35px;
+        text-align: center;
+        line-height: 35px;
+        color: #fff;
+        border-radius: 7px;
+        background-color: var(--cue--line-color);
+        cursor: pointer;
     }
 }
 </style>
