@@ -1,11 +1,10 @@
 <script setup>
-import { ref, reactive, watch, provide } from "vue"
+import { ref, reactive, provide } from "vue"
 import { useRouter } from "vue-router"
 import { SettingConfig, Comment, Peoples, Me } from "@icon-park/vue-next"
 
 const TIBOOK = window.TIBOOK
 const router = useRouter()
-const currentView = ref("message")
 const sideTipLine = ref(null)
 
 const sideNavBarItems = {
@@ -36,19 +35,13 @@ const iconConfig = reactive({
 // 启动socket服务
 TIBOOK.send("start-socket-communication")
 
-const toggleOptions = page => (currentView.value = page)
+const toggleOptions = page => {
+    router.push({ name: page })
+    // const itemInfo = sideNavBarItems[page]
+    // sideTipLine.value.setAttribute("style", `${itemInfo.location}: ${itemInfo.ranking * 60 + 9}px;`)
+}
 
 provide("toggleOptions", toggleOptions)
-
-watch(
-    currentView,
-    page => {
-        const itemInfo = sideNavBarItems[page]
-        sideTipLine.value.setAttribute("style", `${itemInfo.location}: ${itemInfo.ranking * 60 + 9}px;`)
-        router.push({ name: page })
-    }
-    // { immediate: true }
-)
 </script>
 
 <template>
@@ -120,8 +113,7 @@ watch(
             top: 50%;
             width: max-content;
             height: 20px;
-            padding-inline: 8px;
-            padding-block: 1px;
+            padding: 1px 8px 1px 8px;
             font-size: 12px;
             text-align: center;
             line-height: 20px;
@@ -133,6 +125,7 @@ watch(
             transform: translateY(-50%);
             transition: all ease 0.1s;
             transition-delay: 0.2s;
+            z-index: 999;
 
             &::before {
                 content: "";
@@ -177,6 +170,7 @@ watch(
     background-color: var(--view-background-color);
     box-shadow: var(--container-inset-show);
     border-radius: 10px 10px 0 0;
+    overflow: hidden;
 
     // 页面背景上的logo
     .background-logo-image {
