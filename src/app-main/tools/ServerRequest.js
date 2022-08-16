@@ -17,7 +17,10 @@ const axios = create({
     baseURL: "http://localhost:8080",
     timeout: 4000,
     // 跨域请求需要携带凭证(cookie)
-    withCredentials: true
+    withCredentials: true,
+    headers: {
+        token: process.TIBOOK?.USER_CONFIG?.user_data?.token
+    }
 })
 
 /**
@@ -66,12 +69,8 @@ const ServerRequestMethodAllMap = {
         return new Promise((res, rej) => {
             axios
                 .get("/api/publicKey")
-                .then(result => {
-                    res(Buffer.from(result.data.publicKey, "base64").toString())
-                })
-                .catch(err => {
-                    rej(err.message)
-                })
+                .then(result => res(result.data.code === 200 ? Buffer.from(result.data.publicKey, "base64").toString() : result.data))
+                .catch(err => rej(err.message))
         })
     },
 
@@ -94,12 +93,8 @@ const ServerRequestMethodAllMap = {
                             type: type(),
                             ping
                         })
-                        .then(result => {
-                            res(result.data)
-                        })
-                        .catch(err => {
-                            rej(err.message)
-                        })
+                        .then(result => res(result.data))
+                        .catch(err => rej(err.message))
                 })
                 // 上一个方法内部已经处理好了它的报错信息，这里不需要再处理
                 .catch(rej)
@@ -118,16 +113,9 @@ const ServerRequestMethodAllMap = {
                 .then(publicKey => {
                     const ping = publicEncrypt(publicKey, Buffer.from(paw)).toString("base64")
                     axios
-                        .post(`/api/user/login`, {
-                            account,
-                            ping
-                        })
-                        .then(result => {
-                            res(result.data)
-                        })
-                        .catch(err => {
-                            rej(err.message)
-                        })
+                        .post(`/api/user/login`, { account, ping })
+                        .then(result => res(result.data))
+                        .catch(err => rej(err.message))
                 })
                 .catch(rej)
         })
@@ -140,18 +128,23 @@ const ServerRequestMethodAllMap = {
     FindUserFriends() {
         return new Promise((res, rej) => {
             axios
-                .get("/api/search/FriendsList", {
-                    // token用户的身份认证
-                    headers: {
-                        token: process.TIBOOK["USER_CONFIG"]["user_data"]["token"]
-                    }
-                })
-                .then(result => {
-                    res(result.data)
-                })
-                .catch(err => {
-                    rej(err.message)
-                })
+                .get("/api/search/FriendsList")
+                .then(result => res(result.data))
+                .catch(err => rej(err.message))
+        })
+    },
+
+    /**
+     * @example 获取用户的详细信息
+     * @param {string} account
+     * @returns {Promise<Object | Boolean>}
+     */
+    SearchUserInfo(account) {
+        return new Promise((res, rej) => {
+            axios
+                .get("/api/search/userinfo", { params: { account } })
+                .then(result => res(result.data))
+                .catch(err => rej(err.message))
         })
     },
 
@@ -163,23 +156,9 @@ const ServerRequestMethodAllMap = {
     AddFriend(account) {
         return new Promise((res, rej) => {
             axios
-                .post(
-                    "/api/user/addFriend",
-                    {
-                        account
-                    },
-                    {
-                        headers: {
-                            token: process.TIBOOK["USER_CONFIG"]["user_data"]["token"]
-                        }
-                    }
-                )
-                .then(result => {
-                    res(result.data)
-                })
-                .catch(err => {
-                    rej(err.message)
-                })
+                .post("/api/user/addFriend", { account })
+                .then(result => res(result.data))
+                .catch(err => rej(err.message))
         })
     },
 
@@ -191,15 +170,9 @@ const ServerRequestMethodAllMap = {
     SearchUser(account) {
         return new Promise((res, rej) => {
             axios
-                .get("/api/search/SearchUser", {
-                    params: { account }
-                })
-                .then(result => {
-                    res(result.data)
-                })
-                .catch(err => {
-                    rej(err.message)
-                })
+                .get("/api/search/user", { params: { account } })
+                .then(result => res(result.data))
+                .catch(err => rej(err.message))
         })
     },
 
@@ -211,13 +184,9 @@ const ServerRequestMethodAllMap = {
     SearchUsers(key) {
         return new Promise((res, rej) => {
             axios
-                .get("/api/search/SearchUsers", { params: { key } })
-                .then(result => {
-                    res(result.data)
-                })
-                .catch(err => {
-                    rej(err.message)
-                })
+                .get("/api/search/users", { params: { key } })
+                .then(result => res(result.data))
+                .catch(err => rej(err.message))
         })
     },
 
@@ -229,15 +198,9 @@ const ServerRequestMethodAllMap = {
     VerifyTokenIsOut() {
         return new Promise((res, rej) => {
             axios
-                .post("/api/verifyToken", {
-                    token: process.TIBOOK["USER_CONFIG"]["user_data"]["token"]
-                })
-                .then(result => {
-                    res(result.data)
-                })
-                .catch(err => {
-                    rej(err.message)
-                })
+                .get("/api/verifyToken")
+                .then(result => res(result.data))
+                .catch(err => rej(err.message))
         })
     }
 }
