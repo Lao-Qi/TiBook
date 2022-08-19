@@ -7,11 +7,19 @@
  * 这样可以把部分资源转移到子进程，但是请求的过程会变得比较繁琐
  * 因为不管是主进程告诉子进程要发送请求，还是子进程把请求结构进行返回，都是比较繁琐的
  */
+const { type } = require("os")
+const { publicEncrypt } = require("crypto")
+const { createReadStream } = require("fs")
+const {
+    win32: { parse }
+} = require("path")
 const {
     default: { create }
 } = require("axios")
-const { type } = require("os")
-const { publicEncrypt } = require("crypto")
+
+function getToken() {
+    return process.TIBOOK?.USER_CONFIG?.user_data?.token
+}
 
 const axios = create({
     baseURL: "http://localhost:8080",
@@ -19,7 +27,7 @@ const axios = create({
     // 跨域请求需要携带凭证(cookie)
     withCredentials: true,
     headers: {
-        token: process.TIBOOK?.USER_CONFIG?.user_data?.token
+        token: getToken()
     }
 })
 
@@ -40,6 +48,7 @@ process.onLoadMsg(({ request, args = [], renderProcessMark }) => {
     ServerRequestMethodAllMap[request](...args)
         .then(result => {
             process.loadSend({
+                type: "request",
                 result,
                 request,
                 state: 0,
@@ -48,6 +57,7 @@ process.onLoadMsg(({ request, args = [], renderProcessMark }) => {
         })
         .catch(result => {
             process.loadSend({
+                type: "request",
                 result,
                 request,
                 state: 1,
@@ -118,6 +128,82 @@ const ServerRequestMethodAllMap = {
                         .catch(err => rej(err.message))
                 })
                 .catch(rej)
+        })
+    },
+
+    /**
+     * @emample 未过期的token的登用户
+     */
+    TokenLoginUser() {
+        return new Promise((res, rej) => {
+            axios
+                .post("/api/user/tokenLogin")
+                .then(result => res(result.data))
+                .catch(err => rej(err.message))
+        })
+    },
+
+    /**
+     * @emample 获取本地token中的用户信息
+     */
+    FindTokenUser() {
+        return new Promise((res, rej) => {
+            axios
+                .get("/api/search/findTokenUser")
+                .then(result => res(result.data))
+                .catch(err => rej(err.message))
+        })
+    },
+
+    /**
+     * @emample 获取本地token中的用户详细信息
+     * @returns {Promise<Object | String>}
+     */
+    FindTokenUserInfo() {
+        return new Promise((res, rej) => {
+            axios
+                .get("/api/search/findTokenUserInfo")
+                .then(result => res(result.data))
+                .catch(err => rej(err.message))
+        })
+    },
+
+    /**
+     * @emample 更新用户的详细文件数据
+     * @param {any} info
+     * @returns {Promise<Object | string>}
+     */
+    UpdateUserTextInfo(info) {
+        return new Promise((res, rej) => {
+            axios
+                .post("/api/user/updateUserTextInfo", { from: { ...info } })
+                .then(result => res(result.data))
+                .catch(err => rej(err.message))
+        })
+    },
+
+    /**
+     * @emample 修改头像
+     * @returns {Promise<Object | Boolean>}
+     */
+    UploadAvatar(path) {
+        return new Promise(async (res, rej) => {
+            StreamPostFile(path, "hex", "/api/user/uploadAvatar")
+                .then(result => res(result.data))
+                .catch(err => rej(err.message))
+        })
+    },
+
+    /**
+     * 上传用户的个性背景图片
+     * @param {string} path
+     * @returns {Promise<Object | Boolean>}
+     */
+    UploadPPictures(path) {
+        return new Promise((res, rej) => {
+            StreamPostFile(path, "hex", "/api/user/uploadPPictures")
+                .then(result => res(result.data))
+                .catch(err => rej(err.message))
         })
     },
 
@@ -203,4 +289,92 @@ const ServerRequestMethodAllMap = {
                 .catch(err => rej(err.message))
         })
     }
+}
+
+/**
+ * 流式传输文件
+ * @param {string} filePath
+ * @param {string} path
+ */
+function StreamPostFile(filePath, encode, path) {
+    return new Promise((res, rej) => {
+        const fileInfo = parse(filePath)
+        // 创建文件的读取流
+        const fileStream = createReadStream(filePath, { encoding: encode })
+        let schedule = 0
+        // 先暂停读取
+        fileStream.pause()
+        // 文件被打开
+        fileStream.on("open", () => {
+            // 告诉服务器，服务器将创建一个写入流
+            axios
+                .post(path, {
+                    type: "open",
+                    encode,
+                    ext: fileInfo.ext,
+                    name: fileInfo.name
+                })
+                .then(result => {
+                    // 创建成功，开始读取数据
+                    console.log(result.data, "open")
+                    if (result.data.post) {
+                        fileStream.resume()
+                        // 把文件上传的状态发送到前端
+                        process.loadSend({
+                            type: "tool-passive",
+                            event: "server-tool-file-start-upload",
+                            state: 0,
+                            content: "文件开始上传"
+                        })
+                    } else {
+                        // 创建失败，关闭读取流，返回失败的请求消息
+                        fileStream.close(err => console.error(err))
+                        res(result)
+                    }
+                })
+                .catch(rej)
+        })
+
+        // 服务器创建成功会开始读取数据，触发data事件
+        fileStream.on("data", data => {
+            axios
+                .post(path, { type: "data", data })
+                .then(result => {
+                    console.log(result.data, "data")
+                    process.loadSend({
+                        type: "tool-passive",
+                        event: "server-tool-file-uploading",
+                        state: 0,
+                        content: {
+                            data: result.data,
+                            schedule: ++schedule
+                        }
+                    })
+                })
+                .catch(err => {
+                    fileStream.close()
+                    rej(err)
+                })
+        })
+
+        fileStream.on("end", () => {
+            axios
+                .post(path, { type: "end" })
+                .then(result => {
+                    console.log(result.data, "end")
+                    fileStream.close()
+                    res(result)
+                })
+                .catch(err => {
+                    rej(err)
+                    console.error(err.message)
+                })
+        })
+
+        fileStream.on("error", err => {
+            axios.post(path, { type: "error" })
+            fileStream.close(err => console.error(err))
+            rej(err)
+        })
+    })
 }
