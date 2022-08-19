@@ -115,6 +115,7 @@ function startServerRequireTools() {
      * fork一个进程来运行工具文件
      */
     const ServerRequestProcess = CreateToolProcess(join(__dirname, "./tools/ServerRequest.js"), "ServerRequest")
+    const RenderWithBoundServerEvents = {}
 
     ipcMain.on("server-request-send", (_, renderProcessMark, request, ...args) => {
         ServerRequestProcess.send({
@@ -124,8 +125,25 @@ function startServerRequireTools() {
         })
     })
 
-    ServerRequestProcess.onmessage(({ result, request, state, renderProcessMark }) => {
-        AllServiceProcess[renderProcessMark].send("server-request-return", request, result, state)
+    ipcMain.on("render-listener-socket-event", (_, RenderMark, event) => {
+        RenderWithBoundServerEvents[event] ??= []
+        RenderWithBoundServerEvents[event].push(RenderMark)
+    })
+
+    ServerRequestProcess.onmessage(msg => {
+        if (msg.type === "request") {
+            const { renderProcessMark, request, result, state } = msg
+            AllServiceProcess[renderProcessMark].send("server-request-return", request, result, state)
+        } else {
+            const { event, state, content } = msg
+            // 有监听此事件的渲染进程 Listener This Event Renderer Process s Mark
+            const LTERPSM = RenderWithBoundServerEvents[event]
+            if (LTERPSM?.length) {
+                for (let i = 0; i < LTERPSM.length; i++) {
+                    AllServiceProcess[LTERPSM[i]].send("server-request-proactive-return", event, content, state)
+                }
+            }
+        }
     })
 }
 

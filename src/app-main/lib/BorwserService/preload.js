@@ -23,6 +23,8 @@ const LocalOperationCallbackMap = {}
 const SocketCommunicateCallbackMap = {}
 /** 套接字事件管理方法集合表 */
 const ListenerSocketEventsMap = {}
+/** 服务端触发的事件回调集合表 */
+const ListenerServerEventsMap = {}
 /** 监听渲染进程的环境变量变化回调的集合表 */
 const WatchRenderEnvKeySetterMap = {}
 
@@ -107,7 +109,7 @@ window.TIBOOK.socketCommunicate = function (request, ...args) {
 }
 
 /**
- * 对ipcRenderer进行一个小封装
+ * 用于绑定socket被动触发的事件的绑定器
  * @param {string} event
  * @param {Function} callback
  */
@@ -115,6 +117,17 @@ window.TIBOOK.onSocket = function (event, callback) {
     ipcRenderer.send("render-listener-socket-event", window.TIBOOK["Mark"], event)
     ListenerSocketEventsMap[event] ??= []
     ListenerSocketEventsMap[event].push(callback)
+}
+
+/**
+ * 用于绑定server被动触发的事件的绑定器
+ * @param {string} event
+ * @param {Function} callback
+ */
+window.TIBOOK.onServer = function (event, callback) {
+    ipcRenderer.send("render-listener-server-event", window.TIBOOK["Mark"], event)
+    ListenerServerEventsMap[event] ??= []
+    ListenerServerEventsMap[event].push(callback)
 }
 
 /**
@@ -140,6 +153,15 @@ window.TIBOOK.once = (event, callback) => ipcRenderer.once(event, callback)
 ipcRenderer.on("server-request-return", (_, request, result, state) => {
     /** 调用对应操作函数的回调数组中的第一个回调，并将下一个回调置为第一个 */
     ServerRequestCallbackMap[request]?.shift()(result, state)
+})
+
+ipcRenderer.on("server-request-proactive-return", (_, event, content, state) => {
+    const ListenerServerEventList = ListenerServerEventsMap[event]
+    if (ListenerServerEventList?.length) {
+        for (let i = 0; i < ListenerServerEventList.length; i++) {
+            ListenerServerEventList[i](content, state)
+        }
+    }
 })
 
 ipcRenderer.on("local-operation-return", (_, request, result, state) => {
