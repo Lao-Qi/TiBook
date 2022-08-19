@@ -17,24 +17,28 @@ watch(
     { immediate: true }
 )
 
-const operateMap = {
-    conciseLogin() {
+function loginResultDealWith(result) {
+    if (result.code === 200) {
+        TIBOOK.env["USER_CONFIG"]["user_data"] = {
+            info: result.data.userDoc,
+            token: result.data.token,
+            upLoginDate: Date.now()
+        }
         TIBOOK.renderEnv.login = true
         router.replace({ path: "/main" })
+        return
+    }
+
+    alert("登录失败", result.msg)
+}
+
+const operateMap = {
+    conciseLogin() {
+        TIBOOK.serverRequest("TokenLoginUser", loginResultDealWith)
     },
     loginUser(account, password) {
         if (account && password) {
-            TIBOOK.serverRequest("LoginUser", account, password, result => {
-                if (result.code === 200) {
-                    TIBOOK.env["USER_CONFIG"]["user_data"] = {
-                        info: result.data.userDoc,
-                        token: result.data.token,
-                        upLoginDate: Date.now()
-                    }
-                    TIBOOK.renderEnv.login = true
-                    router.replace({ path: "/main" })
-                }
-            })
+            TIBOOK.serverRequest("LoginUser", account, password, loginResultDealWith)
         } else {
             alert("请完整的填写表单信息")
         }
