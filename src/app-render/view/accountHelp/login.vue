@@ -7,8 +7,8 @@ import { reactive, defineEmits, onMounted, ref } from "vue"
 const emit = defineEmits(["toggleUserState", "runStateOperate"])
 
 const TIBOOK = window.TIBOOK
-const user_data = TIBOOK.env.USER_CONFIG.user_data
 
+const user_data = ref(null)
 const accountInput = ref(null)
 const passwordInput = ref(null)
 const runOperationButton = ref(null)
@@ -17,8 +17,13 @@ const loginModel = ref("normal") // normal || concise
 
 
 // 验证本地token，设置登录模式
-TIBOOK.serverRequest("VerifyTokenIsOut", (result) => {
-    if(result.data) loginModel.value = "concise"
+TIBOOK.serverRequest("FindTokenUser", (result) => {
+    if(result?.code === 200) {
+        loginModel.value = "concise"
+        user_data.value = result.data
+    } else if(result.code === 400){
+        emit("toggleUserState")
+    }
 })
 
 const input = reactive({
@@ -35,7 +40,7 @@ const input = reactive({
 })
 
 onMounted(() => {
-    if(loginModel.value !== "concise") {
+    if(loginModel.value === "normal") {
         accountInput.value.focus()
     }
 })
@@ -90,10 +95,10 @@ onMounted(() => {
     </div>
     <div class="concise-login-model-container" v-else>
         <div class="login-user-avatar" @click="emit('runStateOperate','conciseLogin')">
-            <img :src="user_data.info.avatar" :alt="user_data.info.name">
+            <img :src="user_data.avatar" :alt="user_data.name">
         </div>
         <div class="login-user-name">
-            <p>{{user_data.info.name}}</p>
+            <p>{{user_data.name}}</p>
         </div>
     </div>
     <div class="login-operation" :class="{'normal-model': loginModel === 'concise'}">
