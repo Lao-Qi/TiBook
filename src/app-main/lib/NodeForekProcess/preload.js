@@ -9,9 +9,8 @@
  */
 
 process["TIBOOK"] = JSON.parse(process.env["TIBOOK"])
+
 /**
- * msg.URL为要加载的资源入口文件，是一个绝对地址
- *
  * 封装一个loadSend供加载的工具文件内部使用
  */
 process.loadSend = function (...args) {
@@ -32,9 +31,11 @@ process.onLoadMsg = function (cb) {
 
 process.on("message", msg => {
     switch (msg.type) {
-        case "load":
+        // 接收并运行要加载的工具入口文件
+        case "load-resource":
             require(msg.URL)
             break
+        // 发送给加载资源环境的内容
         case "send-load":
             loadonMessageCB && loadonMessageCB(msg.content)
             break
@@ -57,5 +58,6 @@ process.on("message", msg => {
                     }
                 ]
             })
+            break
     }
 })

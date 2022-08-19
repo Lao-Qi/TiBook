@@ -41,8 +41,14 @@ class ToolProcess {
             }
         })
 
-        child.send({ type: "load", URL })
+        /** URL为要加载的资源入口文件，是一个绝对地址，type: load-resource表示加载的资源 */
+        child.send({ type: "load-resource", URL })
 
+        /**
+         * 预加载环境发送过来的消息就调用预加载对应处理函数
+         *
+         * 加载环境发送过来的消息就直接调用主进程有给onmessage方法传递的回调
+         */
         child.on("message", msg => {
             switch (msg.env) {
                 case "preload":
