@@ -17,8 +17,8 @@ const {
     default: { create }
 } = require("axios")
 
-function getToken() {
-    return process.TIBOOK?.USER_CONFIG?.user_data?.token
+const headers = {
+    token: process.TIBOOK?.USER_CONFIG?.user_data?.token
 }
 
 const axios = create({
@@ -26,9 +26,13 @@ const axios = create({
     timeout: 4000,
     // 跨域请求需要携带凭证(cookie)
     withCredentials: true,
-    headers: {
-        token: getToken()
-    }
+    headers
+})
+
+// 拦截请求，将token修改为最新的token
+axios.interceptors.request.use(config => {
+    config.headers = headers
+    return config
 })
 
 /**
@@ -183,13 +187,46 @@ const ServerRequestMethodAllMap = {
     },
 
     /**
+     * @emample 修改用户的账号
+     * @param {string} naccount
+     * @returns {Promise<Object | string>}
+     */
+    UpdateUserAccount(naccount) {
+        return new Promise((res, rej) => {
+            axios
+                .post("/api/user/updateAvatar", { naccount })
+                .then(result => res(result.data))
+                .catch(err => rej(err.message))
+        })
+    },
+
+    /**
+     * @emample 修改用户的名称
+     * @param {string} nname
+     * @returns {Promise<Object | string>}
+     */
+    UpdateUserName(nname) {
+        return new Promise((res, rej) => {
+            axios
+                .post("/api/user/updateName", { nname })
+                .then(result => res(result.data))
+                .catch(err => rej(err.message))
+        })
+    },
+
+    /**
      * @emample 修改头像
      * @returns {Promise<Object | Boolean>}
      */
     UploadAvatar(path) {
         return new Promise(async (res, rej) => {
             StreamPostFile(path, "hex", "/api/user/uploadAvatar")
-                .then(result => res(result.data))
+                .then(result => {
+                    if (result.post) {
+                        headers.token = result.ntoken
+                    }
+                    res(result.data)
+                })
                 .catch(err => rej(err.message))
         })
     },
