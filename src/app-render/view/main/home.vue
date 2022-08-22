@@ -2,6 +2,7 @@
 import { reactive, onMounted, ref } from "vue"
 import { AddPic } from "@icon-park/vue-next"
 import monemt from "moment"
+import Notification from "../../components/notification-popup";
 
 const TIBOOK = window.TIBOOK
 const USER_CONFIG = TIBOOK.env.USER_CONFIG
@@ -66,6 +67,7 @@ const infoCorrespondLocation = {
 // 有被修改过的文本信息
 const infoHaveUpdate = ref({})
 const baseicInfoHaveUpdate = ref({})
+let updateImageNotification = null, updateInfoNotification = null
 
 // 文件的选择框
 const fileicker = reactive({
@@ -75,12 +77,22 @@ const fileicker = reactive({
 
 /** 选择个性图片 */
 function updateUSerPPicture() {
+    updateImageNotification = Notification({
+        type: "info",
+        title: "状态",
+        content: "正在修改您的个性图片"
+    })
     fileicker.type = "PPicture"
     fileicker.el.click()
 }
 
 /** 选择头像 */
 function updateUserAvatar() {
+    updateImageNotification = Notification({
+        type: "info",
+        title: "状态",
+        content: "正在修改您的头像"
+    })
     fileicker.type = "avatar"
     fileicker.el.click()
 }
@@ -105,12 +117,25 @@ function endInputBaseicInfoValue(field) {
 
 /** 向服务器提交修改过的消息 */
 function pushUpdateInfo() {
+    updateInfoNotification = Notification({
+        type: "info",
+        title: "状态",
+        content: "正在修改您的头像"
+    })
     const updateInfo = {}
     Object.keys(infoHaveUpdate.value).forEach(field => {
         updateInfo[field] = userInfo[infoCorrespondLocation[field]][field].value
     })
 
     TIBOOK.serverRequest("UpdateUserTextInfo", updateInfo, result => {
+        updateInfoNotification().then(close => close())
+        
+        Notification({
+            type: result.code,
+            title: "修改状态",
+            content: result.msg
+        })
+
         if(result.post) {
             for(const [key, value] of Object.entries(updateInfo)) {
                 startUserTextInfo[key] = value
@@ -122,7 +147,14 @@ function pushUpdateInfo() {
     Object.keys(baseicInfoHaveUpdate.value).forEach(field => {
         const requestName = field === "name" ? "UpdateUserName": "UpdateUserAccount"
         TIBOOK.serverRequest(requestName, userInfo.basic[field], result => {
-            console.log(result);
+            updateInfoNotification().then(close => close())
+
+            Notification({
+                type: result.code,
+                title: "修改状态",
+                content: result.msg
+            })
+
             if(result.post) {
                 startBaseicUserInfo[field] = result.data[field]
 
@@ -137,19 +169,21 @@ function pushUpdateInfo() {
 // 获取登录的用户详细数据
 TIBOOK.serverRequest("FindTokenUserInfo", result => {
     console.log(result);
-    for (const [key, value] of Object.entries(result.data)) {
-        switch (infoCorrespondLocation[key]) {
-            case "basic": userInfo[infoCorrespondLocation[key]][key] = value; break;
-            case "textInfo": userInfo[infoCorrespondLocation[key]][key].value = value; break;
-            case "personality": userInfo[infoCorrespondLocation[key]][key].value = value; break;
+    if(result.code === 200) {
+        for (const [key, value] of Object.entries(result.data)) {
+            switch (infoCorrespondLocation[key]) {
+                case "basic": userInfo[infoCorrespondLocation[key]][key] = value; break;
+                case "textInfo": userInfo[infoCorrespondLocation[key]][key].value = value; break;
+                case "personality": userInfo[infoCorrespondLocation[key]][key].value = value; break;
+            }
         }
-    }
 
-    userInfo.basic.registerTime = monemt(result.data.registerTime).format("YYYY-MM-DD HH:mm:ss")
-    Object.keys(userInfo.textInfo).forEach(key => startUserTextInfo[key] = userInfo.textInfo[key].value)
-    startUserTextInfo.signature = userInfo.personality.signature.value
-    startBaseicUserInfo["name"] = userInfo.basic.name
-    startBaseicUserInfo["account"] = userInfo.basic.account
+        userInfo.basic.registerTime = monemt(result.data.registerTime).format("YYYY-MM-DD HH:mm:ss")
+        Object.keys(userInfo.textInfo).forEach(key => startUserTextInfo[key] = userInfo.textInfo[key].value)
+        startUserTextInfo.signature = userInfo.personality.signature.value
+        startBaseicUserInfo["name"] = userInfo.basic.name
+        startBaseicUserInfo["account"] = userInfo.basic.account
+    }
 })
 
 onMounted(() => {
@@ -158,7 +192,14 @@ onMounted(() => {
         const type = fileicker.type
         console.log(fileicker.el.files);
         TIBOOK.serverRequest(type === "avatar" ? "UploadAvatar" : "UploadPPictures", filePath, result => {
-            console.log(result);
+            updateImageNotification().then(close => close())
+
+            Notification({
+                type: result.code,
+                title: "修改状态",
+                content: result.msg
+            })
+
             if (result.post === true) {
                 if(type === "avatar") {
                     userInfo.basic.avatar = result.path

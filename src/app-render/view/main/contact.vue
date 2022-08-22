@@ -1,8 +1,9 @@
 <script setup>
-import { DropDownList } from "@icon-park/vue-next"
 import { ref, reactive } from "vue"
+import { DropDownList } from "@icon-park/vue-next"
 import moment from "moment"
 import userInfoContainer from "../../components/user-info-container.vue"
+import Notification from "../../components/notification-popup"
 
 const TIBOOK = window.TIBOOK
 
@@ -27,26 +28,25 @@ function showListArea(area) {
  * @param {any} userBaseInfo
  * @param {string} AddTime
  */
-async function showUserInfo(userBaseInfo, AddTime) {
-    const userInfo = await getUserInfo(userBaseInfo.account)
-    userInfo.showType = "newfriend"
-    if (AddTime) {
-        userInfo.AddTime = moment(AddTime).format("YYYY-MM-DD HH:mm:ss")
-        userInfo.showType = "friend"
-    }
-    console.log(userInfo)
-    showUser.value = userInfo
-}
-
-/**
- * 获取用户详细信息
- * @param {string} account
- */
-function getUserInfo(account) {
-    return new Promise(res => {
-        TIBOOK.serverRequest("SearchUserInfo", account, result => {
-            res(result.data)
+function showUserInfo(userBaseInfo, AddTime) {
+    TIBOOK.serverRequest("SearchUserInfo", userBaseInfo.account, result => {
+        Notification({
+            type: result.code,
+            title: "用户信息获取状态",
+            content: result.msg
         })
+
+        if (result.code === 200) {
+            const userInfo = result.data
+            userInfo.showType = "newfriend"
+            if (AddTime) {
+                userInfo.AddTime = moment(AddTime).format("YYYY-MM-DD HH:mm:ss")
+                userInfo.showType = "friend"
+            }
+            console.log(userInfo)
+            showUser.value = userInfo
+            console.log(result)
+        }
     })
 }
 
@@ -61,8 +61,14 @@ function addFriend() {
 
 // 获取用户的好友列表
 TIBOOK.serverRequest("FindUserFriends", result => {
+    console.log(result)
+    Notification({
+        type: result.code,
+        title: "好友列表获取状态",
+        content: result.msg
+    })
     if (result.code === 200) {
-        friends.value = result.firendsList
+        friends.value = result.data
     }
 })
 
@@ -120,11 +126,11 @@ TIBOOK.onSocket("socket-add-friend", result => {
     width: 100%;
     height: 100%;
     justify-content: space-between;
-    user-select: none;
 
     .friends-list-container {
         width: 230px;
         height: 100%;
+        user-select: none;
 
         .list-area-title {
             position: relative;
@@ -148,7 +154,7 @@ TIBOOK.onSocket("socket-add-friend", result => {
 
             .i-icon-drop-down-list {
                 transform: rotateZ(90deg);
-                transition: all ease 0.2s;
+                transition: all cubic-bezier(0.04, 0.22, 0.41, 1.54) 0.2s;
             }
         }
 
@@ -162,9 +168,9 @@ TIBOOK.onSocket("socket-add-friend", result => {
             width: 100%;
             height: 0;
             opacity: 0;
-            box-shadow: var(--box-inset-show);
-            overflow: hidden;
-            transition: all ease 0.3s;
+            overflow-x: hidden;
+            overflow-y: scroll;
+            transition: all cubic-bezier(0.04, 0.22, 0.41, 1.54) 0.2s;
 
             .list-area-ele {
                 position: relative;
@@ -179,8 +185,8 @@ TIBOOK.onSocket("socket-add-friend", result => {
                     top: 50%;
                     left: 10px;
                     transform: translateY(-50%);
-                    width: 50px;
-                    height: 50px;
+                    width: 40px;
+                    height: 40px;
                     border-radius: 10px;
                 }
 

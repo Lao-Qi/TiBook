@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from "vue"
 import { useRouter } from "vue-router"
+import Notification from "../components/notification-popup"
 
 const TIBOOK = window.TIBOOK
 const router = useRouter()
@@ -18,6 +19,12 @@ watch(
 )
 
 function loginResultDealWith(result) {
+    Notification({
+        type: result.code,
+        title: "登录信息",
+        content: result.msg
+    })
+
     if (result.code === 200) {
         TIBOOK.env["USER_CONFIG"]["user_data"] = {
             info: result.data.userDoc,
@@ -46,13 +53,21 @@ const operateMap = {
     registerUser(name, account, password) {
         if (name && account && password) {
             TIBOOK.serverRequest("RegisterUser", name, account, password, result => {
-                alert(result.msg)
+                Notification({
+                    type: result.code,
+                    title: "登录信息",
+                    content: result.msg
+                })
                 if (result.code === 200) {
                     ToggleUserState()
                 }
             })
         } else {
-            alert("请填写完整的填写表单信息")
+            Notification({
+                type: "warn",
+                title: "注意",
+                content: "请填写完整的表单信息"
+            })
         }
     }
 }
