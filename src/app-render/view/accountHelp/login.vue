@@ -18,11 +18,10 @@ const loginModel = ref("normal") // normal || concise
 
 // 验证本地token，设置登录模式
 TIBOOK.serverRequest("FindTokenUser", (result) => {
+    console.log(result);
     if(result?.code === 200) {
         loginModel.value = "concise"
         user_data.value = result.data
-    } else if(result.code === 400){
-        emit("toggleUserState")
     }
 })
 
