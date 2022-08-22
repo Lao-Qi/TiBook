@@ -26,7 +26,7 @@ const showUser = computed(() => props.userInfo)
             <div class="left-content">
                 <div class="user-basic-info-container">
                     <div class="user-avatar">
-                        <img :src="userInfo.avatar" />
+                        <img :src="showUser.avatar" />
                     </div>
                     <div class="user-name">
                         <p>{{ showUser.name }}</p>
@@ -38,44 +38,57 @@ const showUser = computed(() => props.userInfo)
                 <div class="user-text-info-container">
                     <div class="user-text-info-ele" v-if="showUser.AddTime">
                         <p class="explain">添加时间</p>
-                        <p>{{ showUser.AddTime === "none" ? "用户未设置" : showUser.AddTime }}</p>
-                        <div class="user-text-info-ele-cue-line cue-line-color"></div>
+                        <p>
+                            <span>{{ showUser.AddTime === "none" ? "用户未设置" : showUser.AddTime }}</span>
+                            <div class="user-text-info-ele-cue-line cue-line-color"></div>
+                        </p>
                     </div>
                     <div class="user-text-info-ele">
                         <p class="explain">邮箱</p>
-                        <p>{{ showUser.mail === "none" ? "用户未设置" : showUser.mail }}</p>
-                        <div class="user-text-info-ele-cue-line cue-line-color"></div>
+                        <p>
+                            <span>{{ showUser.mail === "none" ? "用户未设置" : showUser.mail }}</span>
+                            <div class="user-text-info-ele-cue-line cue-line-color"></div>
+                        </p>
                     </div>
                     <div class="user-text-info-ele">
                         <p class="explain">年龄</p>
-                        <p>{{ showUser.age === "none" ? "用户未设置" : showUser.age }}</p>
-                        <div class="user-text-info-ele-cue-line cue-line-color"></div>
+                        <p>
+                            <span>{{ showUser.age === "none" ? "用户未设置" : showUser.age }}</span>
+                            <div class="user-text-info-ele-cue-line cue-line-color"></div>
+                        </p>
+
                     </div>
                     <div class="user-text-info-ele">
                         <p class="explain">性别</p>
-                        <p>{{ showUser.gender === "none" ? "用户未设置" : showUser.gender }}</p>
-                        <div class="user-text-info-ele-cue-line cue-line-color"></div>
+                        <p>
+                            <span>{{ showUser.gender === "none" ? "用户未设置" : showUser.gender }}</span>
+                            <div class="user-text-info-ele-cue-line cue-line-color"></div>
+                        </p>
+                        
                     </div>
                     <div class="user-text-info-ele">
                         <p class="explain">出生日期</p>
-                        <p>{{ showUser.birth === "none" ? "用户未设置" : showUser.birth }}</p>
-                        <div class="user-text-info-ele-cue-line cue-line-color"></div>
+                        <p>
+                            <span>{{ showUser.birth === "none" ? "用户未设置" : showUser.birth }}</span>
+                            <div class="user-text-info-ele-cue-line cue-line-color"></div>
+                        </p>
                     </div>
                     <div class="user-text-info-ele">
                         <p class="explain">地址</p>
-                        <p>{{ showUser.address === "none" ? "用户未设置" : showUser.address }}</p>
-                        <div class="user-text-info-ele-cue-line cue-line-color"></div>
+                        <p>
+                            <span>{{ showUser.address === "none" ? "用户未设置" : showUser.address }}</span>
+                            <div class="user-text-info-ele-cue-line cue-line-color"></div>
+                        </p>
                     </div>
                 </div>
             </div>
             <div class="right-content">
-                <div class="user-personality-info-container">
-                    <div class="user-personalized-background-picture">
-                        <img src="../../assets/img/f062936a96d3c8bd1474189161.jpg" v-if="showUser.cover === 'none'" />
-                    </div>
-                    <div class="user-personalized-signature">
-                        {{ showUser.signature === "none" ? "该用户可能也许应该大概或许八成不想通过此等途径展示自己的个性签名" : showUser.signature }}
-                    </div>
+                <div class="user-personalized-background-picture">
+                    <!-- <img :src="userInfo.cover" v-if="showUser.cover === 'none'" /> -->
+                    <img src="../assets/img/f062936a96d3c8bd1474189161.jpg" alt="">
+                </div>
+                <div class="user-personalized-signature" :class="{ 'is-not-signature': showUser.signature }" :style="{'user-select': showUser.signature !== 'none' ? 'auto' : 'none'}">
+                    <p>{{ showUser.signature === "none" ? "该用户还没展示自己的个性签名" : showUser.signature }}</p>
                 </div>
             </div>
         </div>
@@ -97,11 +110,11 @@ const showUser = computed(() => props.userInfo)
     .info-container-in-container {
         display: flex;
         width: 100%;
-        height: 55%;
+        height: 70%;
 
         .left-content {
             display: flex;
-            width: 320px;
+            width: 400px;
             flex-direction: column;
 
             .user-basic-info-container {
@@ -116,10 +129,10 @@ const showUser = computed(() => props.userInfo)
 
                 .user-avatar {
                     position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100px;
-                    height: 100px;
+                    top: 20px;
+                    left: 20px;
+                    width: 80px;
+                    height: 80px;
                     border-radius: 10px;
                     overflow: hidden;
                     user-select: none;
@@ -139,9 +152,14 @@ const showUser = computed(() => props.userInfo)
             }
 
             .user-text-info-container {
-                margin-top: auto;
+                flex: 1;
+                display: flex;
+                padding-top: 10px;
+                justify-content: space-between;
 
                 .user-text-info-ele {
+                    display: flex;
+                    align-items: center;
                     width: 70%;
                     min-width: 200px;
                     height: 30px;
@@ -149,12 +167,17 @@ const showUser = computed(() => props.userInfo)
 
                     p {
                         display: inline-block;
-                        font-size: 14px;
+
+                        &:nth-child(2) {
+                            flex: 1;
+                            font-size: 15px;
+                            text-align: center;
+                        }
                     }
 
                     .explain {
-                        width: 65px;
-                        font-size: 15px;
+                        width: 75px;
+                        font-size: 17px;
                         margin-right: 15px;
                         user-select: none;
                     }
@@ -170,29 +193,42 @@ const showUser = computed(() => props.userInfo)
 
         .right-content {
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
 
-            .user-personality-info-container {
-                position: relative;
-                width: 100%;
-                height: 100%;
+            .user-personalized-background-picture {
+                display: flex;
+                width: auto;
+                height: 260px;
+                align-items: center;
+                justify-content: right;
                 overflow: hidden;
 
-                .user-personalized-background-picture {
-                    width: max-content;
-                    height: 100%;
-                    opacity: 0.7;
+                img {
+                    width: auto;
                 }
+            }
 
-                .user-personalized-signature {
-                    position: absolute;
-                    top: 10px;
-                    left: 10px;
-                    width: max-content;
+            .user-personalized-signature {
+                margin-top: 20px;
+                width: 100%;
+                height: 100px;
+                overflow-y: scroll;
+                overflow-x: hidden;
+                padding: 5px;
+                border-radius: 10px 0 0 10px;
+                background-color: rgba(143, 143, 143, 0.2);
+
+                p {
+                    width: 100%;
                     height: max-content;
-                    padding-block: 2px;
-                    border-radius: 10px;
-                    color: #ccc;
+                    word-break: break-all;
                 }
+            }
+
+            .is-not-signature {
+                color: #ccc;
             }
         }
     }
