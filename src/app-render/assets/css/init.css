@@ -19,8 +19,8 @@ html {
     --not-me-message-text-color: #3d3d3d;
     --is-me-message-background-color: #2c87f4;
     --is-me-message-text-color: #ffffff;
-    --operable-box-prompt-color: #226285;
     --cue--line-color: #2c87f4;
+    --all-transition: all cubic-bezier(0.04, 0.22, 0.41, 1.54) 0.2s;
 }
 
 body {
@@ -54,6 +54,7 @@ img {
 
 .view-element-container {
     border-radius: 10px;
+    /* box-shadow: var(--container-show), -3px -3px 4px rgba(57, 96, 164, 0.09) inset; */
     box-shadow: var(--container-show);
     background-color: var(--container-background-color);
 }
