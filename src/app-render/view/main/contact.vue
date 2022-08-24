@@ -1,11 +1,13 @@
 <script setup>
 import { ref, reactive } from "vue"
+import { useRouter, useRoute } from "vue-router"
 import { DropDownList } from "@icon-park/vue-next"
 import moment from "moment"
 import userInfoContainer from "../../components/user-info-container.vue"
 import Notification from "../../components/notification-popup"
 
 const TIBOOK = window.TIBOOK
+const router = useRouter()
 
 const friends = ref([])
 const newfriends = ref([])
@@ -50,12 +52,20 @@ function showUserInfo(userBaseInfo, AddTime) {
     })
 }
 
-/**
- * 添加好友
- */
+/** 添加好友 */
 function addFriend() {
     TIBOOK.serverRequest("AddFriend", showUser.value.account, result => {
         console.log(result)
+    })
+}
+
+/** 切换到聊天窗 */
+function toggleChatWindow() {
+    router.push({
+        name: "message",
+        params: {
+            joinAccount: showUser.value.account
+        }
     })
 }
 
@@ -154,7 +164,7 @@ TIBOOK.onSocket("socket-add-friend", result => {
 
             .i-icon-drop-down-list {
                 transform: rotateZ(90deg);
-                transition: all cubic-bezier(0.04, 0.22, 0.41, 1.54) 0.2s;
+                transition: var(--all-transition);
             }
         }
 
@@ -170,7 +180,7 @@ TIBOOK.onSocket("socket-add-friend", result => {
             opacity: 0;
             overflow-x: hidden;
             overflow-y: scroll;
-            transition: all cubic-bezier(0.04, 0.22, 0.41, 1.54) 0.2s;
+            transition: var(--all-transition);
 
             .list-area-ele {
                 position: relative;
