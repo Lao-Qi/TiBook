@@ -18,7 +18,7 @@ const {
 } = require("axios")
 
 const headers = {
-    token: process.TIBOOK?.USER_CONFIG?.user_data?.token
+    token: process.TIBOOK?.USER_CONFIG?.user_data?.token ?? ""
 }
 
 const axios = create({
@@ -128,7 +128,12 @@ const ServerRequestMethodAllMap = {
                     const ping = publicEncrypt(publicKey, Buffer.from(paw)).toString("base64")
                     axios
                         .post(`/api/user/login`, { account, ping })
-                        .then(result => res(result.data))
+                        .then(result => {
+                            if (result.data.code) {
+                                headers.token = result.data.data.token
+                            }
+                            res(result.data)
+                        })
                         .catch(err => rej(err.message))
                 })
                 .catch(rej)
@@ -142,7 +147,12 @@ const ServerRequestMethodAllMap = {
         return new Promise((res, rej) => {
             axios
                 .post("/api/user/tokenLogin")
-                .then(result => res(result.data))
+                .then(result => {
+                    if (result.data.code) {
+                        headers.token = result.data.data.token
+                    }
+                    res(result.data)
+                })
                 .catch(err => rej(err.message))
         })
     },
@@ -195,7 +205,12 @@ const ServerRequestMethodAllMap = {
         return new Promise((res, rej) => {
             axios
                 .post("/api/user/updateAvatar", { naccount })
-                .then(result => res(result.data))
+                .then(result => {
+                    if (result.data.post) {
+                        headers.token = result.data.ntoken
+                    }
+                    res(result.data)
+                })
                 .catch(err => rej(err.message))
         })
     },
@@ -209,7 +224,12 @@ const ServerRequestMethodAllMap = {
         return new Promise((res, rej) => {
             axios
                 .post("/api/user/updateName", { nname })
-                .then(result => res(result.data))
+                .then(result => {
+                    if (result.data.post) {
+                        headers.token = result.data.ntoken
+                    }
+                    res(result.data)
+                })
                 .catch(err => rej(err.message))
         })
     },
