@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, provide } from "vue"
+import { ref, reactive, watch, onMounted } from "vue"
 import { useRouter } from "vue-router"
 import { SettingConfig, Comment, Peoples, Me } from "@icon-park/vue-next"
 
@@ -7,23 +7,38 @@ const TIBOOK = window.TIBOOK
 const router = useRouter()
 const sideTipLine = ref(null)
 
-const sideNavBarItems = {
-    home: {
-        location: "top",
-        ranking: 0
+const sideNavBarList = {
+    top: {
+        home: {
+            el: null,
+            distance: 0,
+            toolstip: "我的"
+        },
+        message: {
+            el: null,
+            distance: 0,
+            toolstip: "消息"
+        },
+        contact: {
+            el: null,
+            distance: 0,
+            toolstip: "联系人"
+        }
     },
-    message: {
-        location: "top",
-        ranking: 1
-    },
-    contact: {
-        location: "top",
-        ranking: 2
-    },
-    config: {
-        location: "bottom",
-        ranking: 0
+    bottom: {
+        config: {
+            el: null,
+            distance: 0,
+            toolstip: "设置"
+        }
     }
+}
+
+const sideNavBarPlace = {
+    home: "top",
+    message: "top",
+    contact: "top",
+    config: "bottom"
 }
 
 const iconConfig = reactive({
@@ -35,40 +50,47 @@ const iconConfig = reactive({
 // 启动socket服务
 TIBOOK.send("start-socket-communication")
 
-const toggleOptions = page => {
-    router.push({ name: page })
-    // const itemInfo = sideNavBarItems[page]
-    // sideTipLine.value.setAttribute("style", `${itemInfo.location}: ${itemInfo.ranking * 60 + 9}px;`)
-}
+onMounted(() => {
+    for (const [name, navBar] of Object.entries(sideNavBarList.top)) {
+        navBar.distance = navBar.el.offsetTop
+    }
 
-provide("toggleOptions", toggleOptions)
+    for (const [name, navBar] of Object.entries(sideNavBarList.bottom)) {
+        navBar.distance = navBar.el.offsetTop
+    }
+    console.log(sideNavBarList)
+})
+
+watch(
+    router.currentRoute,
+    nroute => {
+        sideTipLine.value.style.top = sideNavBarList[sideNavBarPlace[nroute.name]][nroute.name].distance + "px"
+    },
+    {
+        deep: true
+    }
+)
 </script>
 
 <template>
     <div id="side-nav-bar">
         <div class="nav-top-option">
-            <div class="view-option-container" @click="toggleOptions('home')">
-                <me :theme="iconConfig.theme" :size="iconConfig.size" :fill="iconConfig.fill" />
-                <div class="option-toolstip">我的</div>
-            </div>
-            <div class="view-option-container" @click="toggleOptions('message')">
-                <comment :theme="iconConfig.theme" :size="iconConfig.size" :fill="iconConfig.fill" />
-                <div class="option-toolstip">消息</div>
-            </div>
-            <div class="view-option-container" @click="toggleOptions('contact')">
-                <peoples :theme="iconConfig.theme" :size="iconConfig.size" :fill="iconConfig.fill" />
-                <div class="option-toolstip">联系人</div>
+            <div v-for="(navBar, name) in sideNavBarList.top" class="view-option-container" @click="router.push({ name })" :ref="el => (navBar.el = el)">
+                <me v-if="name === 'home'" :theme="iconConfig.theme" :size="iconConfig.size" :fill="iconConfig.fill" />
+                <comment v-else-if="name === 'message'" :theme="iconConfig.theme" :size="iconConfig.size" :fill="iconConfig.fill" />
+                <peoples v-else-if="name === 'contact'" :theme="iconConfig.theme" :size="iconConfig.size" :fill="iconConfig.fill" />
+                <div class="option-toolstip">{{ navBar.toolstip }}</div>
             </div>
         </div>
         <div class="nav-bot-option">
-            <div class="view-option-container" @click="toggleOptions('config')">
-                <setting-config :theme="iconConfig.theme" :size="iconConfig.size" :fill="iconConfig.fill" />
-                <div class="option-toolstip">设置</div>
+            <div v-for="(navBar, name) in sideNavBarList.bottom" class="view-option-container" @click="router.push({ name })" :ref="el => (navBar.el = el)">
+                <setting-config v-if="name === 'config'" :theme="iconConfig.theme" :size="iconConfig.size" :fill="iconConfig.fill" />
+                <div class="option-toolstip">{{ navBar.toolstip }}</div>
             </div>
         </div>
         <div class="side-tip-line" ref="sideTipLine"></div>
     </div>
-    <div id="view-container">
+    <div class="view-container">
         <div class="background-logo-image">
             <img src="../assets/img/tibook-transparent-logo.png" />
         </div>
@@ -149,16 +171,17 @@ provide("toggleOptions", toggleOptions)
     // 侧边提示线
     .side-tip-line {
         position: absolute;
+        top: 9px;
         left: 0;
         width: 3px;
         height: 60px;
         border-radius: 10px;
         background-color: var(--cue--line-color);
-        transition: all ease 0.2s;
+        transition: var(--all-transition);
     }
 }
 
-#view-container {
+.view-container {
     display: flex;
     justify-content: center;
     align-items: center;
