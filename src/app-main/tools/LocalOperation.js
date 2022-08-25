@@ -146,7 +146,7 @@ const LocalOperationMethodAllMap = {
      * @example 修改卡片
      * @returns {Promise<{} | string>}
      */
-    UpdateChatUser(account, { date, content, _id: mid }) {
+    UpdateChatUser(account, { date, content, mid }) {
         return new Promise((res, rej) => {
             USER_CHATLIST.update(
                 {
@@ -154,7 +154,7 @@ const LocalOperationMethodAllMap = {
                 },
                 {
                     $set: {
-                        msg: {
+                        message: {
                             date,
                             content,
                             mid
@@ -173,6 +173,25 @@ const LocalOperationMethodAllMap = {
                           })
                 }
             )
+        })
+    },
+
+    /**
+     * 添加新消息本更新聊天用户的最新消息, 前提是聊天用户必须存在
+     * @param {string} account
+     * @param {{
+     *   mid: string,
+     *   from: string,
+     *   to: string,
+     *   type: string,
+     *   content: any
+     * }} msg
+     */
+    InsertMsgAndUpdateChatUser(account, msg) {
+        return new Promise((res, rej) => {
+            Promise.all([this.InsertMessage(msg), this.UpdateChatUser(account, msg)])
+                .then(result => res(result))
+                .catch(err => rej(err.message))
         })
     }
 }

@@ -86,19 +86,21 @@ const requestMethodAllMap = {
 
     /**
      * 发送消息
-     * @param {string} content 发送的文字内容
+     * @param {{ content: string }} 发送的文字内容
      */
-    async SendTextMessage(content) {
-        const uid = uid(20)
-        socket.emit("client-send-message", {
-            uid,
+    async SendTextMessage({ content }) {
+        const mid = uid(20)
+        const messageInfo = {
+            mid,
             type: "text",
             content,
             date: Date.now()
-        })
+        }
+        socket.emit("client-send-message", messageInfo)
+        console.log(messageInfo)
 
         /** 该事件与被动的receive-message事件不同，该事件是为了验证该条消息发送出去的状态 */
-        return await listenerMethodReturns(`client-send-message-return-${uid}`, "SendMessage")
+        return await listenerMethodReturns(`client-send-message-return-${mid}`, "SendMessage")
     },
 
     /**
@@ -156,12 +158,10 @@ function listenerMethodReturns(event, method) {
                 msg: `请求超时，请求的方法：${method}`
             })
         }, timeout)
-        socket.once(event, recipient => {
+        socket.once(event, result => {
             clearTimeout(RequestTiming)
-            res({
-                ...recipient,
-                msg: "请求成功"
-            })
+            res(result)
+            console.log(result)
         })
     })
 }
