@@ -73,7 +73,7 @@ const LocalOperationMethodAllMap = {
      * @param {string} account
      * @param {number} start
      * @param {number} end
-     * @returns {Promise<[] | string>}
+     * @returns {Promise<[{}] | string>}
      */
     OnDemandFindCorrespondAccountMessage(account, start = 0, amount = 50) {
         return new Promise((res, rej) => {
@@ -83,9 +83,7 @@ const LocalOperationMethodAllMap = {
                     // 及时清除这个巨大的内存占用量
                     messageDocs = null
                 })
-                .catch(err => {
-                    rej(err)
-                })
+                .catch(err => rej(err.message))
         })
     },
 
@@ -102,7 +100,7 @@ const LocalOperationMethodAllMap = {
                 },
                 {},
                 (err, numRemoved) => {
-                    err ? rej(err) : res(numRemoved)
+                    err ? rej(err.message) : res(numRemoved)
                 }
             )
         })
@@ -115,7 +113,7 @@ const LocalOperationMethodAllMap = {
     GetChatList() {
         return new Promise((res, rej) => {
             USER_CHATLIST.find({}, (err, docs) => {
-                err ? rej(err) : res(docs ?? [])
+                err ? rej(err.message) : res(docs ?? [])
             })
         })
     },
@@ -124,23 +122,23 @@ const LocalOperationMethodAllMap = {
      * @example 添加消息卡片
      * @returns {Promise<{} | string>}
      */
-    InsterChatCard({ account, avatar, uname, msg: { date, content, _id: mid } }) {
+    InsterChatUser(account) {
         return new Promise((res, rej) => {
-            USER_CHATLIST.insert(
-                {
-                    account,
-                    avatar,
-                    uname,
-                    msg: {
-                        date,
-                        content,
-                        mid
+            this.OnDemandFindCorrespondAccountMessage(account, 0, 1).then(msgRecord => {
+                USER_CHATLIST.insert(
+                    {
+                        account,
+                        message: {
+                            date: msgRecord[0]?.date ?? Date.now(),
+                            content: msgRecord[0]?.content ?? "",
+                            mid: msgRecord[0]?.mid ?? ""
+                        }
+                    },
+                    (err, nChatUser) => {
+                        err ? rej(err.message) : res(nChatUser)
                     }
-                },
-                (err, newDoc) => {
-                    err ? rej(err) : res(newDoc)
-                }
-            )
+                )
+            })
         })
     },
 
@@ -148,7 +146,7 @@ const LocalOperationMethodAllMap = {
      * @example 修改卡片
      * @returns {Promise<{} | string>}
      */
-    UpdateChatCard(account, { date, content, _id: mid }) {
+    UpdateChatUser(account, { date, content, _id: mid }) {
         return new Promise((res, rej) => {
             USER_CHATLIST.update(
                 {
