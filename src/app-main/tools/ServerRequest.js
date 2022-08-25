@@ -292,6 +292,22 @@ const ServerRequestMethodAllMap = {
     },
 
     /**
+     * 通过账号数组查询用户基本信息
+     * @param {Array} accounts
+     * @returns {Promise<Object | Boolean>}
+     */
+    FindUsers(accounts) {
+        return new Promise((res, rej) => {
+            axios
+                .post("/api/search/findUsers", {
+                    accounts
+                })
+                .then(result => res(result.data))
+                .catch(err => rej(err.message))
+        })
+    },
+
+    /**
      * @example 添加好友
      * @param { String } account
      * @returns { Promise<Object | Boolean }
