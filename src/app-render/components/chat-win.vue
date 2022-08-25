@@ -1,70 +1,46 @@
-<template>
-    <div class="chat-win">
-        <div class="title">
-            <img :src="avatar" :alt="name" />
-            <p>{{ name }}</p>
-        </div>
-        <div class="chat-win-content" ref="chatWin">
-            <template v-if="ChatHistory.length">
-                <div
-                    v-for="chatMessage in ChatHistory"
-                    :key="chatMessage.date"
-                    class="message"
-                    :class="{
-                        'not-me': chatMessage.from !== localUserInfo.account,
-                        'is-me': chatMessage.from === localUserInfo.account,
-                        'up-message-is-same-person': thisMessageIsMe(chatMessage.from === localUserInfo.account)
-                    }"
-                >
-                    <div class="message-content">
-                        <span>{{ chatMessage.content }}</span>
-                    </div>
-                </div>
-            </template>
-        </div>
-        <div class="input-box">
-            <div class="input-textarea-box">
-                <div class="textarea" contenteditable="true" spellcheck="false" ref="textareaBox" @keydown.shift.enter.prevent="SendMessage"></div>
-            </div>
-            <div class="send-btn-box">
-                <a href="javascript:;" class="send-btn" @click.prevent="SendMessage">
-                    <send theme="outline" size="20" fill="#fbfbfb" />
-                </a>
-            </div>
-        </div>
-    </div>
-</template>
+<script setup>
+import { ref, inject, watch } from "vue"
+// import { Send } from "@icon-park/vue-next"
+import Notification from "./notification-popup"
 
-<script setup async>
-import { ref, onMounted } from "vue"
-import { Send } from "@icon-park/vue-next"
-const { ipcRenderer } = require("electron")
-
+const TIBOOK = window.TIBOOK
+const userAccount = TIBOOK.env["USER_CONFIG"]["user_data"]["info"]["account"]
 const props = defineProps({
-    name: String,
-    account: String,
-    avatar: String,
-    localUserInfo: Object
+    chatUser: Object
 })
 
-const avatar = props.avatar === "none" ? "/src/assets/img/DefaultAvatar.jpg" : props.avatar
-const ChatHistory = ref([])
+const historyChatMessageList = ref([])
 const textareaBox = ref(null)
-const chatWin = ref(null)
 let upMessageIsMe = false
 
-ChatHistory.value = await ipcRenderer.invoke("get account history message", props.account)
+TIBOOK.localOperation("OnDemandFindCorrespondAccountMessage", props.chatUser.account, 0, 20, result => {
+    console.log("本地聊天记录", result)
+    historyChatMessageList.value = result
+})
+
+watch(inject("newMessage"), newMessage => {
+    historyChatMessageList.value.push(newMessage)
+    console.log("newMessage", newMessage)
+})
 
 // 用户发送消息
 function SendMessage() {
-    if (textareaBox.value.innerText.length > 0) {
-        ipcRenderer.send("send message", textareaBox.value.innerText)
+    const contentText = String(textareaBox.value.innerText)
+    if (contentText.trim().length) {
+        TIBOOK.socketCommunicate("SendTextMessage", { content: contentText }, result => {
+            console.log(result)
+        })
         textareaBox.value.innerText = ""
+    } else {
+        Notification({
+            title: "聊天窗状态",
+            content: "发送的消息不能为空"
+        })
     }
 }
 
 /**
- * @example 判断上一条消息是否为同一人发送
+ * 判断上一条消息是否为同一人发送
  * @param {Boolean} isMe
  */
 function thisMessageIsMe(isMe) {
@@ -76,76 +52,89 @@ function thisMessageIsMe(isMe) {
         return false
     }
 }
-
-onMounted(() => {
-    chatWin.value.scrollTo(0, 1000)
-})
-
-// 主进程有消息发送过来
-ipcRenderer.on("message", (event, msg) => {
-    // 该消息是本房间的
-    console.log(msg)
-    ChatHistory.value.push(msg)
-    chatWin.value.scrollTo(0, 1000)
-})
 </script>
 
+<template>
+    <div class="chat-win-container view-element-container">
+        <div class="container-title">
+            <img :src="chatUser.avatar" :alt="chatUser.name" />
+            <p>{{ chatUser.name }}</p>
+            <div class="chat-win-operation"></div>
+        </div>
+        <div class="message-list-container">
+            <template v-if="historyChatMessageList.length">
+                <div
+                    v-for="historyMessage in historyChatMessageList"
+                    :key="historyMessage.id"
+                    class="message"
+                    :class="{
+                        'not-me': historyMessage.from !== userAccount,
+                        'is-me': historyMessage.from === userAccount,
+                        'up-message-is-same-person': thisMessageIsMe(historyMessage.from === userAccount)
+                    }"
+                >
+                    <div class="message-content">
+                        <span>{{ historyMessage.content }}</span>
+                    </div>
+                </div>
+            </template>
+        </div>
+        <div class="chat-win-input-container">
+            <div class="input-textarea" contenteditable="true" spellcheck="false" ref="textareaBox" @keydown.enter.prevent="SendMessage"></div>
+            <!-- <div class="send-message-btn-container">
+                <send theme="outline" size="20" fill="#fbfbfb" />
+            </div> -->
+        </div>
+    </div>
+</template>
+
 <style scoped lang="less">
-.chat-win {
+.chat-win-container {
     position: relative;
     display: flex;
+    flex: 1;
     flex-direction: column;
-    width: 100%;
-    height: 100%;
     overflow: hidden;
 
     // 标题
-    .title {
+    .container-title {
         display: flex;
         width: 100%;
         height: 50px;
-        justify-content: center;
+        justify-content: space-between;
         align-items: center;
-        padding-left: 10px;
-        font-size: 18px;
-        background-color: var(--card-background-color);
+        padding-inline: 10px;
         margin-bottom: 10px;
+        border-radius: 0 0 0 0;
 
         img {
-            display: block;
-            width: 43px;
-            height: 43px;
-            border-radius: 25px;
+            width: 40px;
+            height: 40px;
         }
 
         p {
-            margin-left: 10px;
+            margin-left: 15px;
+            margin-top: 3px;
+            font-size: 18px;
+        }
+
+        .chat-win-operation {
+            width: 20%;
+            height: 100%;
         }
     }
 
     // 消息列表展示框
-    .chat-win-content {
+    .message-list-container {
         flex: 1;
         overflow-y: scroll;
         overflow-x: hidden;
-        padding: 0 10px 0 10px;
-        background-color: var(--card-background-color);
 
         .message {
             width: 100%;
             min-height: 40px;
             height: auto;
             margin-top: 10px;
-
-            // .avatar {
-            //     width: 38px;
-            //     height: 38px;
-            //     border-radius: 20px;
-            //     display: inline-block;
-            //     background-size: cover;
-            //     background-position: center;
-            //     background-repeat: no-repeat;
-            // }
 
             .message-content {
                 display: inline-block;
@@ -159,7 +148,6 @@ ipcRenderer.on("message", (event, msg) => {
 
                 span {
                     font-size: 16px;
-                    color: var(--text-color-two);
                 }
             }
         }
@@ -169,10 +157,9 @@ ipcRenderer.on("message", (event, msg) => {
             padding: 5px 0 0 10px;
 
             .message-content {
-                border-top-right-radius: 10px;
-                border-bottom-left-radius: 10px;
-                border-bottom-right-radius: 10px;
-                box-shadow: 2px 2px 2px 1px var(--not-me-message-box-show), 3px 3px 2px 1px rgba(0, 0, 0, 0.3);
+                border-top-right-radius: 20px;
+                border-bottom-left-radius: 20px;
+                border-bottom-right-radius: 20px;
                 background-color: var(--not-me-message-background-color);
             }
         }
@@ -182,10 +169,10 @@ ipcRenderer.on("message", (event, msg) => {
             padding: 5px 10px 0 0;
 
             .message-content {
-                border-top-left-radius: 10px;
-                border-bottom-left-radius: 10px;
-                border-bottom-right-radius: 10px;
-                box-shadow: 2px 2px 2px 1px var(--is-me-message-box-show), 3px 3px 2px 1px rgba(0, 0, 0, 0.3);
+                color: #fff;
+                border-top-left-radius: 20px;
+                border-bottom-left-radius: 20px;
+                border-bottom-right-radius: 20px;
                 background-color: var(--is-me-message-background-color);
             }
         }
@@ -196,66 +183,50 @@ ipcRenderer.on("message", (event, msg) => {
     }
 
     // 输入框
-    .input-box {
+    .chat-win-input-container {
         display: flex;
         height: auto;
         min-height: 30px;
         max-height: 150px;
         padding: 10px 7px 7px 7px;
-        justify-content: space-around;
+        justify-content: space-between;
         align-items: end;
-        overflow: hidden;
-        box-sizing: content-box;
-        background-color: var(--card-background-color);
 
-        .input-textarea-box {
+        .input-textarea {
             display: block;
-            width: 86%;
-            height: 100%;
-            overflow: hidden;
-            border-radius: 8px;
-            box-shadow: 1px 1px 1px 1px #ccc;
-            background-color: var(--card-background-color);
-
-            .textarea {
-                display: block;
-                width: 100%;
-                height: 100%;
-                padding: 4px 0 0 10px;
-                border: none;
-                outline: none;
-                font-size: 16px;
-                text-indent: 16px;
-                overflow-y: scroll;
-                overflow-wrap: break-word;
-                word-break: break-word;
-
-                &::-webkit-scrollbar {
-                    width: 5px;
-                    cursor: pointer;
-                }
-
-                &::-webkit-scrollbar-thumb {
-                    background-color: rgba(255, 255, 255, 0.6);
-                }
-            }
+            width: 100%;
+            height: auto;
+            min-height: 30px;
+            max-height: 200px;
+            padding: 4px 0 0 10px;
+            font-size: 16px;
+            border-radius: 10px;
+            text-indent: 10px;
+            box-shadow: var(--container-inset-show);
+            background-color: var(--input-box-background-color);
+            overflow-y: scroll;
+            overflow-x: hidden;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            border: none;
+            outline: none;
         }
-        .send-btn-box {
-            .send-btn {
-                float: left;
-                width: 50px;
-                height: 28px;
-                padding: 4px 10px 4px 10px;
-                line-height: 20px;
-                font-size: 16px;
-                text-decoration: none;
-                text-align: center;
-                color: var(--text-color-two);
-                border-radius: 8px;
-                box-shadow: 1px 1px 1px 1px #ccc;
-                background-color: var(--operable-box-prompt-color);
-            }
-        }
+
+        // .send-message-btn-container {
+        //     float: left;
+        //     width: 50px;
+        //     height: 28px;
+        //     padding: 4px 10px 4px 10px;
+        //     line-height: 20px;
+        //     font-size: 16px;
+        //     text-decoration: none;
+        //     text-align: center;
+        //     color: var(--text-color-two);
+        //     border-radius: 8px;
+        //     box-shadow: 1px 1px 1px 1px #ccc;
+        //     background-color: var(--cue--line-color);
+        //     cursor: pointer;
+        // }
     }
 }
 </style>

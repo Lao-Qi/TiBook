@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from "vue"
+import { ref, watch, provide } from "vue"
 import { useRoute } from "vue-router"
 import moment from "moment"
 import ChatWin from "../../components/chat-win.vue"
@@ -13,9 +13,12 @@ const joinAccount = route.params.joinAccount
 const chatList = ref([])
 /** 要显示聊天窗的用户 */
 const currentChatUser = ref(null)
+const newMessage = ref(null)
+
+provide("newMessage", newMessage)
 
 /**
- * 展示过程: 获取本地的聊天用户列表 -> 通过服务器接口获取用户的完整信息 -> 渲染聊天列表
+ * 展示流程: 获取本地的聊天用户列表 -> 通过服务器接口获取用户的完整信息 -> 渲染聊天列表
  *      ?-> 有需要显示的用户聊天窗 -> 再已经获取的聊天列表中找到用户的数据，打开聊天窗
  *      ?聊天列表中不存在-> 向服务器接口获取用户的基本数据，向插入本地聊天用户 -> 打开聊天窗口
  *
@@ -95,6 +98,62 @@ TIBOOK.localOperation("GetChatList", async (chatUsers, state) => {
     })
 })
 
+/** 接收消息展示流程：异步的向本地存储该条消息 -> 检查是否为当前显示的窗口可*/
+TIBOOK.onSocket("socket-receive-message", async msg => {
+    /** 消息过来后的基本操作 */
+    const chatUserAccount = TIBOOK.env.USER_CONFIG.user_data.info.account === msg.from ? msg.to : msg.from
+    TIBOOK.localOperation("InsertMsgAndUpdateChatUser", chatUserAccount, msg, result => {
+        console.log(result)
+    })
+
+    /** 消息是当前用户正在通讯的用户发送过来的，通过provide改变值，chat-win组件有在监听该值的变化 */
+    if (msg.from === currentChatUser.value?.account || msg.to === currentChatUser.value?.account) {
+        newMessage.value = msg
+        currentChatUser.value.message = msg
+        return
+    }
+
+    /** 消息是聊天列表中的其他用户发送的 */
+    let messageRenderIndex = chatList.value.findIndex(chatUser => chatUser.account === chatUserAccount)
+
+    if (messageRenderIndex) {
+        /** 将发送新消息的用户位置移动到第一 */
+        chatList.value.splice(messageRenderIndex, 1)
+        messageRenderIndex.message = msg
+        messageRenderIndex.unread++
+        chatList.value.unshift(messageRenderIndex)
+        return
+    }
+
+    /** 消息是外部用户发送过来的 */
+    messageRenderIndex = {
+        account: chatUserAccount,
+        message: {
+            mid: msg.mid,
+            date: msg.date,
+            content: msg.content
+        }
+    }
+
+    await GetChatUserBasicInfo(messageRenderIndex)
+    chatList.value.unshift(messageRenderIndex)
+})
+
+watch(
+    currentChatUser,
+    ncurrentChatUser => {
+        console.log(ncurrentChatUser)
+        if (ncurrentChatUser) {
+            TIBOOK.socketCommunicate("ToggleRecipient", ncurrentChatUser.account, result => {
+                console.log(result)
+            })
+        }
+    },
+    {
+        immediate: true
+    }
+)
+
 // 解析消息的时间
 function paresMessageDate(date) {
     const contarasMessageDate = new Date(date)
@@ -131,12 +190,12 @@ function paresMessageDate(date) {
     return moment(date).format("YYYY/MM/DD")
 }
 
-// 切换聊天窗
-function toggleChatWindow(chatUser) {
-    currentChatUser.value = chatUser
-}
+// // 切换聊天窗
+// function toggleChatWindow(chatUser) {
+//     currentChatUser.value = chatUser
+// }
 
-/** 解析出的用户的账号，向服务器请求用户的基本信息 */
+/** 解析出多个用户的账号，向服务器一次请求多个用户的基本信息，并合并初始数据 */
 function GetChatUsersBasicInfo(chatUsers) {
     const usersAccount = chatUsers.map(chatUser => chatUser.account)
     return new Promise((res, rej) => {
@@ -154,6 +213,7 @@ function GetChatUsersBasicInfo(chatUsers) {
             }
             for (const [_, chatUser] of Object.entries(chatUsers)) {
                 Object.assign(chatUser, usersBasicInfo[chatUser.account])
+                chatUser.unread = 0
             }
 
             res(chatUsers)
@@ -161,20 +221,20 @@ function GetChatUsersBasicInfo(chatUsers) {
     })
 }
 
-watch(
-    currentChatUser,
-    ncurrentChatUser => {
-        console.log(ncurrentChatUser)
-        if (ncurrentChatUser) {
-            TIBOOK.socketCommunicate("ToggleRecipient", ncurrentChatUser.account, result => {
-                console.log(result)
-            })
-        }
-    },
-    {
-        immediate: true
-    }
-)
+/** 解析出的单个用户的账号，向服务器获取该用户的基本信息 */
+function GetChatUserBasicInfo(chatUser) {
+    return new Promise((res, rej) => {
+        TIBOOK.serverRequest("SearchUser", chatUser.account, result => {
+            if (result.code !== 200) {
+                rej(result)
+                return
+            }
+
+            Object.assign(chatUser, result.data)
+            res(chatUser)
+        })
+    })
+}
 </script>
 
 <template>
@@ -186,7 +246,7 @@ watch(
                     :key="chatUser.account"
                     class="chat-element-container"
                     :class="{ 'user-in-chat': currentChatUser?.account === chatUser.account }"
-                    @click="toggleChatWindow(chatUser)"
+                    @click="currentChatUser = chatUser"
                 >
                     <div class="user-avatar">
                         <img :src="chatUser.avatar" :alt="chatUser.name" />
@@ -194,7 +254,7 @@ watch(
                     <div class="user-name">{{ chatUser.name }}</div>
                     <div class="chat-recent-message-date">{{ paresMessageDate(chatUser.message.date ?? Date.now()) }}</div>
                     <div class="chat-recent-message-content">{{ chatUser.message.content ?? "" }}</div>
-                    <div class="message-unread"></div>
+                    <div class="message-unread">{{ chatUser.unread ? (chatUser.unread > 99 ? "99+" : chatUser.unread) : "" }}</div>
                     <div class="unreal-tooltip"></div>
                 </div>
             </template>
