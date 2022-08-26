@@ -278,7 +278,7 @@ function GetChatUserBasicInfo(chatUser) {
         display: flex;
         flex-direction: column;
         align-items: center;
-        width: 240px;
+        width: 260px;
         height: 100%;
         margin-right: 10px;
         padding: 6px;
@@ -298,8 +298,8 @@ function GetChatUserBasicInfo(chatUser) {
                 position: absolute;
                 top: 50%;
                 left: 5px;
-                width: 47px;
-                height: 47px;
+                width: 45px;
+                height: 45px;
                 transform: translateY(-50%);
                 user-select: none;
             }
