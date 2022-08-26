@@ -1,6 +1,7 @@
 <script setup>
 import { ref, inject, watch } from "vue"
 // import { Send } from "@icon-park/vue-next"
+import moment from "moment"
 import Notification from "./notification-popup"
 
 const TIBOOK = window.TIBOOK
@@ -11,7 +12,8 @@ const props = defineProps({
 
 const historyChatMessageList = ref([])
 const textareaBox = ref(null)
-let upMessageIsMe = false
+let upMessageIsMe = false,
+    nextMessageIsMe = true
 
 TIBOOK.localOperation("OnDemandFindCorrespondAccountMessage", props.chatUser.account, 0, 20, result => {
     console.log("本地聊天记录", result)
@@ -41,9 +43,10 @@ function SendMessage() {
 
 /**
  * 判断上一条消息是否为同一人发送
- * @param {Boolean} isMe
+ * @param {boolean} isMe
+ * @returns {boolean}
  */
-function thisMessageIsMe(isMe) {
+function verifyUpMessageIsMe(isMe) {
     if (isMe === upMessageIsMe) {
         return true
     } else {
@@ -52,6 +55,13 @@ function thisMessageIsMe(isMe) {
         return false
     }
 }
+
+/**
+ * 判断下一条消息是否wei
+ * @param {boolean} isMe
+ * @returns {boolean}
+ */
+function verifyNextMessageIsMe(isMe) {}
 </script>
 
 <template>
@@ -70,11 +80,14 @@ function thisMessageIsMe(isMe) {
                     :class="{
                         'not-me': historyMessage.from !== userAccount,
                         'is-me': historyMessage.from === userAccount,
-                        'up-message-is-same-person': thisMessageIsMe(historyMessage.from === userAccount)
+                        'up-message-is-same-person': verifyUpMessageIsMe(historyMessage.from === userAccount)
                     }"
                 >
                     <div class="message-content">
                         <span>{{ historyMessage.content }}</span>
+                    </div>
+                    <div class="message-date" v-if="!verifyNextMessageIsMe(historyMessage.from === userAccount)">
+                        <span>{{ moment(historyMessage.date).format("YYYY/MM/DD HH:mm:ss") }}</span>
                     </div>
                 </div>
             </template>
@@ -94,13 +107,14 @@ function thisMessageIsMe(isMe) {
     display: flex;
     flex: 1;
     flex-direction: column;
+    justify-content: space-between;
     overflow: hidden;
 
     // 标题
     .container-title {
         display: flex;
         width: 100%;
-        height: 50px;
+        height: 40px;
         justify-content: space-between;
         align-items: center;
         padding-inline: 10px;
@@ -108,8 +122,8 @@ function thisMessageIsMe(isMe) {
         border-radius: 0 0 0 0;
 
         img {
-            width: 40px;
-            height: 40px;
+            width: 35px;
+            height: 35px;
         }
 
         p {
@@ -126,7 +140,8 @@ function thisMessageIsMe(isMe) {
 
     // 消息列表展示框
     .message-list-container {
-        flex: 1;
+        --border-radius: 15px;
+        height: 60vh;
         overflow-y: scroll;
         overflow-x: hidden;
 
@@ -150,6 +165,11 @@ function thisMessageIsMe(isMe) {
                     font-size: 16px;
                 }
             }
+
+            .message-date {
+                font-size: 12px;
+                color: #ccc;
+            }
         }
 
         .not-me {
@@ -157,9 +177,9 @@ function thisMessageIsMe(isMe) {
             padding: 5px 0 0 10px;
 
             .message-content {
-                border-top-right-radius: 20px;
-                border-bottom-left-radius: 20px;
-                border-bottom-right-radius: 20px;
+                border-top-right-radius: var(--border-radius);
+                border-bottom-left-radius: var(--border-radius);
+                border-bottom-right-radius: var(--border-radius);
                 background-color: var(--not-me-message-background-color);
             }
         }
@@ -170,15 +190,21 @@ function thisMessageIsMe(isMe) {
 
             .message-content {
                 color: #fff;
-                border-top-left-radius: 20px;
-                border-bottom-left-radius: 20px;
-                border-bottom-right-radius: 20px;
+                border-top-left-radius: var(--border-radius);
+                border-bottom-left-radius: var(--border-radius);
+                border-bottom-right-radius: var(--border-radius);
                 background-color: var(--is-me-message-background-color);
             }
         }
 
         .up-message-is-same-person {
             margin-top: 0;
+        }
+    }
+
+    @media screen and (min-height: 580px) {
+        .message-list-container {
+            height: 70vh;
         }
     }
 
@@ -190,7 +216,6 @@ function thisMessageIsMe(isMe) {
         max-height: 150px;
         padding: 10px 7px 7px 7px;
         justify-content: space-between;
-        align-items: end;
 
         .input-textarea {
             display: block;
