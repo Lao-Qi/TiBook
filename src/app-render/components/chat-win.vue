@@ -1,5 +1,5 @@
 <script setup>
-import { ref, inject, watch } from "vue"
+import { ref, inject, watch, onMounted, onUpdated } from "vue"
 // import { Send } from "@icon-park/vue-next"
 import moment from "moment"
 import Notification from "./notification-popup"
@@ -11,6 +11,7 @@ const props = defineProps({
 })
 
 const historyChatMessageList = ref([])
+const messageListContainer = ref(null)
 const textareaBox = ref(null)
 let upMessageIsMe = false,
     nextMessageIsMe = true
@@ -25,7 +26,17 @@ watch(inject("newMessage"), newMessage => {
     console.log("newMessage", newMessage)
 })
 
-// 用户发送消息
+onMounted(() => {
+    messageListContainer.value.scrollTop = messageListContainer.value.scrollHeight
+    console.log("onMounted", messageListContainer.value.scrollHeight)
+})
+
+onUpdated(() => {
+    messageListContainer.value.scrollTop = messageListContainer.value.scrollHeight
+    console.log("onUpdated", messageListContainer.value.scrollHeight)
+})
+
+/** 用户发送消息 */
 function SendMessage() {
     const contentText = String(textareaBox.value.innerText)
     if (contentText.trim().length) {
@@ -71,7 +82,7 @@ function verifyNextMessageIsMe(isMe) {}
             <p>{{ chatUser.name }}</p>
             <div class="chat-win-operation"></div>
         </div>
-        <div class="message-list-container">
+        <div class="message-list-container" ref="messageListContainer">
             <template v-if="historyChatMessageList.length">
                 <div
                     v-for="historyMessage in historyChatMessageList"
