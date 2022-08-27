@@ -161,7 +161,6 @@ function listenerMethodReturns(event, method) {
         socket.once(event, result => {
             clearTimeout(RequestTiming)
             res(result)
-            console.log(result)
         })
     })
 }

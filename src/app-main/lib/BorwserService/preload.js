@@ -169,7 +169,7 @@ ipcRenderer.on("local-operation-return", (_, request, result, state) => {
 })
 
 ipcRenderer.on("socket-communicate-request-return", (_, request, result, state) => {
-    SocketCommunicateCallbackMap[request]?.shift()(result, state)
+    SocketCommunicateCallbackMap[request].shift()(result, state)
 })
 
 ipcRenderer.on("socket-communicate-proactive-return", (_, event, content, state) => {
@@ -183,20 +183,18 @@ ipcRenderer.on("socket-communicate-proactive-return", (_, event, content, state)
 
 /**
  * 对工具的相同部分进行封装
- * @param {Function} requestCallbackMap
+ * @param {string} event
+ * @param {{}} requestCallbackMap
  * @param {string} request
  * @param  {...any} args
  */
 function RequestMessageSend(event, requestCallbackMap, request, ...args) {
     /** 如果数组最后一个参数是函数则把它视为请求接口后的回调函数 */
     if (typeof args[args.length - 1] === "function") {
-        /** 异步的执行添加回调的操作，不去阻塞消息的发送 */
-        ;(async () => {
-            /** 将最后一位数据作为本次请求执行后的回调，数组中要剔除这个参数 */
-            const cb = args.pop()
-            requestCallbackMap[request] ??= []
-            requestCallbackMap[request].push(cb)
-        })()
+        /** 将最后一位数据作为本次请求执行后的回调，数组中要剔除这个参数 */
+        const cb = args.pop()
+        requestCallbackMap[request] ??= []
+        requestCallbackMap[request].push(cb)
     }
     ipcRenderer.send(event, window.TIBOOK["Mark"], request, ...args)
 }

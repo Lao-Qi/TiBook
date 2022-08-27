@@ -67,7 +67,7 @@ async function startMainWinService() {
     ipcMain.on("window-close", () => mainWinService.kernel.close())
     ipcMain.on("window-maximize", () => (mainWinService.kernel.isMaximized() ? mainWinService.kernel.unmaximize() : mainWinService.kernel.maximize()))
 
-    mainWinService.openDevTools()
+    // mainWinService.openDevTools()
 
     mainWinService.kernel.once("close", () => {
         CloseAllServiceProcess()

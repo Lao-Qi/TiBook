@@ -22,18 +22,14 @@ const DBFilesName = {
 for (const [key, _] of Object.entries(DBFilesName)) {
     const filePath = join(process["TIBOOK"]["APP_LOCATION"], `${key}.db`)
 
-    /**
-     * 验证文件是否存在
-     */
+    /** 验证文件是否存在 */
     try {
         accessSync(filePath)
     } catch {
         writeFileSync(filePath, "")
     }
 
-    /**
-     * 生成存储库
-     */
+    /** 生成存储库 */
     DBFilesName[key] = new NeDB({
         filename: filePath,
         corruptAlertThreshold: process.env["IS_DEV"] ? 1 : 0,
