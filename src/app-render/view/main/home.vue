@@ -309,7 +309,7 @@ onMounted(() => {
 
             .basic-info {
                 input {
-                    width: 180px;
+                    width: 165px;
                     height: 30px;
                     padding-left: 10px;
                     font-size: 20px;
@@ -357,9 +357,10 @@ onMounted(() => {
             .user-avatar {
                 display: flex;
                 position: absolute;
-                left: 20px;
-                width: 110px;
-                height: 110px;
+                bottom: 10px;
+                left: 15px;
+                width: 90px;
+                height: 90px;
                 justify-content: center;
                 align-items: center;
                 border-radius: 10px;
@@ -384,13 +385,13 @@ onMounted(() => {
             }
 
             .user-name {
-                left: 140px;
+                left: 115px;
                 bottom: 40px;
                 font-size: 20px;
             }
 
             .user-account {
-                left: 140px;
+                left: 115px;
                 bottom: 10px;
                 color: #8f8f8f;
                 font-size: 17px;
@@ -411,7 +412,7 @@ onMounted(() => {
             // 用户的文本信息元素
             .user-text-info-ele {
                 display: flex;
-                width: 60%;
+                width: 65%;
                 min-width: 200px;
                 height: 30px;
                 margin-top: 10px;
@@ -419,7 +420,7 @@ onMounted(() => {
                 // 文本信息字段
                 .explain {
                     width: 80px;
-                    font-size: 18px;
+                    font-size: 16px;
                     margin-right: 15px;
                     user-select: none;
                 }
@@ -430,6 +431,7 @@ onMounted(() => {
                     text-align: center;
 
                     input {
+                        width: 100%;
                         height: 30px;
                         font-size: 16px;
                         text-align: center;
@@ -566,6 +568,58 @@ onMounted(() => {
                     color: var(--cue--line-color);
                 }
             }
+        }
+    }
+
+    @media screen and (max-width: 1054px) {
+        justify-content: center;
+
+        .left-content-container {
+            width: 40%;
+            flex: none;
+
+            .user-text-info-container {
+                margin-left: 5px;
+
+                .user-text-info-ele {
+                    width: 90%;
+                }
+
+            }
+        }
+
+        .reght-content-container {
+            flex: 1;
+        }
+    }
+
+    @media screen and (max-height: 615px) {
+        .reght-content-container .user-personality-info-container .user-personalized-signature {
+            height: 150px;
+        }
+    }
+
+    @media screen and (max-height: 560px) , (max-width: 750px) {
+        height: 88vh;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        overflow-y: scroll;
+        overflow-x: hidden;
+
+        .view-element-container {
+            width: 70vw;
+            max-width: 550px;
+        }
+
+        .left-content-container {
+            margin-right: 0;
+        }
+
+        .reght-content-container {
+            margin-left: 0;
+            margin-top: 10px;
+            flex: none;
         }
     }
 }
