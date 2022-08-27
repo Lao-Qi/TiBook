@@ -66,7 +66,10 @@ watch(
     router.currentRoute,
     nroute => {
         if (nroute.name && sideNavBarPlace[nroute.name]) {
+            sideTipLine.value.style.opacity = 1
             sideTipLine.value.style.top = sideNavBarList[sideNavBarPlace[nroute.name]][nroute.name].distance + "px"
+        } else {
+            sideTipLine.value.style.opacity = 0
         }
     },
     {
@@ -181,6 +184,7 @@ watch(
         border-radius: 10px;
         background-color: var(--cue--line-color);
         transition: var(--all-transition);
+        opacity: 0;
     }
 }
 

@@ -17,7 +17,6 @@ const props = defineProps({
     }
 })
 
-const showUser = computed(() => props.userInfo)
 </script>
 
 <template>
@@ -26,34 +25,34 @@ const showUser = computed(() => props.userInfo)
             <div class="left-content">
                 <div class="user-basic-info-container">
                     <div class="user-avatar">
-                        <img :src="showUser.avatar" />
+                        <img :src="userInfo.avatar" />
                     </div>
                     <div class="user-name">
-                        <p>{{ showUser.name }}</p>
+                        <p>{{ userInfo.name }}</p>
                     </div>
                     <div class="user-account">
-                        <p>{{ showUser.account }}</p>
+                        <p>{{ userInfo.account }}</p>
                     </div>
                 </div>
                 <div class="user-text-info-container">
-                    <div class="user-text-info-ele" v-if="showUser.AddTime">
+                    <div class="user-text-info-ele" v-if="userInfo.AddTime">
                         <p class="explain">添加时间</p>
                         <p>
-                            <span>{{ showUser.AddTime === "none" ? "用户未设置" : showUser.AddTime }}</span>
+                            <span>{{ userInfo.AddTime === "none" ? "用户未设置" : userInfo.AddTime }}</span>
                             <div class="user-text-info-ele-cue-line cue-line-color"></div>
                         </p>
                     </div>
                     <div class="user-text-info-ele">
                         <p class="explain">邮箱</p>
                         <p>
-                            <span>{{ showUser.mail === "none" ? "用户未设置" : showUser.mail }}</span>
+                            <span>{{ userInfo.mail === "none" ? "用户未设置" : userInfo.mail }}</span>
                             <div class="user-text-info-ele-cue-line cue-line-color"></div>
                         </p>
                     </div>
                     <div class="user-text-info-ele">
                         <p class="explain">年龄</p>
                         <p>
-                            <span>{{ showUser.age === "none" ? "用户未设置" : showUser.age }}</span>
+                            <span>{{ userInfo.age === "none" ? "用户未设置" : userInfo.age }}</span>
                             <div class="user-text-info-ele-cue-line cue-line-color"></div>
                         </p>
 
@@ -61,7 +60,7 @@ const showUser = computed(() => props.userInfo)
                     <div class="user-text-info-ele">
                         <p class="explain">性别</p>
                         <p>
-                            <span>{{ showUser.gender === "none" ? "用户未设置" : showUser.gender }}</span>
+                            <span>{{ userInfo.gender === "none" ? "用户未设置" : userInfo.gender }}</span>
                             <div class="user-text-info-ele-cue-line cue-line-color"></div>
                         </p>
                         
@@ -69,14 +68,14 @@ const showUser = computed(() => props.userInfo)
                     <div class="user-text-info-ele">
                         <p class="explain">出生日期</p>
                         <p>
-                            <span>{{ showUser.birth === "none" ? "用户未设置" : showUser.birth }}</span>
+                            <span>{{ userInfo.birth === "none" ? "用户未设置" : userInfo.birth }}</span>
                             <div class="user-text-info-ele-cue-line cue-line-color"></div>
                         </p>
                     </div>
                     <div class="user-text-info-ele">
                         <p class="explain">地址</p>
                         <p>
-                            <span>{{ showUser.address === "none" ? "用户未设置" : showUser.address }}</span>
+                            <span>{{ userInfo.address === "none" ? "用户未设置" : userInfo.address }}</span>
                             <div class="user-text-info-ele-cue-line cue-line-color"></div>
                         </p>
                     </div>
@@ -84,11 +83,10 @@ const showUser = computed(() => props.userInfo)
             </div>
             <div class="right-content">
                 <div class="user-personalized-background-picture">
-                    <!-- <img :src="userInfo.cover" v-if="showUser.cover === 'none'" /> -->
-                    <img src="../assets/img/f062936a96d3c8bd1474189161.jpg" alt="">
+                    <img :src="userInfo.cover" :alt="`${userInfo.name}的个性图片`" v-if="userInfo.cover !== 'none'" />
                 </div>
-                <div class="user-personalized-signature" :class="{ 'is-not-signature': showUser.signature }" :style="{'user-select': showUser.signature !== 'none' ? 'auto' : 'none'}">
-                    <p>{{ showUser.signature === "none" ? "该用户还没展示自己的个性签名" : showUser.signature }}</p>
+                <div class="user-personalized-signature" :class="{ 'is-not-signature': userInfo.signature }" :style="{'user-select': userInfo.signature !== 'none' ? 'auto' : 'none'}">
+                    <p>{{ userInfo.signature === "none" ? "该用户还没展示自己的个性签名" : userInfo.signature }}</p>
                 </div>
             </div>
         </div>
@@ -154,6 +152,7 @@ const showUser = computed(() => props.userInfo)
             .user-text-info-container {
                 flex: 1;
                 display: flex;
+                flex-direction: column;
                 padding-top: 10px;
                 justify-content: space-between;
 
@@ -202,7 +201,7 @@ const showUser = computed(() => props.userInfo)
                 width: auto;
                 height: 260px;
                 align-items: center;
-                justify-content: right;
+                justify-content: center;
                 overflow: hidden;
 
                 img {

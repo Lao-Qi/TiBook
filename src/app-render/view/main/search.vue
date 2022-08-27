@@ -3,11 +3,20 @@ import { ref, watch } from "vue"
 import { useRoute } from "vue-router"
 import { PeoplePlusOne } from "@icon-park/vue-next"
 import userInfoContainer from "../../components/user-info-container.vue"
+import Notification from "../../components/notification-popup"
 
 const TIBOOK = window.TIBOOK
 const route = useRoute()
 const serverMatchUsers = ref([])
 const showUser = ref(null)
+
+watch(
+    () => route.query.keyWord,
+    value => {
+        SearchKeyWordMatchInfo(value)
+    },
+    { immediate: true }
+)
 
 /**
  * 关键词搜索用户
@@ -20,14 +29,6 @@ function SearchKeyWordMatchInfo(keyWord) {
         }
     })
 }
-
-watch(
-    () => route.query.keyWord,
-    value => {
-        SearchKeyWordMatchInfo(value)
-    },
-    { immediate: true }
-)
 
 /**
  * 添加好友
@@ -44,8 +45,17 @@ function AddUser(account) {
  * @param {string} account
  */
 async function showUserInfo(account) {
-    const userInfo = await getUserInfo(account)
-    showUser.value = userInfo
+    try {
+        const userInfo = await getUserInfo(account)
+        console.log("userInfo", userInfo)
+        showUser.value = userInfo
+    } catch (result) {
+        Notification({
+            type: result.code,
+            title: "搜索页状态",
+            content: result.msg
+        })
+    }
 }
 
 /**
