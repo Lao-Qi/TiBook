@@ -2,9 +2,11 @@
 
 [![OSCS Status](https://www.oscs1024.com/platform/badge/Lao-Qi/TonYouLu.svg?size=small)](https://www.oscs1024.com/project/Lao-Qi/TonYouLu?ref=badge_small)
 
-### 这是什么？
+<img src="./public/Snipaste_2022-08-27_17-29-37.png"/>
 
-这是一个简易的，基于 socket.io, vue, vite, electron, element3, node, express, mongodb, redis...的聊天软件
+### 什么是题书？
+
+这是一个简易的，基于electron的多进程架构聊天软件
 </br>
 
 ### 进展
