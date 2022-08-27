@@ -51,20 +51,23 @@ const iconConfig = reactive({
 TIBOOK.send("start-socket-communication")
 
 onMounted(() => {
-    for (const [name, navBar] of Object.entries(sideNavBarList.top)) {
+    for (const [_, navBar] of Object.entries(sideNavBarList.top)) {
         navBar.distance = navBar.el.offsetTop
     }
 
-    for (const [name, navBar] of Object.entries(sideNavBarList.bottom)) {
+    for (const [_, navBar] of Object.entries(sideNavBarList.bottom)) {
         navBar.distance = navBar.el.offsetTop
     }
-    console.log(sideNavBarList)
+
+    router.push({ name: "message" })
 })
 
 watch(
     router.currentRoute,
     nroute => {
-        sideTipLine.value.style.top = sideNavBarList[sideNavBarPlace[nroute.name]][nroute.name].distance + "px"
+        if (nroute.name && sideNavBarPlace[nroute.name]) {
+            sideTipLine.value.style.top = sideNavBarList[sideNavBarPlace[nroute.name]][nroute.name].distance + "px"
+        }
     },
     {
         deep: true
@@ -202,6 +205,7 @@ watch(
         height: 20vw;
         min-width: 300px;
         min-height: 300px;
+        user-select: none;
 
         img {
             width: 100%;
