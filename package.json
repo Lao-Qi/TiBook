@@ -2,11 +2,11 @@
     "name": "tibook",
     "version": "0.0.0",
     "description": "题书，一个简单好用的聊天软件",
-    "main": "./src/electron-main/main.js",
+    "main": "./src/app-main/main.js",
     "scripts": {
         "format": "npx prettier -w .",
         "app:dev": "cd ./src && pnpm run dev",
-        "app:build": "cd ./build && pnpm run app:build"
+        "app:build": "cd ./build && pnpm run build"
     },
     "author": "WangLaoQi (https://github.com/Lao-Qi)",
     "license": "MIT",
