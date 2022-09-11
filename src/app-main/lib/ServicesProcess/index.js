@@ -28,6 +28,15 @@ ipcMain.on("operation-service-window", (_, mark, operation, ...args) => {
     ServiceProcess.AllServiceProcess[mark][operation](...args)
 })
 
+ipcMain.on("render-send-event", (_, mark, event, ...args) => {
+    const listenerMap = ServiceProcess.AllServiceProcess[mark]?.listenerMap[event]
+    if (listenerMap) {
+        for (const [_, listener] of Object.entries(listenerMap)) {
+            listener(...args)
+        }
+    }
+})
+
 /**
  * 服务进程
  * 其底层原理是调用了electron的BrowserWindow开启一个隐藏的渲染进程
@@ -35,6 +44,7 @@ ipcMain.on("operation-service-window", (_, mark, operation, ...args) => {
 class ServiceProcess {
     kernel
     webContents
+    listenerMap
 
     /**
      * @param {String} URL 进程要加载的入口文件(绝对路径) type is window ? URL is `file:///${HtmlFile}` || http://... : URL is JSFilePath
@@ -67,6 +77,7 @@ class ServiceProcess {
         this.kernel.loadURL(`${this.loadURL}?Mark=${mark}`)
         this.mark = mark
         this.webContents = this.kernel.webContents
+        this.listenerMap = {}
     }
 
     /** 关闭这个进程 */
@@ -88,6 +99,16 @@ class ServiceProcess {
     /** 和服务进程通讯 */
     send() {
         this.webContents.send(...arguments)
+    }
+
+    /**
+     * 监听该服务进程触发的事件
+     * @param {string} event
+     * @param {Function} listener
+     */
+    on(event, listener) {
+        this.listenerMap[event] ??= []
+        this.listenerMap[event].push(listener)
     }
 
     static get AllServiceProcess() {
@@ -143,7 +164,7 @@ function initConfig(ProcessType, winConfig) {
             spellcheck: false,
             webSecurity: true,
             allowRunningInsecureContent: true,
-            preload: join(__dirname, "./preload.js")
+            preload: join(__dirname, "./servicePreload.js")
         }
     }
 
@@ -179,8 +200,10 @@ function updateServiceProcessTemplateHTMLFile(templateHtmlFilePath, URL, mark) {
     writeFileSync(templateHtmlFilePath, newTemplateHTMLText)
 }
 
-for (const [_, serviceConfig] of Object.entries(serivesProcessConfig)) {
-    ServiceProcess.CreateSerivceProcess(serviceConfig)
+if (serivesProcessConfig.length) {
+    for (const [_, serviceConfig] of Object.entries(serivesProcessConfig)) {
+        ServiceProcess.CreateSerivceProcess(serviceConfig)
+    }
 }
 
 module.exports = ServiceProcess
