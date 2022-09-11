@@ -31,7 +31,7 @@ if (process.env["IS_DEV"]) {
     process.TIBOOK["MAIN_PAGR_URL"] = "http://127.0.0.1:3000"
     process.TIBOOK["PUBLIC_PATH"] = join(__dirname, "../../public")
 } else {
-    process.TIBOOK["MAIN_PAGR_URL"] = `file:///${join(__dirname, "../dist/index.html")}`
+    process.TIBOOK["MAIN_PAGR_URL"] = `file:///${join(__dirname, "../app-render/index.html")}`
     process.TIBOOK["PUBLIC_PATH"] = join(__dirname, "./dist/public")
 }
 

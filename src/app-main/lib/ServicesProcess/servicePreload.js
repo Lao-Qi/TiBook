@@ -78,7 +78,10 @@ window.TIBOOK.invoke = async function (event, ...args) {
     }
 }
 
-window.TIBOOK.send = (event, ...args) => ipcRenderer.send(event, ...args)
+window.TIBOOK.send = (event, ...args) => {
+    ipcRenderer.send("render-send-event", window.TIBOOK["Mark"], event, ...args)
+}
+
 window.TIBOOK.on = (event, callback) => ipcRenderer.on(event, callback)
 window.TIBOOK.once = (event, callback) => ipcRenderer.once(event, callback)
 

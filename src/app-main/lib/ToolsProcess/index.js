@@ -38,7 +38,7 @@ class ToolProcess {
      * @param {String} mark 进程标记
      */
     constructor(URL, mark) {
-        const child = fork(join(__dirname, "./preload.js"), {
+        const child = fork(join(__dirname, "./toolPreload.js"), {
             cwd: join(URL, "../"),
             env: {
                 ...process.env,
@@ -67,12 +67,11 @@ class ToolProcess {
 
         this.pid = child.pid
         this.mark = mark
-        this.type = "Node Tool"
         this.#child = child
-
-        AllToolProcess[mark] = { URL, process: child }
+        this.path = URL
     }
 
+    /** 关闭进程 */
     kill() {
         this.#child.kill()
     }
@@ -85,6 +84,7 @@ class ToolProcess {
         this.#onMessageCB = onMsgCB
     }
 
+    /** 向工具进程发送消息 */
     send(message) {
         this.#child.send({
             type: "send-load",
@@ -105,21 +105,25 @@ class ToolProcess {
         })
     }
 
+    /** 工具进程集合 */
     static get AllToolProcess() {
         return AllToolProcess
     }
 
+    /** 所有工具进程的配置 */
     static get ToolsProcessConfig() {
         return toolsProcessConfig
     }
 
+    /** 关闭所有工具进程 */
     static CloseAllToolProcess() {
-        for (const [_, ToolProcess] of Object.entries(AllToolProcess)) {
+        for (const [mark, ToolProcess] of Object.entries(AllToolProcess)) {
             ToolProcess.kill()
-            delete AllToolProcess[ToolProcess.mark]
+            delete AllToolProcess[mark]
         }
     }
 
+    /** 获取所有工具进程的资源占用 */
     static async GetAllToolProcessMetric() {
         const obj = {}
         for (const [mark, vlaue] of Object.entries(AllToolProcess)) {
@@ -127,6 +131,7 @@ class ToolProcess {
         }
     }
 
+    /** 创建新的工具进程 */
     static CreateToolProcess(toolConfig) {
         toolConfig.startMethod ??= "auto"
 
@@ -136,6 +141,7 @@ class ToolProcess {
         }
 
         const toolProcess = new ToolProcess(toolConfig.path, toolConfig.mark)
+        AllToolProcess[toolConfig.mark] = toolProcess
         const RenderlistenerProactiveEvents = {}
 
         ipcMain.on(toolConfig.sendOperateEvent, (_, renderMark, operate, ...args) => {
@@ -165,8 +171,10 @@ class ToolProcess {
     }
 }
 
-for (const [_, toolConfig] of Object.entries(toolsProcessConfig)) {
-    ToolProcess.CreateToolProcess(toolConfig)
+if (toolsProcessConfig.length) {
+    for (const [_, toolConfig] of Object.entries(toolsProcessConfig)) {
+        ToolProcess.CreateToolProcess(toolConfig)
+    }
 }
 
 module.exports = ToolProcess

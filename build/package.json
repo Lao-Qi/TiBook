@@ -2,8 +2,9 @@
     "name": "tibook_build",
     "version": "0.0.0",
     "scripts": {
-        "build:render": "node ./app-render-build.js",
-        "build:main": "node ./app-main-build.js"
+        "build:render": "node ./index.js render",
+        "build:main": "node ./index.js main",
+        "build": "node ./index.js"
     },
     "license": "MIT",
     "dependencies": {
