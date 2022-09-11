@@ -2,10 +2,8 @@
     "name": "tibook_build",
     "version": "0.0.0",
     "scripts": {
-        "app-render:build": "vite build --config ./vite.config.js",
-        "app-main:build": "node ./electron-main-build.js",
-        "app-resource:build": "concurrently -k \"pnpm run render:build\" \"pnpm run electron:build\"",
-        "app:build": "node ./build.js"
+        "build:render": "node ./app-render-build.js",
+        "build:main": "node ./app-main-build.js"
     },
     "license": "MIT",
     "dependencies": {
