@@ -13,10 +13,10 @@ process["TIBOOK"] = JSON.parse(process.env["TIBOOK"])
 /**
  * 封装一个loadSend供加载的工具文件内部使用
  */
-process.loadSend = function (...args) {
+process.loadSend = function (content) {
     process.send({
         env: "load",
-        content: args
+        content
     })
 }
 

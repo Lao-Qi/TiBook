@@ -1,20 +1,35 @@
 "use strict"
-const { BrowserWindow } = require("electron")
+/**
+ * 应用的服务进程，用于提供一些窗口或隐藏式窗口的功能
+ */
+const serivesProcessConfig = require("./servicesProcessFile.config")
+const { BrowserWindow, ipcMain } = require("electron")
 const { writeFileSync } = require("fs")
 const { join } = require("path")
 
 /**
  * 以Mark作为索引来存储服务进程的集合
- *
  * {
  *  Mark: process: ServiceProcess实例对象
  * }
  */
 const AllServiceProcess = {}
+const EventStartSerives = {}
+
+ipcMain.on("start-event-method-service", (_, mark) => {
+    if (!mark || EventStartSerives[mark]) {
+        throw TypeError(`${mark}标识的服务进程不存在`)
+    }
+
+    ServiceProcess.CreateSerivceProcess(EventStartSerives[mark])
+})
+
+ipcMain.on("operation-service-window", (_, mark, operation, ...args) => {
+    ServiceProcess.AllServiceProcess[mark][operation](...args)
+})
 
 /**
  * 服务进程
- *
  * 其底层原理是调用了electron的BrowserWindow开启一个隐藏的渲染进程
  */
 class ServiceProcess {
@@ -50,49 +65,63 @@ class ServiceProcess {
         // 如果ProcessType是window的话，加载是需要带上协议类型的，如果加载的是default那么就不需要协议，只需要地址就可以
         // 通过资源地址后面追加参数，一种主进程在渲染进程开始加载的时候就可转递参的一种方式，且是同步的
         this.kernel.loadURL(`${this.loadURL}?Mark=${mark}`)
+        this.mark = mark
         this.webContents = this.kernel.webContents
     }
 
-    /**
-     * 关闭这个进程
-     */
+    /** 关闭这个进程 */
     close() {
         this.kernel.close()
+        delete AllServiceProcess[this.mark]
     }
 
-    /**
-     * 打开开发者工具
-     */
+    /** 打开开发者工具 */
     openDevTools() {
         this.webContents.openDevTools({ mode: "detach" })
     }
 
-    /**
-     * 重启服务进程
-     */
+    /** 重启服务进程 */
     reload() {
         this.webContents.reloadIgnoringCache()
     }
 
+    /** 和服务进程通讯 */
     send() {
         this.webContents.send(...arguments)
     }
 
+    static get AllServiceProcess() {
+        return AllServiceProcess
+    }
+
     /**
+     * 获取对应进程的占用信息
      * @param {string} mark
      * @returns {BrowserWindow}
      */
     static GetServiceProcess(mark) {
-        return MarkType_ServerProcessMap[mark].process
+        return AllServiceProcess[mark]
     }
 
-    /**
-     * 关闭所有的服务进程，包括主窗口
-     */
+    /** 关闭所有的服务进程，包括主窗口 */
     static CloseAllServiceProcess() {
-        for (const [_, value] of Object.entries(MarkType_ServerProcessMap)) {
-            value.process.close()
+        for (const [_, ServiceProcess] of Object.entries(AllServiceProcess)) {
+            ServiceProcess.close()
+            delete AllServiceProcess[ServiceProcess.mark]
         }
+    }
+
+    /** 创建服务进程 */
+    static CreateSerivceProcess(serviceConfig) {
+        serviceConfig.startMethod = serviceConfig?.startMethod ? serviceConfig.startMethod : "auto"
+
+        if (serviceConfig.startMethod === "event") {
+            EventStartSerives[serviceConfig.mark] = serviceConfig
+            return
+        }
+
+        AllServiceProcess[serviceConfig.mark] = new ServiceProcess(serviceConfig.path, serviceConfig.mark, serviceConfig.processType, serviceConfig?.window)
+        serviceConfig?.configService(AllServiceProcess[serviceConfig.mark])
     }
 }
 
@@ -102,7 +131,7 @@ class ServiceProcess {
  * @param {{}} winConfig
  * @returns {{}}
  */
-const initConfig = (ProcessType, winConfig) => {
+function initConfig(ProcessType, winConfig) {
     const defaultConfig = {
         width: 0,
         height: 0,
@@ -118,7 +147,13 @@ const initConfig = (ProcessType, winConfig) => {
         }
     }
 
-    return ProcessType === "window" ? Object.assign(defaultConfig, winConfig) : defaultConfig
+    if (ProcessType === "window") {
+        defaultConfig.width = 600
+        defaultConfig.height = 400
+        Object.assign(defaultConfig, winConfig)
+    }
+
+    return defaultConfig
 }
 
 /**
@@ -144,15 +179,8 @@ function updateServiceProcessTemplateHTMLFile(templateHtmlFilePath, URL, mark) {
     writeFileSync(templateHtmlFilePath, newTemplateHTMLText)
 }
 
-function CreateServiceProcess(URL, mark, ProcessType, winConfig) {
-    AllServiceProcess[mark] = new ServiceProcess(URL, mark, ProcessType, winConfig)
-    return AllServiceProcess[mark]
+for (const [_, serviceConfig] of Object.entries(serivesProcessConfig)) {
+    ServiceProcess.CreateSerivceProcess(serviceConfig)
 }
 
-function CloseAllServiceProcess() {
-    for (const [_, ServiceProcess] of Object.entries(AllServiceProcess)) {
-        ServiceProcess.close()
-    }
-}
-
-module.exports = { CreateServiceProcess, CloseAllServiceProcess, AllServiceProcess }
+module.exports = ServiceProcess

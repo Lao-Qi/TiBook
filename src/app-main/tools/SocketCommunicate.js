@@ -165,12 +165,12 @@ function listenerMethodReturns(event, method) {
     })
 }
 
-function runSendRequest({ request, args, renderProcessMark }) {
-    requestMethodAllMap[request](...args)
+function runSendRequest({ operate, args, renderProcessMark }) {
+    requestMethodAllMap[operate](...args)
         .then(result => {
             process.loadSend({
                 type: "request",
-                request,
+                operate,
                 state: 0,
                 renderProcessMark,
                 content: result
@@ -179,7 +179,7 @@ function runSendRequest({ request, args, renderProcessMark }) {
         .catch(result => {
             process.loadSend({
                 type: "request",
-                request,
+                operate,
                 state: 1,
                 renderProcessMark,
                 content: result

@@ -11,25 +11,25 @@ const { USER_CHATLIST, USER_MESSAGE } = require("../lib/LocalDatabase/index")
 /**
  * onLoadMsg传递一个回调函数，用来监听发送给该工具的消息
  */
-process.onLoadMsg(({ request, args, renderProcessMark }) => {
-    if (!LocalOperationMethodAllMap[request]) {
-        throw Error(`本地操作函数不存在: (${request})`)
+process.onLoadMsg(({ operate, args, renderMark }) => {
+    if (!LocalOperationMethodAllMap[operate]) {
+        throw Error(`本地操作函数不存在: (${operate})`)
     }
-    LocalOperationMethodAllMap[request](...args)
+    LocalOperationMethodAllMap[operate](...args)
         .then(result => {
             process.loadSend({
                 result,
-                request,
+                operate,
                 state: 0,
-                renderProcessMark
+                renderMark
             })
         })
         .catch(result => {
             process.loadSend({
                 result,
-                request,
+                operate,
                 state: 1,
-                renderProcessMark
+                renderMark
             })
         })
 })

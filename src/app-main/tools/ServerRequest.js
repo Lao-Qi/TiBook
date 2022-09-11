@@ -37,7 +37,7 @@ axios.interceptors.request.use(config => {
 
 /**
  * type msg: {
- *   request: string // 要请求的方法的名称
+ *   operate: string // 要请求的方法的名称
  *   argv: string[] // 要传递的参数
  * }
  *
@@ -45,27 +45,27 @@ axios.interceptors.request.use(config => {
  *
  * 这里接收renderProcessMark(渲染进程的标注)是为了判断是那个进程要执行的操作
  */
-process.onLoadMsg(({ request, args = [], renderProcessMark }) => {
-    if (!ServerRequestMethodAllMap[request]) {
-        throw Error(`接口请求函数不存在: (${request})`)
+process.onLoadMsg(({ operate, args = [], renderMark }) => {
+    if (!ServerRequestMethodAllMap[operate]) {
+        throw Error(`接口请求函数不存在: (${operate})`)
     }
-    ServerRequestMethodAllMap[request](...args)
+    ServerRequestMethodAllMap[operate](...args)
         .then(result => {
             process.loadSend({
                 type: "request",
                 result,
-                request,
+                operate,
                 state: 0,
-                renderProcessMark
+                renderMark
             })
         })
         .catch(result => {
             process.loadSend({
                 type: "request",
                 result,
-                request,
+                operate,
                 state: 1,
-                renderProcessMark
+                renderMark
             })
         })
 })
