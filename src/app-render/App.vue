@@ -3,6 +3,7 @@
  * 页面展示逻辑
  *
  * 窗口控件(最小化，最大化，关闭) -> 账号帮助页 -> 登录用户 -> 主页
+ *                                                      -> 注册页 -> 登录页 -> 主页
  *
  * 主页和登录注册页分别是俩个路由，App进行判断后跳转对应路由
  */
@@ -71,6 +72,7 @@ router.replace({ path: "/account-help" })
 }
 
 #title {
+    z-index: 999;
     display: flex;
     width: 100%;
     height: 40px;
@@ -97,6 +99,7 @@ router.replace({ path: "/account-help" })
     align-items: center;
     font-size: 13px;
     background-color: var(--input-box-background-color);
+    z-index: 999;
 
     .statusbar-item {
         user-select: none;

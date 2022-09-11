@@ -24,7 +24,7 @@ provide("newMessage", newMessage)
  *
  * 过程中有一步失败，这过程就会中断，并向用户展示提示弹窗
  */
-/** 1 获取本地聊天用户列表 */
+/** 获取本地聊天用户列表 */
 TIBOOK.localOperation("GetChatList", async (chatUsers, state) => {
     if (!!state) {
         Notification({
@@ -99,7 +99,7 @@ TIBOOK.localOperation("GetChatList", async (chatUsers, state) => {
 })
 
 /** 接收消息展示流程：异步的向本地存储该条消息 -> 检查是否为当前显示的窗口可*/
-TIBOOK.onSocket("socket-receive-message", async msg => {
+TIBOOK.addToolListener("socketCommunicate", "socket-receive-message", async msg => {
     /** 消息过来后的基本操作 */
     const chatUserAccount = TIBOOK.env.USER_CONFIG.user_data.info.account === msg.from ? msg.to : msg.from
     TIBOOK.localOperation("InsertMsgAndUpdateChatUser", chatUserAccount, msg, result => {
@@ -154,7 +154,7 @@ watch(
     }
 )
 
-// 解析消息的时间
+/** 解析消息的时间 */
 function paresMessageDate(date) {
     const contarasMessageDate = new Date(date)
     const messageDate = new Date(date)

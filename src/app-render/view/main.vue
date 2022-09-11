@@ -7,6 +7,9 @@ const TIBOOK = window.TIBOOK
 const router = useRouter()
 const sideTipLine = ref(null)
 
+// 启动socket服务
+TIBOOK.send("start-service-process", "socketCommunicate")
+
 const sideNavBarList = {
     top: {
         home: {
@@ -46,9 +49,6 @@ const iconConfig = reactive({
     fill: "#333",
     theme: "outline"
 })
-
-// 启动socket服务
-TIBOOK.send("start-socket-communication")
 
 onMounted(() => {
     for (const [_, navBar] of Object.entries(sideNavBarList.top)) {

@@ -47,7 +47,11 @@ const operateMap = {
         if (account && password) {
             TIBOOK.serverRequest("LoginUser", account, password, loginResultDealWith)
         } else {
-            alert("请完整的填写表单信息")
+            Notification({
+                type: "warn",
+                title: "注意",
+                content: "请完整的填写表单信息"
+            })
         }
     },
     registerUser(name, account, password) {

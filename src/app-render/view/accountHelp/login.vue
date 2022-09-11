@@ -1,6 +1,6 @@
 <script setup>
 /**
- * 登录容器组件
+ * 登录组件
  */
 import { reactive, defineEmits, onMounted, ref } from "vue"
 
@@ -17,7 +17,7 @@ const loginModel = ref("normal") // normal || concise
 
 
 // 验证本地token，设置登录模式
-TIBOOK.serverRequest("FindTokenUser", (result) => {
+TIBOOK.serverRequest("FindTokenUser", result => {
     console.log(result);
     if(result?.code === 200) {
         loginModel.value = "concise"

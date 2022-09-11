@@ -83,7 +83,7 @@ TIBOOK.serverRequest("FindUserFriends", result => {
 })
 
 // 监听服务器发过来的添加好友申请
-TIBOOK.onSocket("socket-add-friend", result => {
+TIBOOK.addToolListener("socketCommunicate", "socket-add-friend", result => {
     newfriends.value.push(result)
 })
 </script>
