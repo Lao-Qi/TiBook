@@ -4,9 +4,13 @@
  * 会封装ipcRenderer的功能到window.process.TIBOOK对象上
  */
 const { ipcRenderer } = require("electron")
+const { mkdir } = require("original-fs")
 
 /** 监听渲染进程的环境变量变化回调的集合表 */
 const WatchRenderEnvKeySetterMap = {}
+const SpecialEvent = {
+    "operation-service-window": true
+}
 
 /** 配置软件独有的对象 */
 window.TIBOOK = { ...ParseURLParameters() }
@@ -79,6 +83,11 @@ window.TIBOOK.invoke = async function (event, ...args) {
 }
 
 window.TIBOOK.send = (event, ...args) => {
+    if (SpecialEvent[event]) {
+        ipcRenderer.send(event, window.TIBOOK["Mark"], ...args)
+        return
+    }
+
     ipcRenderer.send("render-send-event", window.TIBOOK["Mark"], event, ...args)
 }
 

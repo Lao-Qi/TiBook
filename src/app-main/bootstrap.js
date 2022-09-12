@@ -16,8 +16,8 @@ const { app, ipcMain } = require("electron")
  * 服务进程会被所有的服务入口和窗口所使用，这俩个是属于主进程中主动创建的，分布于多个方法中，因此声明在了顶部
  */
 
-const { CloseAllToolProcess } = require("./lib/ToolsProcess/index")
-const { CloseAllServiceProcess, CreateSerivceProcess } = require("./lib/ServicesProcess/index")
+require("./lib/ToolsProcess/index")
+require("./lib/ServicesProcess/index")
 
 startBasicEventBinding() // 基础事件
 // startMainWinService() // 窗口
