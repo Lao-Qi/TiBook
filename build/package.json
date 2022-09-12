@@ -2,12 +2,16 @@
     "name": "tibook_build",
     "version": "0.0.0",
     "scripts": {
-        "build:render": "node ./index.js render",
-        "build:main": "node ./index.js main",
-        "build": "node ./index.js"
+        "build:render": "node ./index.js render_build",
+        "build:main": "node ./index.js main_build",
+        "build:generate_package": "node ./index.js generate_package",
+        "build:cp_public": "node ./index.js cp_public",
+        "build:electron": "node ./index.js electron_build",
+        "build": "node ./index.js",
+        "electron:test": "npx electron ./dist/app-main/main.js"
     },
     "license": "MIT",
-    "dependencies": {
+    "devDependencies": {
         "electron-builder": "^23.0.3",
         "esbuild": "^0.14.49"
     }

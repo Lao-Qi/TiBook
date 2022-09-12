@@ -9,6 +9,7 @@ lerna-debug.log*
 
 # dir
 node_modules
+app-dist
 dist
 dist-ssr
 demo

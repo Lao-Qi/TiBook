@@ -8,7 +8,19 @@
         "app:dev": "cd ./src && pnpm run dev",
         "app:build": "cd ./build && pnpm run build"
     },
-    "author": "WangLaoQi (https://github.com/Lao-Qi)",
+    "author": {
+        "name": "王老柒",
+        "email": "Wang.Lao.Qi@qq.com",
+        "url": "https://github.com/Lao-Qi"
+    },
+    "engines": {
+        "node": ">=16",
+        "pnpm": ">=3"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Lao-Qi/TiBook"
+    },
     "license": "MIT",
     "devDependencies": {
         "@vitejs/plugin-vue": "^2.3.3",

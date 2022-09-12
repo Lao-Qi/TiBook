@@ -1,0 +1,45 @@
+    "build": {
+        "productName": "题书",
+        "appId": "com.tibook.app",
+        "copyright": "Copyright © 2022 - present WangLaoQi(https://github.com/Lao-Qi)",
+        "files": ["./dist/app-render/**/*", "./dist/app-main/**/*"],
+        "directories": {
+            "output": "./app-dist"
+        },
+        "dmg": {
+            "window": {
+                "x": 100,
+                "y": 100,
+                "width": 500,
+                "height": 300
+            }
+        },
+        "nsis": {
+            "oneClick": false,
+            "installerIcon": "./dist/public/icon-256x256.ico",
+            "installerHeaderIcon": "./dist/public/icon-256x256.ico",
+            "uninstallerIcon": "./dist/public/icon-uninstall-256x256.ico",
+            "uninstallDisplayName": "卸载题书",
+            "allowElevation": true,
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true,
+            "allowToChangeInstallationDirectory": true
+        },
+        "win": {
+            "icon": "./dist/public/icon-256x256.ico",
+            "target": [
+                {
+                    "target": "nsis",
+                    "arch": ["ia32"]
+                }
+            ]
+        },
+        "mac": {
+            "icon": "./dist/public/icns-256x256.icns",
+            "target": "dmg"
+        },
+        "linux": {
+            "icon": "./dist/public/icon-256x256.ico",
+            "target": "deb"
+        }
+    }
