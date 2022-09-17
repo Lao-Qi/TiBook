@@ -32,7 +32,7 @@ for (const [key, _] of Object.entries(DBFilesName)) {
     /** 生成存储库 */
     DBFilesName[key] = new NeDB({
         filename: filePath,
-        corruptAlertThreshold: process.env["IS_DEV"] ? 1 : 0,
+        corruptAlertThreshold: 0,
         autoload: true
     })
 }
