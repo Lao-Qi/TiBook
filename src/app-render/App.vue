@@ -36,7 +36,7 @@ const WindowTitle = defineAsyncComponent(() => {
 })
 
 function openMainWindowCli() {
-    TIBOOK.send("operation-service-window", "openDevTools")
+    TIBOOK.renderSend("operation-service-window", "openDevTools")
 }
 
 // 直接跳转到账号帮助页
