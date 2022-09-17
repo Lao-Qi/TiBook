@@ -54,7 +54,7 @@ try {
 try {
     console.log("打包工具进程资源 ...")
 
-    const toolsConfig = require("../src/app-main/lib/ToolsProcess/toolsProcessFile.config")
+    const toolsConfig = require("../src/app-main/toolsProcessFile.config.js")
 
     esbuild.buildSync({
         entryPoints: toolsConfig.map(toolConfig => toolConfig.path),

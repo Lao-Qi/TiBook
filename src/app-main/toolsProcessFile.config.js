@@ -1,9 +1,9 @@
-const { join, basename } = require("path")
+const { join } = require("path")
 
 module.exports = [
     {
         /** 工具进程的入口文件 */
-        path: parseFilePath("../../tools/LocalOperation.js"),
+        path: join(__dirname, "./tools/LocalOperation.js"),
         // path: join(__dirname, "../../tools/LocalOperation.js"),
         /** 进程标识 */
         mark: "localOperation",
@@ -27,7 +27,7 @@ module.exports = [
         startMethod: "auto"
     },
     {
-        path: parseFilePath("../../tools/ServerRequest.js"),
+        path: join(__dirname, "./tools/ServerRequest.js"),
         // path: join(__dirname, "../../tools/ServerRequest.js"),
         mark: "serverRequest",
         sendOperateEvent: "server-request-operate-send",
@@ -36,7 +36,7 @@ module.exports = [
         proactiveSendEvent: "server-request-proactive-send"
     },
     {
-        path: parseFilePath("../../tools/SocketCommunicate.js"),
+        path: join(__dirname, "./tools/SocketCommunicate.js"),
         // path: join(__dirname, "../../tools/SocketCommunicate.js"),
         mark: "socketCommunicate",
         sendOperateEvent: "socket-communicate-send",
@@ -46,7 +46,3 @@ module.exports = [
         startMethod: "event"
     }
 ]
-
-function parseFilePath(path) {
-    return join(__dirname, process.env["IS_DEV"] || process.env["BUILD_ING"] ? path : `./tools/${basename(path)}`)
-}

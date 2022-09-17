@@ -2,7 +2,7 @@
 /**
  * 应用的服务进程，用于提供一些窗口或隐藏式窗口的功能
  */
-const serivesProcessConfig = require("./servicesProcessFile.config")
+const serivesProcessConfig = require("../../servicesProcessFile.config")
 const { BrowserWindow, ipcMain } = require("electron")
 const { writeFileSync } = require("fs")
 const { join } = require("path")
@@ -25,6 +25,7 @@ ipcMain.on("start-event-method-service", (_, mark) => {
 })
 
 ipcMain.on("operation-service-window", (_, mark, operation, ...args) => {
+    console.log(mark, operation)
     ServiceProcess.AllServiceProcess[mark][operation](...args)
 })
 

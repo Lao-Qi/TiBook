@@ -44,12 +44,12 @@ module.exports = [
             serivce.kernel.on("maximize", () => serivce.send("window-maximize"))
             serivce.kernel.on("focus", () => serivce.send("window-focus"))
             serivce.kernel.on("blur", () => serivce.send("window-blur"))
-            serivce.on("window-minimize", () => serivce.kernel.minimize())
             serivce.on("window-close", () => serivce.kernel.close())
+            serivce.on("window-minimize", () => serivce.kernel.minimize())
             serivce.on("window-maximize", () => (serivce.kernel.isMaximized() ? serivce.kernel.unmaximize() : serivce.kernel.maximize()))
             serivce.kernel.once("close", () => {
-                const { CloseAllServiceProcess } = require("./index")
-                const { CloseAllToolProcess } = require("../ToolsProcess/index")
+                const { CloseAllServiceProcess } = require("./lib/ServicesProcess/index")
+                const { CloseAllToolProcess } = require("./lib/ToolsProcess/index")
 
                 CloseAllServiceProcess()
                 CloseAllToolProcess()
