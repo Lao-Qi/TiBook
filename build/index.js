@@ -1,6 +1,6 @@
 "use strict"
 
-const { readFileSync, writeFileSync, cpSync, rmSync, mkdirSync } = require("fs")
+const { readFileSync, writeFileSync, cpSync, rmSync, mkdirSync, accessSync } = require("fs")
 const { join } = require("path")
 
 /**
@@ -64,13 +64,21 @@ const { join } = require("path")
             }
         },
         render_build: () => {
-            rmSync(join(__dirname, "./dist/app-render"), { recursive: true })
-            mkdirSync(join(__dirname, "./dist/app-render"))
+            try {
+                accessSync(join(__dirname, "./dist/app-render"))
+                rmSync(join(__dirname, "./dist/app-render"), { recursive: true })
+            } catch {
+                mkdirSync(join(__dirname, "./dist/app-render"))
+            }
             require("./app-render-build")
         },
         main_build: () => {
-            rmSync(join(__dirname, "./dist/app-main"), { recursive: true })
-            mkdirSync(join(__dirname, "./dist/app-render"))
+            try {
+                accessSync(join(__dirname, "./dist/app-main"))
+                rmSync(join(__dirname, "./dist/app-main"), { recursive: true })
+            } catch {
+                mkdirSync(join(__dirname, "./dist/app-main"))
+            }
             require("./app-main-build")
         },
         electron_build: () => {
