@@ -39,39 +39,3 @@ async function startBasicEventBinding() {
     // 返回全部工具进程的CPU和内存使用信息
     ipcMain.handle("get-tools-process-metric", async () => GetAllToolProcessMetric())
 }
-
-/**
- * 把软件的窗口也用服务进程来启动，但是是在主进程中单独的使用ServiceProcess这个类来启动
- *
- * 这样可以把主窗口和其他的服务隔离开来，又可以顺带把主窗口的数据携带进进程集合表中
- */
-// async function startMainWinService() {
-//     // ipcMain.emit("")
-//     // CreateSerivceProcess({
-//     //     path: process.TIBOOK["MAIN_PAGR_URL"],
-//     //     mark: "appMainWin",
-//     //     processType: "window",
-//     //     window: {
-//     //         width: 800,
-//     //         height: 600,
-//     //         minWidth: 600,
-//     //         minHeight: 450,
-//     //         frame: false
-//     //     },
-//     //     startMethod: "auto",
-//     //     configService(serivce) {
-//     //         serivce.openDevTools()
-//     //         serivce.kernel.on("unmaximize", () => serivce.send("window-unmaximize"))
-//     //         serivce.kernel.on("maximize", () => serivce.send("window-maximize"))
-//     //         serivce.kernel.on("focus", () => serivce.send("window-focus"))
-//     //         serivce.kernel.on("blur", () => serivce.send("window-blur"))
-//     //         ipcMain.on("window-minimize", () => serivce.kernel.minimize())
-//     //         ipcMain.on("window-close", () => serivce.kernel.close())
-//     //         ipcMain.on("window-maximize", () => (serivce.kernel.isMaximized() ? serivce.kernel.unmaximize() : serivce.kernel.maximize()))
-//     //         serivce.kernel.once("close", () => {
-//     //             // CloseAllServiceProcess()
-//     //             // CloseAllToolProcess()
-//     //         })
-//     //     }
-//     // })
-// }

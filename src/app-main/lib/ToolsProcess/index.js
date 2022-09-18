@@ -26,7 +26,7 @@
     const EventStartTools = {}
 
     // 启动事件启动类型的工具进程
-    ipcMain.on("start-event-type-tool", (_, mark) => createToolProcess(EventStartTools[mark]))
+    ipcMain.on("start-event-type-tool", (_, mark) => ToolProcess.CreateToolProcess(EventStartTools[mark]))
     ipcMain.handle("get-tools-process-config", () => ToolProcess.ToolsProcessConfig)
 
     /** 提供一个Node环境给工具使用的进程 */
@@ -138,9 +138,8 @@
 
         /** 创建新的工具进程 */
         static CreateToolProcess(toolConfig) {
-            toolConfig.startMethod ??= "auto"
-
-            if (toolConfig.startMethod === "event") {
+            console.log(toolConfig)
+            if (toolConfig.startMethod && toolConfig.startMethod === "event") {
                 EventStartTools[toolConfig.mark] = toolConfig
                 return
             }

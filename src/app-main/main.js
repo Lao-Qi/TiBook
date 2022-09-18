@@ -32,7 +32,7 @@ if (process.env["IS_DEV"]) {
     process.TIBOOK["PUBLIC_PATH"] = join(__dirname, "../../public")
 } else {
     process.TIBOOK["MAIN_PAGR_URL"] = `file:///${join(__dirname, "../app-render/index.html")}`
-    process.TIBOOK["PUBLIC_PATH"] = join(__dirname, "./dist/public")
+    process.TIBOOK["PUBLIC_PATH"] = join(__dirname, "../public")
 }
 
 app.once("ready", () => {
