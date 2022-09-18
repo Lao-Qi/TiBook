@@ -8,7 +8,9 @@ const { ipcRenderer } = require("electron")
 /** 监听渲染进程的环境变量变化回调的集合表 */
 const WatchRenderEnvKeySetterMap = {}
 const SpecialEvent = {
-    "operation-service-window": true
+    "operation-service-window": true,
+    "start-service-process": true,
+    "start-tool-process": true
 }
 
 /** 配置软件独有的对象 */
@@ -82,6 +84,7 @@ window.TIBOOK.invoke = async function (event, ...args) {
 }
 
 window.TIBOOK.renderSend = (event, ...args) => {
+    console.log(event, args)
     if (SpecialEvent[event]) {
         ipcRenderer.send(event, window.TIBOOK["Mark"], ...args)
         return

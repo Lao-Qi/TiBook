@@ -16,7 +16,7 @@ const { join } = require("path")
 const AllServiceProcess = {}
 const EventStartSerives = {}
 
-ipcMain.on("start-event-method-service", (_, mark) => {
+ipcMain.on("start-service-process", (_, mark) => {
     if (!mark || EventStartSerives[mark]) {
         throw TypeError(`${mark}标识的服务进程不存在`)
     }

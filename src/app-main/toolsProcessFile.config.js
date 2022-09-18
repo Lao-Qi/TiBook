@@ -4,7 +4,6 @@ module.exports = [
     {
         /** 工具进程的入口文件 */
         path: join(__dirname, "./tools/LocalOperation.js"),
-        // path: join(__dirname, "../../tools/LocalOperation.js"),
         /** 进程标识 */
         mark: "localOperation",
         /**
@@ -28,7 +27,6 @@ module.exports = [
     },
     {
         path: join(__dirname, "./tools/ServerRequest.js"),
-        // path: join(__dirname, "../../tools/ServerRequest.js"),
         mark: "serverRequest",
         sendOperateEvent: "server-request-operate-send",
         operationResultReturnEvent: "server-request-operate-reveive",
@@ -37,7 +35,6 @@ module.exports = [
     },
     {
         path: join(__dirname, "./tools/SocketCommunicate.js"),
-        // path: join(__dirname, "../../tools/SocketCommunicate.js"),
         mark: "socketCommunicate",
         sendOperateEvent: "socket-communicate-send",
         operationResultReturnEvent: "socket-communicate-operate-reveive",
