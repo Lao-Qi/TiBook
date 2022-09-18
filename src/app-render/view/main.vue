@@ -8,7 +8,7 @@ const router = useRouter()
 const sideTipLine = ref(null)
 
 // 启动socket服务
-TIBOOK.send("start-service-process", "socketCommunicate")
+TIBOOK.renderSend("start-service-process", "socketCommunicate")
 
 const sideNavBarList = {
     top: {

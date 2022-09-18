@@ -19,14 +19,14 @@ TIBOOK.on("window-unmaximize", () => (isMaximize.value = false))
     </div>
     <p class="window-drag-area"></p>
     <div class="window-controls-container">
-        <div @click="() => TIBOOK.send('window-minimize')" class="window-minimize">
+        <div @click="() => TIBOOK.renderSend('window-minimize')" class="window-minimize">
             <minus />
         </div>
-        <div @click="() => TIBOOK.send('window-maximize')" class="window-maximize">
+        <div @click="() => TIBOOK.renderSend('window-maximize')" class="window-maximize">
             <off-screen v-if="isMaximize" />
             <full-screen v-else />
         </div>
-        <div @click="() => TIBOOK.send('window-close')" class="window-close">
+        <div @click="() => TIBOOK.renderSend('window-close')" class="window-close">
             <close />
         </div>
     </div>

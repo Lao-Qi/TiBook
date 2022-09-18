@@ -6,9 +6,9 @@ const TIBOOK = window.TIBOOK
 
 <template>
     <div id="window-controls-container">
-        <div class="window-controls window-close" @click="() => TIBOOK.send('window-close')"></div>
-        <div class="window-controls window-minimize" @click="() => TIBOOK.send('window-minimize')"></div>
-        <div class="window-controls window-maximize" @click="() => TIBOOK.send('window-maximize')"></div>
+        <div class="window-controls window-close" @click="() => TIBOOK.renderSend('window-close')"></div>
+        <div class="window-controls window-minimize" @click="() => TIBOOK.renderSend('window-minimize')"></div>
+        <div class="window-controls window-maximize" @click="() => TIBOOK.renderSend('window-maximize')"></div>
     </div>
     <div class="window-drag-area">
         <search-box />
