@@ -12,7 +12,7 @@
     },
     "license": "MIT",
     "devDependencies": {
-        "electron-builder": "^23.0.3",
+        "electron-builder": "^23.3.3",
         "esbuild": "^0.14.49"
     }
 }
