@@ -24,10 +24,12 @@ build({
         productName: "题书",
         appId: "com.tibook.app",
         copyright: "Copyright © 2022 - present WangLaoQi(https://github.com/Lao-Qi)",
-        files: ["./app-main/**/*", "./app-render/**/*"],
+        files: ["app-main/**/*", "app-render/**/*"],
         directories: {
+            buildResources: "public/**/*",
             output: "../app-dist"
         },
+        asar: false,
         dmg: {
             window: {
                 x: 100,
