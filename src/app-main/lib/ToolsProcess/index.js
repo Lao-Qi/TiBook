@@ -148,7 +148,7 @@
             })
 
             toolProcess.onmessage(msg => {
-                if (msg.type === "request") {
+                if (msg.type === "operate") {
                     const { renderMark, operate, result, state } = msg
                     AllServiceProcess[renderMark].send(toolConfig.operationResultReturnEvent, operate, result, state)
                 } else {

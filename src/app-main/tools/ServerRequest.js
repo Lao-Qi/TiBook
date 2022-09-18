@@ -52,7 +52,7 @@ process.onLoadMsg(({ operate, args = [], renderMark }) => {
     ServerRequestMethodAllMap[operate](...args)
         .then(result => {
             process.loadSend({
-                type: "request",
+                type: "operate",
                 result,
                 operate,
                 state: 0,
@@ -61,7 +61,7 @@ process.onLoadMsg(({ operate, args = [], renderMark }) => {
         })
         .catch(result => {
             process.loadSend({
-                type: "request",
+                type: "operate",
                 result,
                 operate,
                 state: 1,

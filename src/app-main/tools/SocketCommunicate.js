@@ -30,10 +30,29 @@ process.onLoadMsg(msg => {
     // 请求过来的时候检查socket有没有连接，如果没有则将请求占时存储到SendMethods中
     if (!socket.connected) {
         SendMethods.push(msg)
-    } else if (!requestMethodAllMap[msg.request]) {
-        throw Error(`请求的方法不存在：{${msg.request}}`)
+    } else if (!requestMethodAllMap[msg.operate]) {
+        throw Error(`请求的方法不存在：{${msg.operate}}`)
     } else {
-        runSendRequest(msg)
+        const { operate, args, renderMark } = msg
+        requestMethodAllMap[operate](...args)
+            .then(result => {
+                process.loadSend({
+                    type: "operate",
+                    operate,
+                    state: 0,
+                    renderMark,
+                    content: result
+                })
+            })
+            .catch(result => {
+                process.loadSend({
+                    type: "operate",
+                    operate,
+                    state: 1,
+                    renderMark,
+                    content: result
+                })
+            })
     }
 })
 
@@ -66,6 +85,27 @@ socket.on("disconnect", reason => {
         event: "socket-disconnect",
         state: 0,
         content: reason
+    })
+})
+
+/**
+ * 接收服务端发送过来的所有类型的消息，包括用户发送出去的和其他用户发送过来的
+ */
+socket.on("receive-message", msg => {
+    process.loadSend({
+        type: "socket-passive",
+        event: "socket-receive-message",
+        state: 0,
+        content: msg
+    })
+})
+
+socket.on("add-friend-message", msg => {
+    process.loadSend({
+        type: "socket-passive",
+        event: "socket-add-friend-message",
+        state: 0,
+        content: msg
     })
 })
 
@@ -164,46 +204,3 @@ function listenerMethodReturns(event, method) {
         })
     })
 }
-
-function runSendRequest({ operate, args, renderProcessMark }) {
-    requestMethodAllMap[operate](...args)
-        .then(result => {
-            process.loadSend({
-                type: "request",
-                operate,
-                state: 0,
-                renderProcessMark,
-                content: result
-            })
-        })
-        .catch(result => {
-            process.loadSend({
-                type: "request",
-                operate,
-                state: 1,
-                renderProcessMark,
-                content: result
-            })
-        })
-}
-
-/**
- * 接收服务端发送过来的所有类型的消息，包括用户发送出去的和其他用户发送过来的
- */
-socket.on("receive-message", msg => {
-    process.loadSend({
-        type: "socket-passive",
-        event: "socket-receive-message",
-        state: 0,
-        content: msg
-    })
-})
-
-socket.on("add-friend-message", msg => {
-    process.loadSend({
-        type: "socket-passive",
-        event: "socket-add-friend-message",
-        state: 0,
-        content: msg
-    })
-})

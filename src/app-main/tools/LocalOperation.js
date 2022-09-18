@@ -12,12 +12,14 @@ const { USER_CHATLIST, USER_MESSAGE } = require("../lib/LocalDatabase/index")
  * onLoadMsg传递一个回调函数，用来监听发送给该工具的消息
  */
 process.onLoadMsg(({ operate, args, renderMark }) => {
+    console.log(operate, args, renderMark)
     if (!LocalOperationMethodAllMap[operate]) {
         throw Error(`本地操作函数不存在: (${operate})`)
     }
     LocalOperationMethodAllMap[operate](...args)
         .then(result => {
             process.loadSend({
+                type: "operate",
                 result,
                 operate,
                 state: 0,
@@ -26,6 +28,7 @@ process.onLoadMsg(({ operate, args, renderMark }) => {
         })
         .catch(result => {
             process.loadSend({
+                type: "operate",
                 result,
                 operate,
                 state: 1,
