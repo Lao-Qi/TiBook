@@ -1,6 +1,6 @@
 {
     "name": "tibook_build",
-    "version": "0.0.0",
+    "version": "1.0.0",
     "scripts": {
         "build:render": "node ./index.js render_build",
         "build:main": "node ./index.js main_build",
