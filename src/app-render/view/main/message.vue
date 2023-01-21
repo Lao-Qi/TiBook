@@ -35,6 +35,8 @@ TIBOOK.localOperation("GetChatList", async (chatUsers, state) => {
         return
     }
 
+    console.log(chatUsers)
+
     /** 2 查询并和并用户的基本信息和消息信息 */
     if (chatUsers.length) {
         try {
@@ -190,15 +192,11 @@ function paresMessageDate(date) {
     return moment(date).format("YYYY/MM/DD")
 }
 
-// // 切换聊天窗
-// function toggleChatWindow(chatUser) {
-//     currentChatUser.value = chatUser
-// }
-
 /** 解析出多个用户的账号，向服务器一次请求多个用户的基本信息，并合并初始数据 */
 function GetChatUsersBasicInfo(chatUsers) {
-    const usersAccount = chatUsers.map(chatUser => chatUser.account)
     return new Promise((res, rej) => {
+        const usersAccount = chatUsers.map(chatUser => chatUser.account)
+
         TIBOOK.serverRequest("FindUsers", usersAccount, UsersResult => {
             console.log(UsersResult)
             if (UsersResult.code !== 200) {
